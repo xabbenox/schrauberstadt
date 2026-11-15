@@ -182,6 +182,7 @@ button:focus-visible { outline: 4px solid var(--navy); outline-offset: 3px; }
 #menuKoop { background: #ece8dc; font-size: 18px; }
 .mp-box { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 10px; overflow-y: auto; }
 .mp-box .item { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+#loginMail { text-transform: none !important; letter-spacing: 0 !important; font-size: 17px !important; text-align: left !important; font-family: inherit !important; }
 .mp-row { display: flex; gap: 8px; } .mp-row input { flex: 1; min-width: 0; font-family: var(--display); font-size: 24px; letter-spacing: .2em; text-transform: uppercase; border: 3px solid var(--ink); border-radius: 14px; padding: 6px 10px 3px; text-align: center; }
 .mp-box .buy { font-size: 18px; } .mp-box .big { font-size: 20px; }
 #mpStatus { font-weight: 800; color: var(--navy); font-size: 13px; }
@@ -315,6 +316,17 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
     </div>
   </div>
 </div>
+<div class="sheet" id="login" hidden>
+  <div class="panel" role="dialog" aria-labelledby="loginH">
+    <div class="panel-head"><h2 id="loginH">Online-Konto</h2><button class="x" id="loginClose" type="button">Schließen</button></div>
+    <div class="mp-box">
+      <p id="loginState"></p>
+      <div id="loginForm" class="mp-row"><input id="loginMail" type="email" autocomplete="email" placeholder="deine@email.at" aria-label="E-Mail"><button class="buy" id="loginSend" type="button">Link schicken</button></div>
+      <div id="loginOut" hidden><button class="fire" id="loginLogout" type="button">Abmelden</button></div>
+      <p class="hint">Kein Passwort nötig: Du bekommst einen Anmelde-Link per Mail. Google-Login folgt.</p>
+    </div>
+  </div>
+</div>
 <div class="sheet" id="help" hidden>
   <div class="panel" role="dialog" aria-labelledby="helpH">
     <div class="panel-head"><h2 id="helpH">So geht’s</h2><button class="x" id="helpClose" type="button">Schließen</button></div>
@@ -338,6 +350,7 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
       <button class="big no" id="menuKoop" type="button" hidden>Koop verlassen</button>
       <div class="row2"><button class="big sm" id="menuBoard" type="button">Bestenliste</button><button class="big sm" id="menuSettings" type="button">Einstellungen</button></div>
       <button class="big sm" id="menuHelp" type="button">So geht’s</button>
+      <button class="big sm" id="menuLogin" type="button">☁️ Anmelden &amp; online speichern</button>
     </div>
   </div>
 </div>
@@ -504,7 +517,7 @@ const fresh = () => ({ money: 50000, day: 1, dayT: 0, rep: 3, owned: {}, jobsDon
 let S = fresh();
 let running = false, muted = false;
 function load() { try { const r = localStorage.getItem(SAVE_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
-function save() { if (NET.mode === 'guest' || NET.visit) return; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignorieren */ } }
+function save() { if (NET.mode === 'guest' || NET.visit) return; S.savedAt = Date.now(); ONLINE.dirty = true; try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) { /* ignorieren */ } }
 function num(v, d) { return typeof v === 'number' && isFinite(v) ? v : d; }
 const isObj = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
 function migrate(s) {
@@ -2506,6 +2519,99 @@ $('setReset').addEventListener('click', () => {
   if (!confirm('Spielstand wirklich löschen? Das lässt sich nicht rückgängig machen.')) return;
   resetGame(); try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* egal */ } $('settings').hidden = true; menuInfo(); toast('Spielstand gelöscht.');
 });
+/* ---------------- Online: Login per E-Mail-Link + Spielstand in Supabase ---------------- */
+// Nur der öffentliche Schlüssel steht hier; Schreibrechte regelt die Datenbank (jeder nur seinen eigenen Spielstand).
+const SB_URL = 'https://yjxzmlnwtmrvzmtwbwrz.supabase.co', SB_KEY = 'sb_publishable_NboKBZDEgo-jiyptztBEFA_pcWdaBE3', SB_SESS = 'ss_sb_session';
+const ONLINE = { sess: null, busy: false, dirty: false, lastPush: 0, status: '' };
+const sbHead = (tok) => ({ apikey: SB_KEY, 'Content-Type': 'application/json', ...(tok ? { Authorization: 'Bearer ' + tok } : {}) });
+function sbStore(s) { ONLINE.sess = s; if (s) lsSet(SB_SESS, JSON.stringify(s)); else { try { localStorage.removeItem(SB_SESS); } catch (e) { /* egal */ } } }
+async function sbToken() {
+  const s = ONLINE.sess; if (!s) return null;
+  if (Date.now() < s.exp - 60000) return s.at;
+  try {
+    const r = await fetch(SB_URL + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: sbHead(), body: JSON.stringify({ refresh_token: s.rt }) });
+    if (!r.ok) { if (r.status === 400 || r.status === 401) sbStore(null); return null; }
+    const j = await r.json(); sbStore({ ...s, at: j.access_token, rt: j.refresh_token, exp: Date.now() + j.expires_in * 1000 }); return j.access_token;
+  } catch (e) { return null; }
+}
+async function sbLink(email) {
+  const to = location.origin + location.pathname;
+  const r = await fetch(SB_URL + '/auth/v1/otp?redirect_to=' + encodeURIComponent(to), { method: 'POST', headers: sbHead(), body: JSON.stringify({ email, create_user: true }) });
+  if (!r.ok) { let m = ''; try { m = (await r.json()).msg || ''; } catch (e) { /* egal */ } throw new Error(m || 'Fehler ' + r.status); }
+}
+// Rückkehr aus der Login-Mail: Token stehen im #-Teil der Adresse
+async function sbFromHash() {
+  if (!location.hash || location.hash.length < 10) return;
+  const h = new URLSearchParams(location.hash.slice(1));
+  if (h.get('error_description')) { setTimeout(() => toast('Login: ' + h.get('error_description').replace(/\+/g, ' ')), 1500); }
+  const at = h.get('access_token'), rt = h.get('refresh_token');
+  history.replaceState(null, '', location.pathname + location.search);
+  if (!at || !rt) return;
+  let email = '', uid = '';
+  try { const r = await fetch(SB_URL + '/auth/v1/user', { headers: sbHead(at) }); if (r.ok) { const u = await r.json(); email = u.email || ''; uid = u.id || ''; } } catch (e) { /* egal */ }
+  if (!uid) return;
+  sbStore({ at, rt, exp: Date.now() + (Number(h.get('expires_in')) || 3600) * 1000, email, uid });
+  setTimeout(() => toast('Angemeldet als ' + email), 1200);
+}
+async function sbRest(path, opt = {}) {
+  const tok = await sbToken(); if (!tok) throw new Error('nicht angemeldet');
+  const r = await fetch(SB_URL + '/rest/v1/' + path, { ...opt, headers: { ...sbHead(tok), ...(opt.headers || {}) } });
+  if (!r.ok) throw new Error('Server ' + r.status);
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+// Hochladen: höchstens alle 20 s, beim Verlassen sofort
+async function onlinePush(force) {
+  if (!ONLINE.sess || NET.mode === 'guest' || NET.visit || ONLINE.busy) return;
+  if (!force && (!ONLINE.dirty || Date.now() - ONLINE.lastPush < 20000)) return;
+  ONLINE.busy = true;
+  try {
+    const body = JSON.stringify({ player: ONLINE.sess.uid, data: S, day: S.day, money: Math.round(S.money), updated_at: new Date().toISOString() });
+    await sbRest('saves?on_conflict=player', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body, keepalive: body.length < 60000 });
+    ONLINE.dirty = false; ONLINE.lastPush = Date.now(); ONLINE.status = 'Online gespeichert ' + new Date().toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) { ONLINE.status = 'Online-Speichern fehlgeschlagen'; }
+  ONLINE.busy = false; loginUi();
+}
+// Nach dem Login: anmelden im Spiel + neueren Spielstand holen
+async function onlineSync() {
+  if (!ONLINE.sess) return;
+  try { await sbRest('rpc/join_game', { method: 'POST', body: JSON.stringify({ p_name: myName() }) }); } catch (e) { /* Name evtl. vergeben: egal für den Spielstand */ }
+  try {
+    const rows = await sbRest('saves?select=data,updated_at&player=eq.' + ONLINE.sess.uid);
+    const remote = rows && rows[0];
+    const localT = Number(S.savedAt) || 0, remoteT = remote ? Date.parse(remote.updated_at) : 0;
+    if (remote && remote.data && remoteT > localT + 5000 && !running && !lsGet('ss_sb_pulled_' + remote.updated_at)) {
+      lsSet('ss_sb_pulled_' + remote.updated_at, '1');
+      remote.data.savedAt = remoteT; lsSet(SAVE_KEY, JSON.stringify(remote.data)); location.reload(); return;
+    }
+    if (!remote || localT > remoteT) { ONLINE.dirty = true; onlinePush(true); }
+    else ONLINE.status = 'Online-Spielstand ist aktuell';
+  } catch (e) { ONLINE.status = 'Server nicht erreichbar'; }
+  loginUi();
+}
+function loginUi() {
+  const s = ONLINE.sess, b = $('menuLogin'); if (!b) return;
+  b.textContent = s ? '☁️ ' + (s.email || 'Angemeldet') : '☁️ Anmelden & online speichern';
+  const st = $('loginState'); if (!st) return;
+  $('loginForm').hidden = !!s; $('loginOut').hidden = !s;
+  st.textContent = s ? `Angemeldet als ${s.email}. ${ONLINE.status}` : 'Mit deiner E-Mail anmelden: Dein Spielstand liegt dann online und du spielst auf jedem Gerät weiter. Bald auch: die gemeinsame Stadt.';
+}
+async function onlineInit() {
+  try { const raw = lsGet(SB_SESS); if (raw) ONLINE.sess = JSON.parse(raw); } catch (e) { ONLINE.sess = null; }
+  await sbFromHash(); loginUi(); if (ONLINE.sess) onlineSync();
+  setInterval(() => { if (running) onlinePush(false); }, 5000);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) onlinePush(true); });
+}
+$('menuLogin').addEventListener('click', () => { loginUi(); $('login').hidden = false; });
+$('loginClose').addEventListener('click', () => { $('login').hidden = true; });
+$('loginSend').addEventListener('click', async () => {
+  const email = $('loginMail').value.trim(), btn = $('loginSend');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Bitte eine gültige E-Mail eingeben.'); return; }
+  btn.disabled = true; btn.textContent = 'Sende …';
+  try { await sbLink(email); $('loginState').textContent = `Link an ${email} geschickt. Öffne die Mail auf diesem Gerät und tippe auf den Link.`; }
+  catch (e) { $('loginState').textContent = 'Das hat nicht geklappt: ' + e.message + '. Probier es in ein paar Minuten nochmal.'; }
+  btn.disabled = false; btn.textContent = 'Link schicken';
+});
+$('loginLogout').addEventListener('click', async () => { await onlinePush(true); sbStore(null); ONLINE.status = ''; loginUi(); toast('Abgemeldet. Dein Spielstand bleibt online gespeichert.'); });
 /* ---------------- Mehrspieler ---------------- */
 // Alles läuft über die claude.ai-Laufzeit (room/db/user). Ohne sie bleibt das Spiel ein normales Einzelspiel.
 // - Lobby: jede Spielerin zeigt in ihrer Presence eine „Visitenkarte“ (Level, Umsatz, Ausbau, Team, Daumen).
@@ -3108,7 +3214,7 @@ function boot(data) {
     try { S = migrate(saved); }
     catch (e) { console.error('[Schrauberstadt] Spielstand unlesbar, neues Spiel', e); S = fresh(); }
   }
-  resize(); safe('hud', hud); safe('menu', () => { setMenu(true); menuInfo(); }); netInit().catch((e) => console.error('[Schrauberstadt] Mehrspieler', e));
+  resize(); safe('hud', hud); safe('menu', () => { setMenu(true); menuInfo(); }); netInit().catch((e) => console.error('[Schrauberstadt] Mehrspieler', e)); onlineInit().catch((e) => console.error('[Schrauberstadt] Online', e));
   loadAll().then(() => {
     safe('blur', makeBlurBg); dirty = true; bgDirty = true;
     safe('van', () => { van.front = tinted('car_kombi', 0, 0, 1.2); van.rear = tinted('car_kombi_r', 0, 0, 1.2); });
