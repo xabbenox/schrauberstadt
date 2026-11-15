@@ -290,10 +290,10 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
     <div class="panel-head"><h2 id="mpH">Mehrspieler</h2><button class="x" id="mpClose" type="button">Schließen</button></div>
     <p id="mpStatus"></p>
     <div class="mp-box">
-      <div class="item"><div class="it-main"><h3>Koop: gemeinsam schrauben</h3><p>Du bist Gastgeber mit deiner Werkstatt. Freunde treten mit dem Code bei und helfen live mit: Kunden annehmen, Teile holen, kassieren, ausbauen.</p></div><button class="big start" id="mpHost" type="button">Koop-Spiel starten</button></div>
-      <div class="item"><div class="it-main"><h3>Bei Freunden mitspielen</h3><p>Code vom Gastgeber eingeben. Dein eigener Spielstand bleibt unberührt.</p></div><div class="mp-row"><input id="mpCode" maxlength="4" autocomplete="off" placeholder="CODE" aria-label="Koop-Code"><button class="buy" id="mpJoin" type="button">Beitreten</button></div></div>
+      <div class="item"><div class="it-main"><h3>🏙️ Gemeinsame Stadt</h3><p>Bald spielen alle in EINER Schrauberstadt: eigene Kasse, eigene Betriebe, Grundstücke kaufen, andere Betriebe übernehmen. Ohne Einladung, einfach anmelden.</p></div><button class="big start" type="button" disabled>Kommt bald</button></div>
+      <div hidden><button id="mpHost" type="button"></button><input id="mpCode"><button id="mpJoin" type="button"></button></div>
       <div class="item"><div class="it-main"><h3>Bestenliste &amp; Besuche</h3><p>Wer hat die größte Werkstatt? Wochen-Challenge, fremde Werkstätten anschauen, Daumen hoch geben.</p></div><button class="big mp" id="mpBoard" type="button">Bestenliste öffnen</button></div>
-      <p class="hint">Mitspielen können alle, mit denen du dieses Spiel über claude.ai teilst.</p>
+      <p class="hint">Folg @schrauberstadt auf Instagram und TikTok: dort erfährst du zuerst, wann die Stadt öffnet.</p>
     </div>
   </div>
 </div>
@@ -323,7 +323,7 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
       <h3>Kunden</h3><p>Tippe auf die Sprechblase über einem Auto und nimm den Auftrag an. Fehlen Teile, tippe auf „Teile holen“. Ist das Auto fertig, tippe auf „Kassieren“.</p>
       <h3>Team</h3><p>Lehrlinge und Mechaniker schrauben mit. Der Serviceberater nimmt einfache Aufträge selbst an und kassiert. VIPs, Termine und große Arbeiten bleiben Chefsache (⭐).</p>
       <h3>Aufgaben im Hof</h3><p>Immer wieder taucht etwas auf: Ölfleck, Lieferung, Telefon, Kaffee. Schnell antippen, sonst ist die Chance weg. Dazu kommen Entscheidungen mit zwei Antworten und Zusatzverkäufe beim Abholen (orange).</p>
-      <h3>Mehrspieler</h3><p>Im Koop spielt ihr live zu mehreren in einer Werkstatt. In der Bestenliste seht ihr alle Werkstätten und könnt sie besuchen.</p>
+      <h3>Mehrspieler</h3><p>Bald spielen alle gemeinsam in einer Stadt, jeder mit eigener Kasse und eigenen Betrieben. In der Bestenliste seht ihr alle Werkstätten und könnt sie besuchen.</p>
     </div>
   </div>
 </div>
@@ -2611,7 +2611,7 @@ function entries() {
 function netStatus() {
   const el = $('mpStatus'); if (!el) return;
   const n = Object.keys(NET.live).length;
-  el.textContent = NET.room ? (NET.conn ? `Online · ${n} ${n === 1 ? 'Werkstatt' : 'Werkstätten'} gerade da` : 'Verbinde …') : 'Mehrspieler ist nur im claude.ai-Link verfügbar.';
+  el.textContent = NET.room ? (NET.conn ? `Online · ${n} ${n === 1 ? 'Werkstatt' : 'Werkstätten'} gerade da` : 'Verbinde …') : 'Die gemeinsame Stadt ist gerade im Bau.';
   ['mpHost', 'mpJoin', 'mpCode'].forEach((id) => { $(id).disabled = !NET.room; });
 }
 
