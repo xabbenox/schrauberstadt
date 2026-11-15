@@ -162,6 +162,9 @@ button:focus-visible { outline: 4px solid var(--navy); outline-offset: 3px; }
 #bizList { list-style: none; margin: 12px 0 0; padding: 0 2px 4px; overflow-y: auto; display: grid; gap: 10px; }
 #bizList .item { flex-wrap: wrap; } .offers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; } .offer { font-size: 15px !important; background: #3bb36b !important; color: #fff; }
 #shop .tab { font-size: 13px; }
+#shop .tabs, #biz .tabs { flex-wrap: wrap; row-gap: 6px; }
+#shop .tabs .tab { flex: 1 1 30%; }
+#biz .tabs .tab { flex: 1 1 45%; }
 #title { z-index: 10; } .sheet { z-index: 20; } #toast { z-index: 30; } #decide { z-index: 12; } #goalDone { z-index: 25; }
 /* Mini-Aufgaben, Entscheidungen, Chefsache, Zusatzverkauf */
 .task { position: absolute; transform: translate(-50%, -100%); pointer-events: auto; background: #fff7d6; border: 3px solid var(--ink); border-radius: 14px; box-shadow: 0 4px 0 var(--ink); padding: 4px 10px 6px; display: grid; justify-items: center; gap: 1px; min-width: 96px; animation: bob 1.1s ease-in-out infinite; }
@@ -233,7 +236,7 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
 <div class="sheet" id="shop" hidden>
   <div class="panel" role="dialog" aria-labelledby="shopH">
     <div class="panel-head"><h2 id="shopH">Ausbau</h2><button class="x" id="shopClose" type="button">Schließen</button></div>
-    <div class="tabs" role="tablist"><button class="tab" type="button" role="tab" data-tab="build" aria-selected="true">Werkstatt</button><button class="tab" type="button" role="tab" data-tab="tech" aria-selected="false">Technik</button><button class="tab" type="button" role="tab" data-tab="team" aria-selected="false">Team</button><button class="tab" type="button" role="tab" data-tab="ads" aria-selected="false">Werbung</button><button class="tab" type="button" role="tab" data-tab="branch" aria-selected="false">Standorte</button></div>
+    <div class="tabs" role="tablist"><button class="tab" type="button" role="tab" data-tab="build" aria-selected="true">Werkstatt</button><button class="tab" type="button" role="tab" data-tab="tech" aria-selected="false">Technik</button><button class="tab" type="button" role="tab" data-tab="team" aria-selected="false">Team</button><button class="tab" type="button" role="tab" data-tab="ads" aria-selected="false">Werbung</button><button class="tab" type="button" role="tab" data-tab="branch" aria-selected="false">Standorte</button><button class="tab" type="button" role="tab" data-tab="town" aria-selected="false">Stadt</button></div>
     <ul id="shopList"></ul>
   </div>
 </div>
@@ -241,7 +244,7 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
 <div class="sheet" id="biz" hidden>
   <div class="panel" role="dialog" aria-labelledby="bizH">
     <div class="panel-head"><h2 id="bizH">Betriebe</h2><button class="x" id="bizClose" type="button">Schließen</button></div>
-    <div class="tabs" role="tablist"><button class="tab ztab" type="button" role="tab" data-zt="dealer" aria-selected="true">Gebrauchtwagen</button><button class="tab ztab" type="button" role="tab" data-zt="tow" aria-selected="false">Abschleppdienst</button></div>
+    <div class="tabs" role="tablist"><button class="tab ztab" type="button" role="tab" data-zt="dealer" aria-selected="true">Gebrauchtwagen</button><button class="tab ztab" type="button" role="tab" data-zt="tow" aria-selected="false">Abschlepp</button><button class="tab ztab" type="button" role="tab" data-zt="rhotel" aria-selected="false">Reifenhotel</button><button class="tab ztab" type="button" role="tab" data-zt="tank" aria-selected="false">Tankstelle</button></div>
     <ul id="bizList" class="list"></ul>
   </div>
 </div>
@@ -460,7 +463,7 @@ const NAMES = ['Herr Pirker', 'Frau Wieser', 'Herr Kofler', 'Frau Moser', 'Herr 
   'Herr Wutte', 'Frau Sabitzer', 'Herr Krassnig', 'Frau Jessernig', 'Herr Kuchling', 'Frau Gailer'];
 // Namenspool je Rolle. Der erste Mechaniker ist immer „mx_fly_high“ (aus der Instagram-Community).
 const FLY = 'mx_fly_high';
-const NAME_POOL = { lehrling: ['Jonas', 'Lena', 'Fabian', 'Selina', 'Luca'], mech: [FLY, 'Markus', 'Sandra', 'Tobias', 'Kevin', 'Andrea'], lack: ['Elif', 'Branko', 'Nina'], service: ['Petra', 'Sabine', 'Christoph'], fahrer: ['Mario', 'Hannes', 'Doris'], leiter: ['Günther', 'Brigitte'] };
+const NAME_POOL = { lehrling: ['Jonas', 'Beta_Siluu', 'Lena', 'Fabian', 'Selina', 'Luca'], mech: [FLY, 'Markus', 'Sandra', 'Tobias', 'Kevin', 'Andrea'], lack: ['Elif', 'Branko', 'Nina'], service: ['Petra', 'Sabine', 'Christoph'], fahrer: ['Mario', 'Hannes', 'Doris'], leiter: ['Günther', 'Brigitte'] };
 // wird vor rebuildCrew() aus S.team befüllt (rebuildCrew liest die Namen von hier)
 const STAFF_NAMES = { lehrling: [], mech: [], service: [], fahrer: [], lack: [], leiter: [] };
 // Eigenschaften der Leute
@@ -1319,6 +1322,7 @@ function chooseJob() {
     const possible = !impossible(j);
     let w = j.w * (possible ? 3 : j.stLv || (j.req && j.req !== 'cart' && j.req !== 'diag') ? 0.15 : 0.4);
     if (j.st === 'paint' && !S.owned.lift2) w = 0;
+    if (j.st === 'tyre' && tyreSeason()) w *= 3;
     if (!S.owned.lift1 && j.st === 'lift' && !j.req) w = j.w * 1.5;
     return { j, w };
   });
@@ -1437,7 +1441,7 @@ function updateCars(dt) {
     trafficT2 -= dt;
     if (trafficT2 <= 0) { trafficT2 = rnd(1, 2.4); if (Math.random() < 0.1) trafficGoal = 3 + Math.floor(Math.random() * 4); if (traffic.length < trafficGoal) spawnTraffic(); }
   }
-  const speedBoost = (has('leiter') ? 1.1 : 1) * taskSpeed();
+  const speedBoost = (has('leiter') ? 1.1 : 1) * taskSpeed() * townSpeed();
   for (let i = cars.length - 1; i >= 0; i--) {
     const c = cars[i];
     if (c.holds) releaseHolds(c);
@@ -1552,6 +1556,7 @@ function decorate(car) {
   car.job = Object.assign({}, base, { pay: payFor(base, mult) });
   let pat = { normal: 60, eilig: 38, regular: 90, vip: 50, oldtimer: 120, termin: 110, panne: 120 }[type];
   if (office('service', 'frohnatur') || office('leiter', 'frohnatur')) pat *= 1.2;
+  pat *= townPat();
   if (S.rep < 2) pat *= 0.85;
   if (impossible(car.job)) { pat = Math.min(pat, 30); car.imp = true; }
   car.patience = car.maxPat = pat;
@@ -1677,18 +1682,19 @@ function openBranch(b) {
 function applyOwned() { dirty = true; bgDirty = true; Object.keys(PATCH_POS).forEach((k) => { if (S.owned[k]) patchAnim[k] = 1; else delete patchAnim[k]; }); baseFade = 1; syncCrew(); }
 const wageOf = (m) => Math.round(roleOf(m.role).wage * (m.trait === 'pause' ? 0.75 : 1) * (1 + 0.05 * (m.lv - 1)));
 function wagesToday() { return S.team.reduce((a, m) => a + wageOf(m), 0); }
-function fixCosts() { return RENT + POWER + POWER_ST * ownedStations().length + (S.owned.wash ? 30 : 0); }
+function fixCosts() { return RENT + POWER + POWER_ST * ownedStations().length + (S.owned.wash ? 30 : 0) + cityCosts(); }
 const branchInc = (b) => Math.round(b.income * (0.7 + S.rep / 10));
 function branchIncome() { return BRANCHES.reduce((a, b) => a + (S.branches[b.id] ? branchInc(b) : 0), 0); }
 function newDay() {
-  const costs = fixCosts() + wagesToday(), inc = branchIncome();
+  const costs = fixCosts() + wagesToday(), inc = branchIncome() + cityNewDay();
   S.money += inc - costs; S.revenue += inc; if (inc) gainXp(Math.round(inc / 4)); S.day += 1;
   const st = S.stats; st.dayRev += inc; st.dayCost += costs;
+  const tax = Math.max(0, Math.round((st.dayRev - st.dayCost) * TAX)); S.money -= tax; st.dayCost += tax; S.townPaid = (S.townPaid || 0) + tax;
   st.lastRev = st.dayRev; st.lastJobs = st.dayJobs; st.lastJobRev = st.dayJobRev; st.lastCost = st.dayCost; st.best = Math.max(st.best, st.dayRev);
   st.dayRev = 0; st.dayJobs = 0; st.dayJobRev = 0; st.dayCost = 0;
   // Tagesauftrag „niemand fährt verärgert weg“ wird am Abend abgerechnet
   const d = S.daily; if (d && d.type === 'nolose' && !d.done && !d.failed && S.stats.lastJobs > 0) { d.prog = 1; checkDaily(); }
-  toast(`Tag ${S.day} · Fixkosten und Löhne −${fmt(costs)}${inc ? ` · Filialen +${fmt(inc)}` : ''}`);
+  toast(`Tag ${S.day} · Kosten und Löhne −${fmt(costs)}${tax ? ` · Steuer −${fmt(tax)}` : ''}${inc ? ` · Betriebe +${fmt(inc)}` : ''}${tyreSeason() ? ' · 🛞 Reifensaison!' : ''}`);
   Object.keys(S.adDays).forEach((k) => { if (S.adDays[k] > 0) S.adDays[k]--; });
   if (S.rep > 4) S.rep -= 0.03; // ein Spitzenruf will gepflegt werden
   tickEvent(); tasksNewDay(); bizNewDay();
@@ -1781,7 +1787,7 @@ function autoTick() {
 /* Kundenstrom: hängt an Ruf, Level, Werbung, Ereignis und freier Kapazität; gedeckelt durch Arbeitsplätze */
 function spawnInterval() {
   const ev = evNow();
-  const demand = (0.7 + 0.1 * S.rep) * (1 + 0.04 * (S.level - 1)) * (S.owned.wash ? 1.1 : 1) * (1 + adBoost() + (ev && ev.boost ? ev.boost : 0));
+  const demand = (0.7 + 0.1 * S.rep) * (1 + 0.04 * (S.level - 1)) * (S.owned.wash ? 1.1 : 1) * (1 + adBoost() + (ev && ev.boost ? ev.boost : 0)) * townDemand() * (tyreSeason() ? 1.25 : 1);
   const stations = ownedStations().length;
   const busy = cars.filter((c) => c.station && ['toStation', 'needParts', 'fetching', 'working', 'done'].includes(c.state)).length;
   const queue = cars.filter((c) => c.state === 'arriving' || c.state === 'waiting').length;
@@ -1948,6 +1954,8 @@ const SPECS = [
 const BIZ = [
   { id: 'dealer', name: 'Gebrauchtwagenhandel', plot: 'plot_l', price: 25000, lv: 3, desc: 'Gebrauchte günstig kaufen, herrichten und mit Gewinn verkaufen.' },
   { id: 'tow', name: 'Abschleppdienst', plot: 'plot_r', price: 35000, lv: 4, desc: 'Pannenrufe annehmen: Abschleppgebühr kassieren und das Auto als Auftrag in die Werkstatt holen.' },
+  { id: 'rhotel', name: 'Reifenhotel', plot: null, needs: 'tyre', price: 18000, lv: 3, desc: 'Reifensätze einlagern (3 € pro Satz und Tag). Alle 12 Tage Reifensaison: viele Reifenwechsel.' },
+  { id: 'tank', name: 'Tankstelle', plot: null, pop: 50, price: 40000, lv: 4, desc: 'Die Tankstelle an der Kreuzung übernehmen: Spritpreis selbst festlegen, Shop, Laufkundschaft.' },
 ];
 const CAR_BASE = { 'Golf 4': 4200, 'Octavia Kombi': 6800, '3er': 7900 };
 const PLACES = [['Glanegg', 3], ['Feldkirchen', 9], ['St. Veit', 14], ['Moosburg', 7], ['Liebenfels', 11], ['Ossiacher See', 16], ['Pörtschach', 18], ['Wernberg', 21], ['Klagenfurt-Nord', 15], ['Villach-Land', 24]];
@@ -2064,6 +2072,13 @@ function updateBiz(dt) {
   bizDirty = false; bizBadge();
 }
 let bizDirty = false, bizTick = 1;
+function bizWhy(b) {
+  if (S.level < b.lv) return `Ab Level ${b.lv}`;
+  if (b.plot && !S.owned[b.plot]) return `Zuerst: ${SHOP.find((x) => x.id === b.plot).name}`;
+  if (b.needs && !S.owned[b.needs]) return `Zuerst: ${SHOP.find((x) => x.id === b.needs).name}`;
+  if (b.pop && TOWN_POP < b.pop) return `Ab ${b.pop} Einwohnern`;
+  return '';
+}
 function bizNewDay() { bizInit(); if (S.owned.dealer) refreshMarket(); }
 function bizCount() {
   let n = 0; if (S.tow && S.tow.call) n++;
@@ -2071,7 +2086,7 @@ function bizCount() {
   return n;
 }
 function bizBadge() {
-  const b = $('bizBtn'); const show = !!(S.owned.plot_l || S.owned.plot_r); if (b.hidden === show) b.hidden = !show;
+  const b = $('bizBtn'); const show = !!(S.owned.reno && S.level >= 3); if (b.hidden === show) b.hidden = !show;
   const n = bizCount(), t = n ? `Betriebe (${n})` : 'Betriebe'; if (b.textContent !== t) b.textContent = t; b.classList.toggle('hot', n > 0);
   const cl = $('towCall'), c = S.tow && S.tow.call && S.owned.tow ? S.tow.call : null;
   cl.hidden = !c || !running; if (c) { const h = `🚨 Panne in ${c.place} (${c.km} km) · +${fmt(c.fee)} <b>Abschleppen</b>`; if (cl._h !== h) { cl._h = h; cl.innerHTML = h; } }
@@ -2085,10 +2100,22 @@ function renderBiz() {
   const list = $('bizList'); list.innerHTML = ''; shopBtns = [];
   const b = BIZ.find((x) => x.id === bizTab);
   if (!S.owned[b.id]) {
-    const plot = SHOP.find((x) => x.id === b.plot);
-    list.appendChild(li('hint', S.owned[b.plot] ? `Auf dem ${plot.name.replace('Grundstück', 'Grundstück')} ist noch Platz.` : `Dafür brauchst du zuerst das ${plot.name} (unter Ausbau).`));
-    list.appendChild(card(b.name, b.desc, S.level < b.lv ? `Ab Level ${b.lv}` : !S.owned[b.plot] ? `Zuerst: ${plot.name}` : '', fmt(b.price),
-      () => S.owned[b.plot] && S.level >= b.lv && S.money >= b.price, S.owned[b.plot] && S.level >= b.lv ? '' : 'locked', () => buildBiz(b)));
+    const why = bizWhy(b);
+    list.appendChild(li('hint', b.plot ? (S.owned[b.plot] ? `Auf dem ${SHOP.find((x) => x.id === b.plot).name} ist noch Platz.` : `Dafür brauchst du zuerst das ${SHOP.find((x) => x.id === b.plot).name} (unter Ausbau).`)
+      : b.pop ? `Wird frei ab ${b.pop} Einwohnern (aktuell ${TOWN_POP}). Jeder neue Follower von @schrauberstadt zählt!` : `Braucht: ${SHOP.find((x) => x.id === b.needs).name}.`));
+    list.appendChild(card(b.name, b.desc, why, fmt(b.price), () => !bizWhy(b) && S.money >= b.price, why ? 'locked' : '', () => buildBiz(b)));
+    return;
+  }
+  if (b.id === 'rhotel') {
+    cityInit();
+    list.appendChild(li('hint', `🛞 Eingelagert: ${S.rhSets}/${RH_CAP} Sätze · bringt ${fmt(S.rhSets * RH_FEE)} pro Tag.`));
+    list.appendChild(li('hint', tyreSeason() ? 'Reifensaison läuft: viele Kunden wollen ihre Reifen gewechselt haben!' : `Nächste Reifensaison in ${SEASON_EVERY - SEASON_LEN - (S.day % SEASON_EVERY)} Tagen.`));
+    return;
+  }
+  if (b.id === 'tank') {
+    list.appendChild(li('hint', `⛽ Einnahmen ca. ${fmt(tankIncome())} pro Tag (Betriebskosten ${fmt(BIZ_UPKEEP.tank)}). Mehr Einwohner = mehr Umsatz.`));
+    list.appendChild(li('sec', 'Spritpreis'));
+    TANK_MODES.forEach((m) => list.appendChild(card(m.name, m.desc, '', S.tankMode === m.id ? 'Aktiv' : 'Wählen', () => S.tankMode !== m.id, S.tankMode === m.id ? 'owned' : '', () => setTank(m.id))));
     return;
   }
   if (b.id === 'dealer') {
@@ -2128,10 +2155,10 @@ function renderBiz() {
 }
 function buildBiz(b) {
   if (bizGuest('build', b.id)) return;
-  if (S.owned[b.id] || !S.owned[b.plot] || S.level < b.lv) return;
+  if (S.owned[b.id] || bizWhy(b)) return;
   if (!spend(b.price)) return;
   S.owned[b.id] = true; bizInit(); if (b.id === 'dealer') refreshMarket(); if (b.id === 'tow') S.tow.next = 8;
-  dirty = true; bgDirty = true; sfx.goal(); banner('Neuer Betrieb', b.name, b.id === 'dealer' ? 'Kauf dein erstes Gebrauchtauto!' : 'Gleich kommt der erste Pannenruf.'); hud(); save(); renderBiz();
+  dirty = true; bgDirty = true; sfx.goal(); banner('Neuer Betrieb', b.name, { dealer: 'Kauf dein erstes Gebrauchtauto!', tow: 'Gleich kommt der erste Pannenruf.', rhotel: 'Die ersten Reifensätze kommen morgen.', tank: 'Leg deinen Spritpreis fest!' }[b.id]); hud(); save(); renderBiz();
 }
 function bizAct(op, arg) {
   if (op === 'up' && ST_UP[arg]) upgrade(arg);
@@ -2142,6 +2169,7 @@ function bizAct(op, arg) {
   else if (op === 'tacc') towAccept();
   else if (op === 'tdec') towDecline();
   else if (op === 'build') { const b = BIZ.find((x) => x.id === arg); if (b) buildBiz(b); }
+  else if (op === 'tank') setTank(arg);
 }
 document.querySelectorAll('.ztab').forEach((t) => t.addEventListener('click', () => { bizTab = t.dataset.zt; renderBiz(); }));
 $('bizBtn').addEventListener('click', () => { renderBiz(); $('biz').hidden = false; });
@@ -2163,6 +2191,79 @@ function renderTech(list) {
     const note = lvLock ? `Ab Level ${it.lv}` : needLock ? `Zuerst: ${SHOP.find((x) => x.id === it.needs).name}` : '';
     list.appendChild(card(it.name, it.desc, note, owned ? 'Gekauft' : fmt(it.price), () => !S.owned[it.id] && !lockWhy(it.lv, it.needs) && S.money >= it.price, owned ? 'owned' : (lvLock || needLock ? 'locked' : ''), () => buy(it)));
   });
+}
+/* ---------------- Stadt: Einwohner, Kosten, Steuern, Community-Bauten, neue Betriebe ---------------- */
+// Einwohner = Follower (Instagram + TikTok), wird mit jeder Folge nachgetragen.
+const TOWN_POP = 39, TOWN_FUND = 4760;
+const MILESTONES = [
+  { pop: 50, name: 'Tankstelle', desc: 'Das Tankstellen-Grundstück wird frei: eigener Betrieb mit Spritpreis und Shop.' },
+  { pop: 100, name: 'Hotel', desc: 'Grundstück für ein Hotel: Gäste brauchen Taxis und Werkstätten.' },
+  { pop: 250, name: 'Gewerbegebiet', desc: 'Neue Grundstücke für Teilehändler, Autohandel und mehr.' },
+];
+// Community-Bauten aus den Kommentaren: wirken für alle
+const COMMUNITY = [
+  { id: 'siedlung', ep: 3, name: 'Neubausiedlung', by: '', desc: '8 neue Häuser an der Siedlungsstraße.', fx: '+8 Einwohner' },
+  { id: 'cafe', ep: 3, name: 'Café', by: '', desc: 'Wartende Kunden holen sich einen Kaffee.', fx: 'Kunden warten 10 % länger' },
+  { id: 'parkplatz', ep: 4, name: 'Parkplatz', by: 'mx_fly_high', desc: 'Platz für die Schlange vor der Werkstatt.', fx: 'Kunden warten 25 % länger' },
+  { id: 'metzgerei', ep: 4, name: 'Metzgerei', by: 'jonas.cbg2', desc: 'Mittagessen für die ganze Truppe.', fx: 'Team arbeitet 5 % schneller' },
+  { id: 'hausboot', ep: 4, name: 'Hausboot am Bach', by: 'fraya1985', desc: 'Das Finanzamt wohnt jetzt ruhig am Wasser.', fx: 'Ab und zu ein Stammkunde mit Dienstwagen' },
+];
+const townHas = (id) => COMMUNITY.some((c) => c.id === id && c.ep <= TOWN_EP);
+function townPat() { return (townHas('cafe') ? 1.1 : 1) * (townHas('parkplatz') ? 1.25 : 1); }
+function townSpeed() { return townHas('metzgerei') ? 1.05 : 1; }
+function townDemand() { return 1 + TOWN_POP * 0.004 + (S.owned.tank && tankMode().id === 'cheap' ? 0.1 : 0); }
+// Kosten: Lebensunterhalt, Pacht, Betriebskosten; Steuer geht in die Stadtkasse
+const PLOT_RENT = 40, BIZ_UPKEEP = { dealer: 25, tow: 35, rhotel: 20, tank: 50 };
+const living = () => 40 + 10 * (S.level - 1);
+function cityCosts() {
+  let c = living();
+  ['plot_l', 'plot_r'].forEach((p) => { if (S.owned[p]) c += PLOT_RENT; });
+  Object.keys(BIZ_UPKEEP).forEach((b) => { if (S.owned[b]) c += BIZ_UPKEEP[b]; });
+  return c;
+}
+const TAX = 0.1;
+/* Reifenhotel: Reifensätze einlagern, in der Reifensaison kommen die Wechsel */
+const RH_CAP = 40, RH_FEE = 3, SEASON_EVERY = 12, SEASON_LEN = 3;
+const tyreSeason = () => S.owned.rhotel && (S.day % SEASON_EVERY) >= SEASON_EVERY - SEASON_LEN;
+/* Tankstelle: Spritpreis bestimmt Menge und Spanne */
+const TANK_MODES = [{ id: 'cheap', name: 'Günstig', vol: 1.4, mar: 0.65, desc: 'Viel los, kleine Spanne, +10 % Werkstattkunden' }, { id: 'normal', name: 'Normal', vol: 1, mar: 1, desc: 'Ausgewogen' }, { id: 'dear', name: 'Teuer', vol: 0.65, mar: 1.35, desc: 'Weniger Kunden, mehr pro Liter' }];
+const tankMode = () => TANK_MODES.find((m) => m.id === (S.tankMode || 'normal')) || TANK_MODES[1];
+const tankIncome = () => Math.round((TOWN_POP * 5 + 90) * tankMode().vol * tankMode().mar * (0.8 + S.rep / 10));
+function cityInit() {
+  if (!Number.isFinite(S.rhSets)) S.rhSets = 0;
+  if (!Number.isFinite(S.townPaid)) S.townPaid = 0;
+  if (!TANK_MODES.some((m) => m.id === S.tankMode)) S.tankMode = 'normal';
+}
+// Tagesabschluss der Stadt-Betriebe; gibt die Einnahmen zurück (Kosten stecken in cityCosts)
+function cityNewDay() {
+  cityInit(); let inc = 0;
+  if (S.owned.rhotel) {
+    if (tyreSeason()) { const out = Math.min(S.rhSets, 4 + Math.floor(Math.random() * 4)); S.rhSets -= out; S.towQ = (S.towQ || []).concat(Array(Math.min(3, out)).fill('reifen')).slice(0, 5); }
+    else S.rhSets = Math.min(RH_CAP, S.rhSets + 2 + Math.floor(Math.random() * 3));
+    inc += S.rhSets * RH_FEE;
+  }
+  if (S.owned.tank) inc += tankIncome();
+  return inc;
+}
+function setTank(id) { if (bizGuest('tank', id)) return; if (!TANK_MODES.some((m) => m.id === id)) return; S.tankMode = id; save(); renderBiz(); }
+/* Stadt-Reiter im Ausbau-Menü */
+function renderTown(list) {
+  cityInit();
+  list.appendChild(li('hint', `🏘️ Schrauberstadt hat ${TOWN_POP} Einwohner: jeder Follower auf Instagram und TikTok ist einer. Mehr Einwohner = mehr Kunden für alle (+${Math.round(TOWN_POP * 0.4)} %).`));
+  list.appendChild(li('hint', `💰 Stadtkasse ${fmt(TOWN_FUND + S.townPaid)} · deine Steuern bisher ${fmt(S.townPaid)} (10 % vom Tagesgewinn).`));
+  list.appendChild(li('sec', 'Deine täglichen Kosten'));
+  const rows = [['Lebensunterhalt', living()], ['Löhne', wagesToday()], ['Miete und Strom', fixCosts() - cityCosts()]];
+  ['plot_l', 'plot_r'].forEach((p) => { if (S.owned[p]) rows.push(['Pacht ' + SHOP.find((x) => x.id === p).name, PLOT_RENT]); });
+  Object.keys(BIZ_UPKEEP).forEach((b) => { if (S.owned[b]) rows.push(['Betrieb ' + BIZ.find((x) => x.id === b).name, BIZ_UPKEEP[b]]); });
+  rows.forEach(([n, v]) => list.appendChild(li('hint', `${n}: ${fmt(v)}`)));
+  list.appendChild(li('sec', 'Gebaut von der Community'));
+  COMMUNITY.forEach((c) => {
+    const built = c.ep <= TOWN_EP;
+    list.appendChild(card(`${c.name}${c.by ? ` <small class="cnt">von @${esc(c.by)}</small>` : ''}`, `${c.desc} ${c.fx}.`, built ? '' : `Kommt mit Folge ${c.ep}`, built ? 'Steht' : 'Bald', () => false, built ? 'owned' : 'locked', () => {}));
+  });
+  list.appendChild(li('sec', 'Meilensteine'));
+  MILESTONES.forEach((m) => list.appendChild(card(`${m.pop} Einwohner: ${m.name}`, m.desc, TOWN_POP >= m.pop ? '' : `Noch ${m.pop - TOWN_POP} Einwohner`, TOWN_POP >= m.pop ? 'Frei' : `${TOWN_POP}/${m.pop}`, () => false, TOWN_POP >= m.pop ? 'owned' : 'locked', () => {})));
+  list.appendChild(li('hint', 'Folg @schrauberstadt und schreib in die Kommentare, was als Nächstes gebaut wird!'));
 }
 /* ---------------- HTML-Overlay ---------------- */
 const layer = $('bubbles');
@@ -2274,7 +2375,7 @@ function memberCard(m) {
   el.appendChild(b); return el;
 }
 function renderShop() {
-  document.querySelectorAll('.tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === shopTab)));
+  document.querySelectorAll('#shop .tab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === shopTab)));
   const list = $('shopList'); list.innerHTML = ''; shopBtns = [];
   if (shopTab === 'build') SHOP.forEach((it) => {
     const owned = !!S.owned[it.id], lvLock = S.level < it.lv, needLock = it.needs && !S.owned[it.needs];
@@ -2282,6 +2383,7 @@ function renderShop() {
     list.appendChild(card(it.name, it.desc, note, owned ? 'Gekauft' : fmt(it.price), () => !S.owned[it.id] && !lockWhy(it.lv, it.needs) && S.money >= it.price, owned ? 'owned' : (lvLock || needLock ? 'locked' : ''), () => buy(it)));
   });
   if (shopTab === 'tech') renderTech(list);
+  if (shopTab === 'town') renderTown(list);
   if (shopTab === 'team') {
     const hands = S.team.filter((m) => WORKER_ROLES.includes(m.role)).length + 1, st = ownedStations().length;
     list.appendChild(li('hint', `${hands} ${hands === 1 ? 'Schrauber' : 'Schrauber'} (mit dir) für ${st} ${st === 1 ? 'Arbeitsplatz' : 'Arbeitsplätze'}. Löhne: ${fmt(wagesToday())}/Tag.`));
@@ -2313,7 +2415,7 @@ function renderShop() {
     });
   }
 }
-document.querySelectorAll('.tab').forEach((t) => t.addEventListener('click', () => { shopTab = t.dataset.tab; renderShop(); }));
+document.querySelectorAll('#shop .tab').forEach((t) => t.addEventListener('click', () => { shopTab = t.dataset.tab; renderShop(); }));
 $('shopBtn').addEventListener('click', () => { renderShop(); $('shop').hidden = false; });
 $('shopClose').addEventListener('click', () => { $('shop').hidden = true; });
 
