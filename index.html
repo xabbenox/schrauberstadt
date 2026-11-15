@@ -75,6 +75,7 @@ button:focus-visible { outline: 4px solid var(--navy); outline-offset: 3px; }
 .pin { position: absolute; transform: translate(-50%, -100%); background: var(--navy); color: #fff; border: 3px solid var(--ink); border-radius: 12px; padding: 4px 10px; display: grid; text-align: center; pointer-events: none; }
 .pin b { font-family: var(--display); font-weight: normal; font-size: 15px; color: var(--sun); } .pin span { font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .pin.busy { background: #2f5fb3; }
+.pin.city { background: #1f7a4a; } .pin.city.free { background: #fffdf6; color: #1b1b1b; } .pin.city.free b { color: #1f7a4a; }
 /* Toast */
 #toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); transform: translateX(-50%); background: var(--ink); color: #fff; font-weight: 800; padding: 10px 18px; border-radius: 16px; max-width: calc(100% - 40px); text-align: center; font-size: 15px; }
 #toast.show { animation: pop .3s ease-out; }
@@ -160,6 +161,8 @@ button:focus-visible { outline: 4px solid var(--navy); outline-offset: 3px; }
 #towCall { pointer-events: auto; background: var(--red); color: #fff; border: 3px solid var(--ink); border-radius: 30px; padding: 5px 14px; font-weight: 800; font-size: 13px; box-shadow: 0 4px 0 var(--ink); animation: bob 1.1s ease-in-out infinite; max-width: min(560px, 100%); }
 #towCall b { font-family: var(--display); font-weight: normal; color: var(--sun); margin-left: 4px; }
 #bizList { list-style: none; margin: 12px 0 0; padding: 0 2px 4px; overflow-y: auto; display: grid; gap: 10px; }
+#cityList { list-style: none; margin: 12px 0 0; padding: 0 2px 4px; overflow-y: auto; display: grid; gap: 10px; }
+#cityList .item { flex-wrap: wrap; } #cityList .found { font-size: 14px !important; }
 #bizList .item { flex-wrap: wrap; } .offers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; } .offer { font-size: 15px !important; background: #3bb36b !important; color: #fff; }
 #shop .tab { font-size: 13px; }
 #shop .tabs, #biz .tabs { flex-wrap: wrap; row-gap: 6px; }
@@ -291,7 +294,7 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
     <div class="panel-head"><h2 id="mpH">Mehrspieler</h2><button class="x" id="mpClose" type="button">Schließen</button></div>
     <p id="mpStatus"></p>
     <div class="mp-box">
-      <div class="item"><div class="it-main"><h3>🏙️ Gemeinsame Stadt</h3><p>Bald spielen alle in EINER Schrauberstadt: eigene Kasse, eigene Betriebe, Grundstücke kaufen, andere Betriebe übernehmen. Ohne Einladung, einfach anmelden.</p></div><button class="big start" type="button" disabled>Kommt bald</button></div>
+      <div class="item"><div class="it-main"><h3>🏙️ Gemeinsame Stadt</h3><p>Alle spielen in EINER Schrauberstadt: Grundstücke kaufen, eigene Betriebe gründen, mit eigener Stadt-Kasse. Ohne Einladung, einfach anmelden.</p></div><button class="big start" id="cityOpen" type="button">Stadt öffnen</button></div>
       <div hidden><button id="mpHost" type="button"></button><input id="mpCode"><button id="mpJoin" type="button"></button></div>
       <div class="item"><div class="it-main"><h3>Bestenliste &amp; Besuche</h3><p>Wer hat die größte Werkstatt? Wochen-Challenge, fremde Werkstätten anschauen, Daumen hoch geben.</p></div><button class="big mp" id="mpBoard" type="button">Bestenliste öffnen</button></div>
       <p class="hint">Folg @schrauberstadt auf Instagram und TikTok: dort erfährst du zuerst, wann die Stadt öffnet.</p>
@@ -314,6 +317,12 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
       <div class="set-row"><span class="cnt">Ton</span><button class="buy" id="setMute" type="button">Ton: an</button></div>
       <div class="set-row"><span class="cnt">Spielstand</span><button class="fire" id="setReset" type="button">Löschen</button></div>
     </div>
+  </div>
+</div>
+<div class="sheet" id="city" hidden>
+  <div class="panel" role="dialog" aria-labelledby="cityH">
+    <div class="panel-head"><h2 id="cityH">Gemeinsame Stadt</h2><button class="x" id="cityClose" type="button">Schließen</button></div>
+    <ul id="cityList"></ul>
   </div>
 </div>
 <div class="sheet" id="login" hidden>
@@ -3061,6 +3070,84 @@ $('mpJoin').addEventListener('click', () => { joinKoop($('mpCode').value); });
 $('mpCode').addEventListener('keydown', (e) => { if (e.key === 'Enter') joinKoop($('mpCode').value); });
 $('mpBoard').addEventListener('click', () => { $('mp').hidden = true; openBoard(); });
 $('mpClose').addEventListener('click', () => { $('mp').hidden = true; });
+/* ---------------- Gemeinsame Stadt (Supabase): Grundstücke, Betriebe, Kasse, Bestenliste ---------------- */
+// Der Server rechnet alles (Kauf, Gründung, Tagesabrechnung alle 30 min). Das Spiel zeigt nur an und schickt Aktionen.
+const CITY = { state: null, me: null, ledger: [], pins: {}, t: 99, ping: 0, busy: false, err: '' };
+const CITY_ERR = { 'not enough cash': 'Nicht genug Geld in deiner Stadt-Kasse.', 'plot taken': 'Das Grundstück hat schon jemand gekauft.', 'join first': 'Bitte zuerst anmelden.',
+  'not your plot': 'Das ist nicht dein Grundstück.', 'kind not allowed here': 'Dieser Betrieb passt nicht auf dieses Grundstück.', 'plot in use': 'Hier steht schon ein Betrieb.', 'max 5 businesses': 'Höchstens 5 Betriebe pro Spieler.' };
+const cityErr = (m) => { for (const k in CITY_ERR) if (m.includes(k)) return CITY_ERR[k]; const r = /needs (\d+) residents/.exec(m); return r ? `Erst ab ${r[1]} Einwohnern.` : 'Das hat nicht geklappt.'; };
+async function sbRpc(fn, args) {
+  const tok = await sbToken(); if (!tok) throw new Error('join first');
+  const r = await fetch(SB_URL + '/rest/v1/rpc/' + fn, { method: 'POST', headers: sbHead(tok), body: JSON.stringify(args || {}) });
+  const t = await r.text(); if (!r.ok) { let m = t; try { m = JSON.parse(t).message || t; } catch (e) { /* egal */ } throw new Error(m); }
+  return t ? JSON.parse(t) : null;
+}
+async function cityLoad() {
+  if (!ONLINE.sess || CITY.busy) return; CITY.busy = true;
+  try {
+    CITY.state = await sbRpc('city_state');
+    const uid = ONLINE.sess.uid;
+    const me = await sbRest('players?select=name,cash,last_tick_net&id=eq.' + uid); CITY.me = me && me[0];
+    if (!CITY.me) { await sbRpc('join_game', { p_name: myName() }); const m2 = await sbRest('players?select=name,cash,last_tick_net&id=eq.' + uid); CITY.me = m2 && m2[0]; }
+    CITY.ledger = await sbRest('ledger?select=amount,reason,created_at&order=created_at.desc&limit=8&player=eq.' + uid) || [];
+    CITY.err = '';
+  } catch (e) { CITY.err = 'Stadt-Server nicht erreichbar.'; }
+  CITY.busy = false; CITY.t = 0; cityPinsBuild(); if (!$('city').hidden) renderCity();
+}
+async function cityAct(fn, args, okMsg) {
+  try { await sbRpc(fn, args); sfx.goal(); toast(okMsg); } catch (e) { sfx.nope(); toast(cityErr(e.message || '')); }
+  await cityLoad();
+}
+const kindOf = (k) => ((CITY.state && CITY.state.kinds) || []).find((x) => x.kind === k);
+const KIND_ICON = { tankstelle: '⛽', autohandel: '🚗', abschlepp: '🚛', reifenhotel: '🛞', waschanlage: '🧽', taxi: '🚕', hotel: '🏨' };
+function renderCity() {
+  const list = $('cityList'); list.innerHTML = ''; shopBtns = [];
+  if (!ONLINE.sess) { list.appendChild(li('hint', 'Melde dich zuerst an (Menü → Anmelden), dann kannst du in der gemeinsamen Stadt Grundstücke kaufen und Betriebe gründen.')); return; }
+  const st = CITY.state; if (!st) { list.appendChild(li('hint', CITY.err || 'Lade die Stadt …')); return; }
+  const me = CITY.me || {}, uid = ONLINE.sess.uid, town = st.town || {};
+  list.appendChild(li('hint', `🏙️ ${town.residents} Einwohner · Stadtkasse ${fmt(town.fund)} · alle 30 Minuten ist Tagesabrechnung.`));
+  list.appendChild(li('hint', `💼 Deine Stadt-Kasse: ${fmt(me.cash || 0)}${me.last_tick_net ? ` · letzte Abrechnung ${me.last_tick_net > 0 ? '+' : ''}${fmt(me.last_tick_net)}` : ''}`));
+  list.appendChild(li('sec', 'Grundstücke'));
+  (st.plots || []).forEach((p) => {
+    const mine = p.owner === uid, free = !p.owner, locked = (town.residents || 0) < p.min;
+    let title = esc(p.label), desc = '', note = '', btn = '', can = () => false, fn = () => {}, extra = '';
+    if (free) {
+      desc = `Pacht ${fmt(p.rent)}/Tag · passt für: ${p.kinds.map((k) => (KIND_ICON[k] || '') + ' ' + ((kindOf(k) || {}).label || k)).join(', ')}`;
+      note = locked ? `Ab ${p.min} Einwohnern` : ''; btn = fmt(p.price); can = () => !locked && (me.cash || 0) >= p.price; fn = () => cityAct('buy_plot', { p_plot: p.id }, 'Grundstück gekauft!');
+    } else if (p.biz) {
+      const b = p.biz; title += ` <small class="cnt">${KIND_ICON[b.kind] || ''} ${esc(b.name)}</small>`;
+      desc = `${mine ? 'Dein Betrieb' : 'Gehört ' + esc(p.ownerName || '?')} · letzte Abrechnung ${fmt(b.income)}`; btn = mine ? 'Läuft' : 'Belegt';
+    } else if (mine) {
+      desc = 'Dein Grundstück. Gründe hier einen Betrieb:'; btn = 'Frei';
+      extra = '<div class="offers">' + p.kinds.map((k) => { const kd = kindOf(k) || {}; const lock = (town.residents || 0) < (kd.min_residents || 0);
+        return `<button type="button" class="buy found" data-p="${esc(p.id)}" data-k="${esc(k)}" ${lock ? 'disabled' : ''}>${KIND_ICON[k] || ''} ${esc(kd.label || k)} · ${fmt((kd.upkeep || 0) * 100)}${lock ? ` (ab ${kd.min_residents} EW)` : ''}</button>`; }).join('') + '</div>';
+    } else { desc = 'Gehört ' + esc(p.ownerName || '?'); btn = 'Verkauft'; }
+    list.appendChild(card(title, desc, note, btn, can, free ? (locked ? 'locked' : '') : 'owned', fn, extra));
+  });
+  list.querySelectorAll('.found').forEach((b) => b.addEventListener('click', () => { const kd = kindOf(b.dataset.k) || {}; cityAct('found_business', { p_kind: b.dataset.k, p_plot: b.dataset.p, p_name: myName() + ' ' + (kd.label || '') }, (kd.label || 'Betrieb') + ' gegründet!'); }));
+  if ((st.top || []).length) { list.appendChild(li('sec', 'Reichste Spieler')); st.top.forEach((x, i) => list.appendChild(li('hint', `${i + 1}. ${x.name} · ${fmt(x.worth)} · ${x.biz} ${x.biz === 1 ? 'Betrieb' : 'Betriebe'}`))); }
+  if (CITY.ledger.length) { list.appendChild(li('sec', 'Deine letzten Buchungen')); CITY.ledger.forEach((l) => list.appendChild(li('hint', `${l.amount > 0 ? '+' : ''}${fmt(l.amount)} · ${l.reason}`))); }
+}
+// Namensschilder der Grundstücke auf der Karte
+function cityPinsBuild() {
+  const st = CITY.state; if (!st) return; const seen = {};
+  (st.plots || []).forEach((p) => {
+    seen[p.id] = 1; let el = CITY.pins[p.id];
+    if (!el) { el = document.createElement('div'); el.className = 'pin city'; layer.appendChild(el); CITY.pins[p.id] = el; const q = iso(p.u, p.w); el._x = q.x; el._y = q.y - 60; }
+    const h = p.biz ? `<b>${KIND_ICON[p.biz.kind] || ''} ${esc(p.biz.name)}</b><span>${esc(p.ownerName || '')}</span>` : p.owner ? `<b>${esc(p.ownerName || '')}</b><span>Grundstück</span>` : `<b>${fmt(p.price)}</b><span>zu verkaufen</span>`;
+    if (el._h !== h) { el._h = h; el.innerHTML = h; el.classList.toggle('free', !p.owner); }
+  });
+  for (const id in CITY.pins) if (!seen[id]) { CITY.pins[id].remove(); delete CITY.pins[id]; }
+}
+function cityTick(dt) {
+  const on = !!(ONLINE.sess && CITY.state && running);
+  for (const id in CITY.pins) { const el = CITY.pins[id]; el.hidden = !on; if (on) { const s = toScreen(el._x, el._y); setPos(el, s.x, s.y); } }
+  if (!ONLINE.sess) return;
+  CITY.t += dt; if (CITY.t > 30) cityLoad();
+  CITY.ping += dt; if (running && CITY.ping > 120) { CITY.ping = 0; sbRpc('ping').catch(() => {}); }
+}
+$('cityClose').addEventListener('click', () => { $('city').hidden = true; });
+$('cityOpen').addEventListener('click', () => { $('mp').hidden = true; $('city').hidden = false; renderCity(); cityLoad(); });
 /* ---------------- Zeichnen ---------------- */
 function drawSprite(img, x, y, w, flip, alpha = 1, anchorY = 0.62) {
   if (!img || !img.width || !img.height) return; // fehlendes/kaputtes Bild: nichts zeichnen statt Exception
@@ -3176,6 +3263,7 @@ function frame(dt, now) {
   if (NET.mode === 'host') safe('host', hostTick, dt);
   const ps = toScreen(DEALER.x, DEALER.y); setPos(dealerPin, ps.x, ps.y);
   const busy = van.active > 0; if (dealerPin._busy !== busy) { dealerPin.classList.toggle('busy', busy); dealerPin._busy = busy; }
+  safe('city', cityTick, dt);
   if (running && !guest) safe('goal', checkGoal);
 }
 function loop(now) {
