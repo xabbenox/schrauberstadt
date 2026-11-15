@@ -1,2 +1,5 @@
-# schrauberstadt
-Schrauberstadt - das Mitmach-Spiel zur Serie auf Insagram und TikTok
+# Schrauberstadt
+
+Das Mitmach-Spiel zur Serie auf Instagram und TikTok.
+
+Spielen: https://xabbenox.github.io/schrauberstadt/
