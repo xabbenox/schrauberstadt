@@ -1548,6 +1548,11 @@ function updateCars(dt) {
     fixT = 1;
     crew.forEach((w) => { if (w.busy && !cars.some((c) => c.id === w.busy && c.worker === w)) { w.busy = null; w.tx = w.home.x; w.ty = w.home.y; } });
     if (van.active > 0 && !cars.some((c) => c.state === 'fetching')) van.active = 0;
+    // Plätze freigeben, deren Auto es nicht mehr gibt (sonst bleibt „Arbeitsplatz belegt“ bis zum Neustart)
+    Object.values(ST).forEach((s) => { if (s.car && !cars.includes(s.car)) s.car = null; });
+    SLOTS.forEach((s) => { if (s.car && !cars.includes(s.car)) s.car = null; });
+    // Wer beim Wegfahren hängen bleibt, verschwindet nach 40 s (gibt Platz und Bühne frei)
+    cars.forEach((c) => { if (c.state === 'leaving') { c.leaveT = (c.leaveT || 0) + 1; if (c.leaveT > 40 && c.fade === undefined) { c.fade = 0.6; releaseHolds(c, true); } } else c.leaveT = 0; });
     // Notbremse: Fahrzeug mit kaputter Position (NaN/Infinity) aus dem Spiel nehmen statt alles dahinter zu blockieren
     for (let i = cars.length - 1; i >= 0; i--) {
       const c = cars[i]; if (Number.isFinite(c.x) && Number.isFinite(c.y)) continue;
