@@ -162,7 +162,14 @@ button:focus-visible { outline: 4px solid var(--navy); outline-offset: 3px; }
 #towCall b { font-family: var(--display); font-weight: normal; color: var(--sun); margin-left: 4px; }
 #bizList { list-style: none; margin: 12px 0 0; padding: 0 2px 4px; overflow-y: auto; display: grid; gap: 10px; }
 #cityList { list-style: none; margin: 12px 0 0; padding: 0 2px 4px; overflow-y: auto; display: grid; gap: 10px; }
-#cityList .item { flex-wrap: wrap; } .beta { display: inline-block; background: var(--red); color: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 0 6px; font-size: .7em; vertical-align: middle; transform: rotate(-4deg); } .auc { color: #a05cff; font-weight: 800; } .bidIn { width: 110px; font: inherit; font-weight: 800; padding: 4px 6px; border: 2px solid var(--ink); border-radius: 8px; } #cityList .bar { height: 10px; background: #e6e0cf; border: 2px solid var(--ink); border-radius: 6px; margin-top: 6px; overflow: hidden; } #cityList .bar i { display: block; height: 100%; background: #d9342b; } .offIn { width: 110px; font: inherit; font-weight: 800; padding: 4px 6px; border: 2px solid var(--ink); border-radius: 8px; } .offNo { background: #e6e0cf !important; } .chip { cursor: default; font-size: 13px !important; } .chip.off { opacity: .55; } .profBtn.on { background: #1f9a52 !important; color: #fff; } .fireVote.on { background: #d9342b !important; color: #fff; } #cityList .hint .buy { font-size: 14px !important; } #cityList .found { font-size: 14px !important; }
+#cityList .item { flex-wrap: wrap; } .beta { display: inline-block; background: var(--red); color: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 0 6px; font-size: .7em; vertical-align: middle; transform: rotate(-4deg); } .auc { color: #a05cff; font-weight: 800; } .bidIn { width: 110px; font: inherit; font-weight: 800; padding: 4px 6px; border: 2px solid var(--ink); border-radius: 8px; } #cityList .bar { height: 10px; background: #e6e0cf; border: 2px solid var(--ink); border-radius: 6px; margin-top: 6px; overflow: hidden; } #cityList .bar i { display: block; height: 100%; background: #d9342b; } .offIn { width: 110px; font: inherit; font-weight: 800; padding: 4px 6px; border: 2px solid var(--ink); border-radius: 8px; } .offNo { background: #e6e0cf !important; } .wtime { height: 10px; background: #e6e0cf; border: 2px solid var(--ink); border-radius: 6px; overflow: hidden; margin: 6px 0 10px; } .wtime i { display: block; height: 100%; width: 100%; background: #3bb36b; }
+#workArea { position: relative; min-height: 300px; background: #f3efe2; border: 3px solid var(--ink); border-radius: 18px; padding: 10px; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.whint { font-weight: 800; margin: 0 0 8px; } .wtap { position: absolute; font-size: 34px; width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--ink); background: #fffdf6; transform: translate(-50%, -50%); box-shadow: 0 4px 0 var(--ink); cursor: pointer; } .wtap.ok { opacity: .25; transform: translate(-50%, -50%) scale(.8); }
+.wgauge { position: relative; height: 34px; background: #fffdf6; border: 3px solid var(--ink); border-radius: 12px; overflow: hidden; margin: 12px 0; } .wgauge .zone { position: absolute; top: 0; bottom: 0; background: rgba(59,179,107,.45); } .wgauge .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: rgba(47,155,232,.75); }
+.wval { font-family: var(--display); font-size: 24px; margin: 4px 0 10px; text-align: center; } .whold { width: 100%; font-size: 22px; touch-action: none; }
+.wgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .wopt { font-size: 17px !important; padding: 12px 8px !important; }
+#workRes { font-weight: 800; min-height: 1.4em; text-align: center; margin: 10px 0 0; }
+.chip { cursor: default; font-size: 13px !important; } .chip.off { opacity: .55; } .profBtn.on { background: #1f9a52 !important; color: #fff; } .fireVote.on { background: #d9342b !important; color: #fff; } #cityList .hint .buy { font-size: 14px !important; } #cityList .found { font-size: 14px !important; }
 #bizList .item { flex-wrap: wrap; } .offers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; } .offer { font-size: 15px !important; background: #3bb36b !important; color: #fff; }
 #shop .tab { font-size: 13px; }
 #shop .tabs, #biz .tabs { flex-wrap: wrap; row-gap: 6px; }
@@ -286,6 +293,14 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
 
 <div id="decide" hidden role="dialog" aria-labelledby="decT"><h3 id="decT"></h3><p id="decX"></p><div class="dbar"><i id="decBar"></i></div><div class="actions"><button class="big no" id="decB" type="button"></button><button class="big go" id="decA" type="button"></button></div></div>
 <div id="walkBar" hidden><div class="vb" id="walkInfo"></div><button class="big go" id="walkCity" type="button">🏙️ Stadt</button><button class="big no" id="walkExit" type="button">☰ Menü</button></div>
+<div class="sheet" id="work" hidden>
+  <div class="panel" role="dialog" aria-labelledby="workTitle">
+    <div class="panel-head"><h2 id="workTitle">Auftrag</h2><button class="x" id="workStop" type="button">Feierabend</button></div>
+    <div class="wtime"><i id="workTime"></i></div>
+    <div id="workArea"></div>
+    <p id="workRes"></p>
+  </div>
+</div>
 <div class="sheet" id="place" hidden>
   <div class="panel" role="dialog" aria-labelledby="placeH">
     <div class="panel-head"><h2 id="placeH">Ort</h2><button class="x" id="placeClose" type="button">Schließen</button></div>
@@ -3418,7 +3433,7 @@ function walkTo(x, y, place) {
   const a = uwOf(WALK.me), b = uwOf({ x, y });
   WALK.path = walkRoute(a, b); WALK.dest = place || null; WALK.follow = true; walkStopShift();
 }
-function walkStopShift() { if (WALK.shift) { WALK.shift = null; toast('Schicht beendet.'); } }
+function walkStopShift() { if (WALK.shift) { WALK.shift = null; if (typeof closeWork === 'function' && WK.on) closeWork('Schicht beendet.'); } }
 // Bewegung: Gehsteig entlang, wartet, wenn ein Auto kommt (Autos halten ihrerseits für Fußgänger, siehe personAhead)
 function walkTick(dt) {
   if (!WALK.on) return;
@@ -3438,7 +3453,7 @@ function walkTick(dt) {
   if (WALK.follow && !ptrs.size) { view.cx += (m.x - view.cx) * Math.min(1, dt * 2.5); view.cy += (m.y - 80 - view.cy) * Math.min(1, dt * 2.5); clampView(); }
   // Schicht läuft: alle 20 s abrechnen, solange man dort steht
   const s = WALK.shift;
-  if (s) { s.t += dt; if (s.t >= 20 && !s.busy) { s.busy = true; workShift().finally(() => { if (WALK.shift === s) { s.t = 0; s.busy = false; } }); } }
+  if (s) s.t = (s.t + dt) % 20; // nur für die Arbeits-Animation; abgerechnet wird pro erledigtem Auftrag (63_work.js)
   walkPins(); walkHud();
 }
 async function workShift() {
@@ -3491,21 +3506,21 @@ function walkHud() {
 function openPlace(p) {
   const st = CITY.state || {}, me = st.me || {}, uid = ONLINE.sess && ONLINE.sess.uid, rk = rankOf(me.xp || 0);
   const list = $('placeList'); list.innerHTML = ''; shopBtns = []; $('placeH').textContent = `${p.icon} ${p.name}`;
-  const workHere = () => { $('place').hidden = true; WALK.shift = { t: 0, busy: false }; WALK.follow = true; toast('Schicht läuft – alle 20 Sekunden gibt’s Lohn. Zum Aufhören einfach woanders hintippen.'); };
+  const workHere = () => { $('place').hidden = true; WALK.shift = { t: 0, busy: false }; WALK.follow = true; openWork(); };
   const take = (args, okMsg) => async () => { try { await sbRpc('take_job', args); sfx.goal(); toast(okMsg); await cityLoad(); openPlace(p); } catch (e) { sfx.nope(); toast(cityErr(e.message || '')); } };
   if (p.kind === 'town') {
     const mine = me.townJob === p.id;
     list.appendChild(li('hint', `${p.by ? `Wunsch von @${p.by}. ` : ''}Hier wird ${p.job} gesucht.`));
-    if (mine) list.appendChild(card('Du arbeitest hier', `Als ${RANKS[rk][0]} bekommst du ${fmt(RANK_PAY[rk])} pro Schicht. Mit jeder Schicht steigst du auf.`, '', 'Schicht starten', () => true, 'owned', workHere));
-    else list.appendChild(card(`Arbeit als ${p.job}`, `Start als ${RANKS[rk][0]} mit ${fmt(RANK_PAY[rk])} pro Schicht (20 s). Später als Geselle, Meister, Chef mehr.`, me.townJob || me.employer ? 'Dein alter Job endet dann.' : '', 'Arbeit anfragen', () => true, '', take({ p_business: null, p_town: p.id }, `Eingestellt als ${p.job}! Tippe auf „Schicht starten“.`)));
+    if (mine) list.appendChild(card('Du arbeitest hier', `Erledige Aufträge: Als ${RANKS[rk][0]} bekommst du bis zu ${fmt(RANK_PAY[rk])} pro Auftrag – je sauberer, desto mehr. Gute Arbeit bringt Erfahrung.`, '', 'Arbeiten', () => true, 'owned', workHere));
+    else list.appendChild(card(`Arbeit als ${p.job}`, `Start als ${RANKS[rk][0]} mit bis zu ${fmt(RANK_PAY[rk])} pro Auftrag. Später als Geselle, Meister, Chef mehr.`, me.townJob || me.employer ? 'Dein alter Job endet dann.' : '', 'Arbeit anfragen', () => true, '', take({ p_business: null, p_town: p.id }, `Eingestellt als ${p.job}! Tippe auf „Arbeiten“.`)));
   } else {
     const pl = p.plot, b = pl.biz, mineBiz = pl.owner === uid;
     if (b) {
       const staff = b.staff || [], here = me.employer === b.id;
       list.appendChild(li('hint', `${mineBiz ? 'Dein Betrieb' : 'Gehört ' + (pl.ownerName || '?')} · Stufe ${b.level} · Team ${staff.length}/${b.slots}${staff.length ? ': ' + staff.join(', ') : ''}`));
-      if (mineBiz || here) list.appendChild(card(mineBiz ? 'Selbst mitarbeiten' : 'Du arbeitest hier', `${fmt(mineBiz ? Math.round(RANK_PAY[rk] * 1.5) : RANK_PAY[rk])} pro Schicht${here ? `, der Betrieb von ${esc(pl.ownerName || 'deinem Chef')} verdient die Hälfte davon zusätzlich` : ' (Lohn + Betriebsanteil)'}.`, '', 'Schicht starten', () => true, 'owned', workHere));
+      if (mineBiz || here) list.appendChild(card(mineBiz ? 'Selbst mitarbeiten' : 'Du arbeitest hier', `${fmt(mineBiz ? Math.round(RANK_PAY[rk] * 1.5) : RANK_PAY[rk])} pro Schicht${here ? `, der Betrieb von ${esc(pl.ownerName || 'deinem Chef')} verdient die Hälfte davon zusätzlich` : ' (Lohn + Betriebsanteil)'}.`, '', 'Arbeiten', () => true, 'owned', workHere));
       else if (staff.length >= b.slots) list.appendChild(li('hint', 'Alle Stellen sind besetzt. Schau später wieder vorbei – oder mach dem Besitzer in der Stadt-Übersicht ein Kaufangebot.'));
-      else list.appendChild(card('Arbeit anfragen', `Du wirst ${KIND_ICON[b.kind] || ''} Fachkraft im Betrieb von ${esc(pl.ownerName || '?')}. Dein Lohn: ${fmt(RANK_PAY[rk])} pro Schicht.`, '', 'Anfragen', () => true, '', take({ p_business: b.id, p_town: null }, 'Du hast die Stelle! Tippe auf „Schicht starten“.')));
+      else list.appendChild(card('Arbeit anfragen', `Du wirst ${KIND_ICON[b.kind] || ''} Fachkraft im Betrieb von ${esc(pl.ownerName || '?')}. Dein Lohn: ${fmt(RANK_PAY[rk])} pro Schicht.`, '', 'Anfragen', () => true, '', take({ p_business: b.id, p_town: null }, 'Du hast die Stelle! Tippe auf „Arbeiten“.')));
     } else if (!pl.owner && !pl.auction) {
       const cash = (CITY.me && CITY.me.cash) || 0;
       list.appendChild(card('Grundstück kaufen', `Preis ${fmt(pl.price)} · Pacht ${fmt(pl.rent)}/Tag. Passt für: ${pl.kinds.map((k) => KIND_ICON[k] || k).join(' ')}`, cash < pl.price ? `Dir fehlen noch ${fmt(pl.price - cash)} – arbeite dich hoch!` : '', fmt(pl.price), () => cash >= pl.price, '', async () => { await cityAct('buy_plot', { p_plot: pl.id }, 'Grundstück gekauft! Gründe jetzt einen Betrieb (ab Geselle).'); openPlace(p); }));
@@ -3592,6 +3607,127 @@ function drawPeer(o) {
   ctx.fillStyle = '#1b1b1b'; ctx.fillText(label, s.x, s.y - 6); if (o.w) { ctx.font = '16px system-ui'; ctx.fillText('🔧', s.x, s.y - 26); }
   ctx.restore();
 }
+/* ---------------- Arbeiten im Mehrspieler: echte Aufträge statt Wartezeit ---------------- */
+// Je nach Beruf kommen kurze Aufträge (Minispiele): Schrauben lösen, Öl/Tank füllen, Kunden bedienen, Fehler finden.
+// Gute Arbeit = voller Lohn + Erfahrung. Der Server rechnet ab (work_task mit Qualität 0..1).
+const TAP = (title, icon, n, time, hint) => ({ t: 'tap', title, icon, n, time, hint });
+const GAUGE = (title, icon, unit, max, hint) => ({ t: 'gauge', title, icon, unit, max, hint });
+const ORDER = (title, items, who) => ({ t: 'order', title, items, who });
+const PICK = (title, rounds) => ({ t: 'pick', title, rounds });
+const DIAG = PICK('Fehler finden', [
+  ['Motorleuchte, Motor ruckelt', 'Zündkerzen', ['Zündkerzen', 'Bremsbeläge', 'Wischerblätter']],
+  ['Quietscht beim Bremsen', 'Bremsbeläge', ['Auspuff', 'Bremsbeläge', 'Batterie']],
+  ['Springt morgens nicht an', 'Batterie', ['Batterie', 'Luftfilter', 'Reifen']],
+  ['Klima kühlt nicht', 'Klimaservice', ['Ölwechsel', 'Klimaservice', 'Zündkerzen']],
+  ['Lenkrad zittert ab 100 km/h', 'Reifen wuchten', ['Reifen wuchten', 'Batterie', 'Kühlwasser']],
+  ['Pickerl fällig', '§57a-Prüfung', ['§57a-Prüfung', 'Lackieren', 'Waschen']],
+]);
+const WORK = {
+  mechaniker: [TAP('Reifen wechseln', '🔩', 5, 7, 'Alle Radmuttern lösen!'), GAUGE('Öl auffüllen', '🛢️', 'L', 6, 'Genau bis zur Markierung füllen'), DIAG],
+  lackierer: [TAP('Kratzer ausbessern', '🖌️', 6, 8, 'Alle Kratzer überlackieren!'), GAUGE('Farbe mischen', '🎨', '%', 100, 'Genau den richtigen Farbton treffen')],
+  restaurator: [TAP('Rost entfernen', '🟤', 7, 9, 'Alle Roststellen abschleifen!'), DIAG, GAUGE('Chrom polieren', '✨', '%', 100, 'Polieren, bis es glänzt – nicht zu lang!')],
+  reifenprofi: [TAP('Radmuttern', '🔩', 5, 7, 'Alle Radmuttern lösen!'), ORDER('Reifen ausgeben', ['☀️ Sommerreifen', '❄️ Winterreifen', '🌦️ Ganzjahresreifen', '🏎️ Sportreifen'], '🧑'), GAUGE('Reifendruck', '🛞', 'bar', 4, 'Auf den richtigen Druck pumpen')],
+  tankwart: [GAUGE('Volltanken', '⛽', 'L', 60, 'Genau so viel tanken, wie der Kunde will'), ORDER('Shop-Kasse', ['☕ Kaffee', '🥪 Weckerl', '📰 Zeitung', '🧴 Scheibenwischwasser'], '🧑‍🦰')],
+  aushilfe: [ORDER('Café-Bestellung', ['☕ Melange', '🥐 Kipferl', '🍰 Sachertorte', '🥤 Almdudler'], '🧓')],
+  metzger: [ORDER('Theke', ['🥖 Leberkässemmel', '🌭 Käsekrainer', '🥓 Speck', '🍖 Schnitzelfleisch'], '👷'), GAUGE('Wurst abwiegen', '⚖️', 'g', 500, 'Genau abwiegen')],
+  landwirt: [TAP('Kühe füttern', '🐄', 6, 8, 'Jede Kuh bekommt Heu!'), GAUGE('Melken', '🥛', 'L', 20, 'Kübel voll – aber nicht überlaufen lassen')],
+  parkwaechter: [TAP('Autos einweisen', '🚗', 5, 8, 'Jedes Auto auf seinen Platz winken!'), ORDER('Parkticket', ['🎫 1 Stunde', '🎫 Tagesticket', '🎫 Monatskarte', '🆓 Kundenparkplatz'], '🧑')],
+  feuerwehr: [TAP('Brand löschen', '🔥', 7, 7, 'Schnell alle Flammen löschen!'), GAUGE('Wassertank füllen', '💧', 'L', 2000, 'Tank füllen – genau bis zur Linie')],
+  waescher: [TAP('Schmutz wegputzen', '🟫', 7, 8, 'Alle Dreckflecken weg!'), ORDER('Waschprogramm', ['🫧 Basis', '✨ Glanz', '🐝 Wachs', '🧽 Innenreinigung'], '🧑‍🦱')],
+  taxifahrer: [ORDER('Fahrgast', ['🔧 Werkstatt', '☕ Café', '🏨 Hotel', '⛪ Kirche'], '🧳')],
+  abschlepper: [TAP('Auto sichern', '⛓️', 4, 7, 'Alle Haken einhängen!'), GAUGE('Seilwinde', '🪝', 'm', 10, 'Genau so weit ziehen, bis das Auto oben ist')],
+  autohaendler: [PICK('Beratung', [['Familie mit 3 Kindern', '🚐 Van', ['🏎️ Sportwagen', '🚐 Van', '🛻 Pick-up']], ['Student, wenig Geld', '🚗 Kleinwagen', ['🚗 Kleinwagen', '🚙 SUV', '🏎️ Sportwagen']], ['Bauer mit Anhänger', '🛻 Pick-up', ['🛻 Pick-up', '🚗 Kleinwagen', '🏎️ Sportwagen']], ['Pendler, 80 km am Tag', '🔌 E-Auto', ['🔌 E-Auto', '🚐 Van', '🛻 Pick-up']]]), TAP('Auto polieren', '✨', 5, 7, 'Alle Stellen polieren!')],
+  kinobetreiber: [ORDER('Kino-Kiosk', ['🍿 Popcorn', '🥤 Cola', '🍫 Schoko', '🎟️ Ticket'], '🧑‍🤝‍🧑')],
+  hotelier: [ORDER('Rezeption', ['🔑 Zimmer 1', '🍳 Frühstück', '🧳 Gepäck', '🚕 Taxi rufen'], '🧳')],
+};
+const WK = { on: false, task: null, t: 0, timer: null, done: 0, busy: false };
+function workTasksFor() {
+  const me = (CITY.state && CITY.state.me) || {}; let pid = me.profession;
+  if (!me.employer && !me.townJob) { // eigener Betrieb: Beruf passend zum Betrieb
+    const uid = ONLINE.sess && ONLINE.sess.uid, mine = ((CITY.state && CITY.state.plots) || []).find((p) => p.biz && p.owner === uid);
+    const pr = mine && ((CITY.state && CITY.state.professions) || []).find((x) => x.kinds.includes(mine.biz.kind)); if (pr) pid = pr.id;
+  }
+  return WORK[pid] || WORK.mechaniker;
+}
+const rnd01 = Math.random;
+function openWork() {
+  WK.on = true; WK.done = 0; $('work').hidden = false; nextTask();
+}
+function closeWork(msg) { WK.on = false; clearInterval(WK.timer); $('work').hidden = true; WALK.shift = null; if (msg) toast(msg); }
+function nextTask() {
+  if (!WK.on) return; clearInterval(WK.timer);
+  const list = workTasksFor(), def = list[Math.floor(rnd01() * list.length)];
+  WK.task = def; const A = $('workArea'); A.innerHTML = ''; $('workTitle').textContent = def.title; $('workRes').textContent = '';
+  ({ tap: taskTap, gauge: taskGauge, order: taskOrder, pick: taskPick }[def.t])(def, A);
+}
+// Ergebnis an den Server, dann nächster Auftrag
+async function finishTask(q, note) {
+  if (WK.busy || !WK.on) return; WK.busy = true; clearInterval(WK.timer);
+  q = Math.max(0, Math.min(1, q)); const stars = q >= 0.9 ? '⭐⭐⭐' : q >= 0.65 ? '⭐⭐' : q >= 0.4 ? '⭐' : '😬';
+  $('workRes').textContent = `${stars} ${note || ''}`;
+  try {
+    const r = await sbRpc('work_task', { p_quality: Math.max(0.2, q) });
+    const rk = rankOf(r.xp), next = RANKS[rk + 1]; WK.done++;
+    sfx.cash(); $('workRes').textContent = `${stars} +${fmt(r.pay)}${r.gain ? '' : ' (keine Erfahrung – sorgfältiger arbeiten!)'} · ${RANKS[rk][0]}${next ? ` ${r.xp}/${next[1]}` : ''}`;
+    if (rk > rankOf(r.xp - (r.gain ? 1 : 0))) { sfx.goal(); toast(`🎉 Aufgestiegen: Du bist jetzt ${RANKS[rk][0]}!`); }
+    cityLoad();
+  } catch (e) { $('workRes').textContent = e.message.includes('too fast') ? 'Kurz durchschnaufen …' : e.message.includes('no job') ? 'Du hast hier keine Arbeit.' : 'Abrechnung hat nicht geklappt.'; }
+  WK.busy = false; setTimeout(() => { if (WK.on) nextTask(); }, 1600);
+}
+function bar(sec, onEnd) { const b = $('workTime'); const t0 = performance.now(); b.style.width = '100%'; WK.timer = setInterval(() => { const k = 1 - (performance.now() - t0) / (sec * 1000); b.style.width = Math.max(0, k * 100) + '%'; if (k <= 0) { clearInterval(WK.timer); onEnd(); } }, 50); return () => Math.max(0, 1 - (performance.now() - t0) / (sec * 1000)); }
+// 1) Antippen: alle Ziele erwischen, bevor die Zeit abläuft
+function taskTap(d, A) {
+  A.appendChild(Object.assign(document.createElement('p'), { className: 'whint', textContent: d.hint }));
+  const cells = [...Array(12).keys()].sort(() => rnd01() - 0.5);
+  let left = d.n; const leftK = bar(d.time, () => finishTask((d.n - left) / d.n * 0.7, `${d.n - left}/${d.n} geschafft`));
+  for (let i = 0; i < d.n; i++) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'wtap'; b.textContent = d.icon;
+    const cell = cells[i], cx = cell % 4, cy = Math.floor(cell / 4); // Raster 4×3, damit sich nichts überdeckt
+    b.style.left = (14 + cx * 24 + (rnd01() - 0.5) * 8) + '%'; b.style.top = (30 + cy * 24 + (rnd01() - 0.5) * 8) + '%';
+    b.addEventListener('click', () => { b.disabled = true; b.classList.add('ok'); sfx.pop(); left--; if (!left) finishTask(0.55 + 0.45 * leftK(), 'Alles erledigt!'); });
+    A.appendChild(b);
+  }
+}
+// 2) Füllen: gedrückt halten, im grünen Bereich loslassen
+function taskGauge(d, A) {
+  const target = Math.round(d.max * (0.35 + rnd01() * 0.5) * 10) / 10, tol = d.max * 0.06;
+  A.innerHTML = `<p class="whint">${d.hint}: <b>${target} ${d.unit}</b></p><div class="wgauge"><i class="zone" style="left:${(target - tol) / d.max * 100}%;width:${tol * 2 / d.max * 100}%"></i><i class="fill"></i></div><p class="wval">0 ${d.unit}</p><button type="button" class="big go whold">${d.icon} Gedrückt halten</button>`;
+  const fill = A.querySelector('.fill'), val = A.querySelector('.wval'), btn = A.querySelector('.whold'); let v = 0, hold = false, done = false, iv = null;
+  const speed = d.max / 2.6;
+  const stop = () => { if (!hold || done) return; hold = false; done = true; clearInterval(iv); const err = Math.abs(v - target) / d.max; finishTask(err < 0.06 ? 1 - err * 3 : Math.max(0.2, 0.8 - err * 4), `${Math.round(v * 10) / 10} ${d.unit} (Ziel ${target})`); };
+  btn.addEventListener('pointerdown', (e) => { e.preventDefault(); if (done) return; hold = true; iv = setInterval(() => { v = Math.min(d.max, v + speed * 0.03); fill.style.width = v / d.max * 100 + '%'; val.textContent = `${Math.round(v * 10) / 10} ${d.unit}`; if (v >= d.max) stop(); }, 30); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => btn.addEventListener(ev, stop));
+  bar(12, () => { if (!done) { done = true; clearInterval(iv); finishTask(0.2, 'Zu langsam'); } });
+}
+// 3) Bestellung: Kunde will etwas – das Richtige antippen (4 Kunden)
+function taskOrder(d, A) {
+  let round = 0, ok = 0; const rounds = 4;
+  const leftK = bar(14, () => finishTask(ok / rounds * 0.6, `${ok}/${rounds} richtig`));
+  const show = () => {
+    const want = d.items[Math.floor(rnd01() * d.items.length)];
+    A.innerHTML = `<p class="whint">${d.who} „Einmal <b>${want.replace(/^\S+\s/, '')}</b>, bitte!“ <small>(${round + 1}/${rounds})</small></p><div class="wgrid">${d.items.map((it) => `<button type="button" class="buy wopt">${it}</button>`).join('')}</div>`;
+    A.querySelectorAll('.wopt').forEach((b) => b.addEventListener('click', () => {
+      if (b.textContent === want) { ok++; sfx.pop(); } else sfx.nope();
+      round++; if (round >= rounds) finishTask(ok / rounds * (0.6 + 0.4 * leftK()), `${ok}/${rounds} richtig`); else show();
+    }));
+  };
+  show();
+}
+// 4) Fehler finden / beraten: richtige Lösung wählen (3 Runden)
+function taskPick(d, A) {
+  const qs = [...d.rounds].sort(() => rnd01() - 0.5).slice(0, 3); let i = 0, ok = 0;
+  const leftK = bar(15, () => finishTask(ok / qs.length * 0.6, `${ok}/${qs.length} richtig`));
+  const show = () => {
+    const [q, right, opts] = qs[i];
+    A.innerHTML = `<p class="whint">🧑 „${q}“ <small>(${i + 1}/${qs.length})</small></p><div class="wgrid">${[...opts].sort(() => rnd01() - 0.5).map((o) => `<button type="button" class="buy wopt">${o}</button>`).join('')}</div>`;
+    A.querySelectorAll('.wopt').forEach((b) => b.addEventListener('click', () => {
+      if (b.textContent === right) { ok++; sfx.pop(); } else sfx.nope();
+      i++; if (i >= qs.length) finishTask(ok / qs.length * (0.6 + 0.4 * leftK()), `${ok}/${qs.length} richtig`); else show();
+    }));
+  };
+  show();
+}
+$('workStop').addEventListener('click', () => closeWork(WK.done ? `Feierabend! ${WK.done} Aufträge erledigt.` : ''));
 /* ---------------- Schleife ---------------- */
 let last = performance.now(), loopOn = false;
 // Sicherheitsnetz: eine Exception in Update oder Zeichnen darf die Schleife nie anhalten. Jede Meldung nur einmal loggen.
