@@ -203,6 +203,12 @@ button:focus-visible { outline: 4px solid var(--navy); outline-offset: 3px; }
 /* Besuch + Koop */
 #visitBar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 14px) max(16px, env(safe-area-inset-left, 0px)); display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; background: linear-gradient(180deg, transparent, rgba(20,24,32,.6)); }
 #visitBar .vb { background: var(--paper); border: 4px solid var(--ink); border-radius: 18px; padding: 6px 14px; box-shadow: 0 5px 0 var(--ink); text-align: center; } #visitBar .vb b { display: block; font-family: var(--display); font-weight: normal; font-size: 20px; } #visitBar .vb span { font-weight: 800; font-size: 12px; color: var(--mute); }
+#walkBar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 14px) max(16px, env(safe-area-inset-left, 0px)); display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; background: linear-gradient(180deg, transparent, rgba(20,24,32,.6)); z-index: 6; }
+#walkBar .vb { background: var(--paper); border: 4px solid var(--ink); border-radius: 18px; padding: 6px 14px; box-shadow: 0 5px 0 var(--ink); text-align: center; } #walkBar .vb b { display: block; font-family: var(--display); font-weight: normal; font-size: 20px; } #walkBar .vb span { font-weight: 800; font-size: 12px; color: var(--mute); }
+#walkBar .big { flex: none; font-size: 18px; padding: 8px 14px 5px; }
+.pin.walkpin { pointer-events: auto; cursor: pointer; background: #fffdf6; color: #1b1b1b; font: inherit; } .pin.walkpin b { color: #1f2a44; } .pin.walkpin.mine { background: #1f9a52; color: #fff; } .pin.walkpin.mine b { color: #ffd23f; }
+body.walking .pin:not(.walkpin), body.walking .bubble, body.walking .sbub, body.walking .task, body.walking #goal, body.walking #daily, body.walking #event, body.walking #decide, body.walking #towCall, body.walking #bizBtn { display: none !important; }
+#loginOAuth .oauth { flex: 1 1 180px; } #login_apple { background: #111 !important; color: #fff; } #login_google { background: #fff !important; }
 #visitBar .big { flex: none; font-size: 18px; padding: 8px 14px 5px; }
 @keyframes popR { from { transform: scale(.85); opacity: 0; } }
 @media (min-width: 900px) and (prefers-reduced-motion: no-preference) { #decide { animation-name: popR; } }
@@ -279,6 +285,13 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
 </div>
 
 <div id="decide" hidden role="dialog" aria-labelledby="decT"><h3 id="decT"></h3><p id="decX"></p><div class="dbar"><i id="decBar"></i></div><div class="actions"><button class="big no" id="decB" type="button"></button><button class="big go" id="decA" type="button"></button></div></div>
+<div id="walkBar" hidden><div class="vb" id="walkInfo"></div><button class="big go" id="walkCity" type="button">🏙️ Stadt</button><button class="big no" id="walkExit" type="button">🔧 Werkstatt</button></div>
+<div class="sheet" id="place" hidden>
+  <div class="panel" role="dialog" aria-labelledby="placeH">
+    <div class="panel-head"><h2 id="placeH">Ort</h2><button class="x" id="placeClose" type="button">Schließen</button></div>
+    <ul class="list" id="placeList"></ul>
+  </div>
+</div>
 <div id="visitBar" hidden><div class="vb"><b id="visitName"></b><span id="visitInfo"></span></div><button class="big go" id="visitLike" type="button">👍 Daumen hoch</button><button class="big no" id="visitBack" type="button">Zurück</button></div>
 <div id="goalDone" hidden><small id="goalDoneSmall">Ziel geschafft</small><b id="goalDoneName"></b><span id="goalDoneSub"></span></div>
 
@@ -331,6 +344,7 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
     <div class="panel-head"><h2 id="loginH">Online-Konto</h2><button class="x" id="loginClose" type="button">Schließen</button></div>
     <div class="mp-box">
       <p id="loginState"></p>
+      <div id="loginOAuth" class="mp-row"><button class="buy oauth" id="login_apple" type="button"> Mit Apple anmelden</button><button class="buy oauth" id="login_google" type="button">G Mit Google anmelden</button></div>
       <div id="loginForm" class="mp-row"><input id="loginMail" type="email" autocomplete="email" placeholder="deine@email.at" aria-label="E-Mail"><button class="buy" id="loginSend" type="button">Link schicken</button></div>
       <div id="loginCode" class="mp-row" hidden><input id="loginOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Code aus der Mail" aria-label="Code"><button class="buy" id="loginVerify" type="button">Anmelden</button></div>
       <div id="loginOut" hidden><button class="fire" id="loginLogout" type="button">Abmelden</button> <button class="fire" id="loginDelete" type="button">Konto löschen</button></div>
@@ -1100,7 +1114,7 @@ function scanAhead(A, V) {
 const PR = 24;
 const c_atWork = (w) => cars.some((c) => c.worker === w && c.station && c.state !== 'toStation' && Math.hypot(w.x - c.station.wx, w.y - c.station.wy) < 8);
 function personAhead(A) {
-  A.pw = null; if (!crew.length) return Infinity;
+  A.pw = null; const PPL = WALK.on ? crew.concat([WALK.me]) : crew; if (!PPL.length) return Infinity; // auch die eigene Figur im Mehrspieler
   const range = A.v * A.v / (2 * DEC) + 160; let s = 0, px = A.x, py = A.y, best = Infinity;
   for (let i = 0; i < A.path.length && i < 12 && s < range; i++) {
     const q = A.path[i], sx = q.x - px, sy = q.y - py, ls = Math.hypot(sx, sy);
@@ -1108,8 +1122,8 @@ function personAhead(A) {
     const gx = sx, gy = 2 * sy, lg = Math.hypot(gx, gy), ux = gx / lg, uy = gy / lg, nx = -uy, ny = ux, k = ls / lg;
     const sxy = sx * sy, diag = Math.abs(sxy) > 0.02 * ls * ls ? sxy > 0 : A.flip;
     const eAu = extA(CAR_L, diag, ux, uy), eAn = extA(CAR_L, diag, nx, ny);
-    for (const w of crew) {
-      if (w.busy && !w.moving && c_atWork(w)) continue; // wer an seinem Arbeitsplatz arbeitet, steht abseits
+    for (const w of PPL) {
+      if (!w.me && w.busy && !w.moving && c_atWork(w)) continue; // wer an seinem Arbeitsplatz arbeitet, steht abseits
       const bx = w.x - px, by = 2 * (w.y - py), t = bx * ux + by * uy;
       if (i === 0 ? t <= -0.3 * eAu : t < -20) continue;
       if (t > lg + eAu + PR) continue;
@@ -2555,7 +2569,7 @@ $('newGame').addEventListener('click', () => {
 });
 $('continue').addEventListener('click', () => { if (NET.mode === 'guest') { setMenu(false); return; } startGame(); sfx.pop(); });
 $('menuKoop').addEventListener('click', () => { if (NET.mode === 'guest') leaveKoop('Koop verlassen.'); else { stopKoop(); toast('Koop beendet.'); menuInfo(); } });
-$('menuMp').addEventListener('click', () => { netStatus(); $('mp').hidden = false; });
+$('menuMp').addEventListener('click', () => { startWalk(); }); // Mehrspieler: direkt als Figur in die Stadt
 $('menuBoard').addEventListener('click', () => openBoard());
 $('menuSettings').addEventListener('click', () => { $('setName').value = myName(); $('setMute').textContent = muted ? 'Ton: aus' : 'Ton: an'; $('settings').hidden = false; });
 $('menuHelp').addEventListener('click', () => { $('help').hidden = false; });
@@ -2685,6 +2699,12 @@ $('loginVerify').addEventListener('click', async () => {
   } catch (e) { toast('Der Code passt nicht oder ist abgelaufen.'); }
   btn.disabled = false;
 });
+
+// Anmelden mit Google / Apple (Supabase OAuth): kommt mit den Tokens im #-Teil zurück → sbFromHash
+['google', 'apple'].forEach((pv) => { const b = $('login_' + pv); if (b) b.addEventListener('click', () => {
+  const to = /^https?:$/.test(location.protocol) && !/localhost/.test(location.host) ? location.origin + location.pathname : 'https://schrauberstadt.com/';
+  location.href = SB_URL + '/auth/v1/authorize?provider=' + pv + '&redirect_to=' + encodeURIComponent(to);
+}); });
 /* ---------------- Mehrspieler ---------------- */
 // Alles läuft über die claude.ai-Laufzeit (room/db/user). Ohne sie bleibt das Spiel ein normales Einzelspiel.
 // - Lobby: jede Spielerin zeigt in ihrer Presence eine „Visitenkarte“ (Level, Umsatz, Ausbau, Team, Daumen).
@@ -3296,7 +3316,7 @@ function cityPinsBuild() {
   for (const id in CITY.pins) if (!seen[id]) { CITY.pins[id].remove(); delete CITY.pins[id]; }
 }
 function cityTick(dt) {
-  const on = !!(ONLINE.sess && CITY.state && running);
+  const on = !!(ONLINE.sess && CITY.state && running) && !WALK.on;
   for (const id in CITY.pins) { const el = CITY.pins[id]; el.hidden = !on; if (on) { const s = toScreen(el._x, el._y); setPos(el, s.x, s.y); } }
   if (!ONLINE.sess) return;
   CITY.t += dt; if (CITY.t > 30) cityLoad();
@@ -3388,10 +3408,164 @@ function draw(now) {
   if (van.trip && van.front) ents.push(van);
   for (const w of crew) ents.push(w);
   if (ampelOn()) for (const a of AMPELN) ents.push(a);
+  if (WALK.on) ents.push(WALK.me);
   ents.sort(byY);
-  for (const e of ents) { if (e.amp) drawAmpel(e); else if (e.role) drawCrew(e, now); else drawCar(e); }
+  for (const e of ents) { if (e.me) drawMe(); else if (e.amp) drawAmpel(e); else if (e.role) drawCrew(e, now); else drawCar(e); }
   ents.length = 0; // keine Referenzen auf entfernte Autos festhalten
 }
+/* ---------------- Mehrspieler: als eigene Figur durch die Stadt laufen, Arbeit suchen, hocharbeiten ---------------- */
+// Tippen auf den Boden = hingehen (über die Gehsteige), Tippen auf ein Schild = zum Betrieb gehen und dort fragen.
+// Lohn, Erfahrung und Käufe rechnet der Server (Supabase-RPCs take_job, work_shift, buy_plot …).
+const RANKS = [['Aushilfe', 0], ['Lehrling', 5], ['Geselle', 15], ['Meister', 40], ['Chef', 80]];
+const RANK_PAY = [30, 60, 100, 150, 200];
+const WALK = { on: false, me: { x: 0, y: 0, me: true, busy: false, moving: false, flip: false, w: 58 }, path: [], dest: null, shift: null, pins: {}, follow: true, wait: 0 };
+// Arbeitgeber der Stadt (immer da) – Positionen am Eingang, an einer Straße
+const TOWN_PLACES = [
+  { id: 'werkstatt', name: 'Schrauberstadt-Werkstatt', icon: '🔧', u: -900, w: 330, job: 'Mechaniker', ep: 1 },
+  { id: 'cafe', name: 'Café', icon: '☕', u: -470, w: 1300, job: 'Café-Aushilfe', ep: 3 },
+  { id: 'metzgerei', name: 'Metzgerei', icon: '🥩', u: -1150, w: -300, job: 'Metzger', by: 'jonas.cbg2', ep: 4 },
+  { id: 'parkplatz', name: 'Parkplatz', icon: '🅿️', u: -1680, w: -290, job: 'Parkwächter', by: 'mx_fly_high', ep: 4 },
+  { id: 'tankstelle', name: 'Tankstelle', icon: '⛽', u: 420, w: -330, job: 'Tankwart', ep: 1 },
+  { id: 'feuerwehr', name: 'Freiwillige Feuerwehr', icon: '🚒', u: -1471, w: 300, job: 'Feuerwehr (Ehrenamt)', by: 'nicokofe', ep: 4 },
+];
+const rankOf = (xp) => { let r = 0; RANKS.forEach(([, n], i) => { if (xp >= n) r = i; }); return r; };
+const SIDE = 215; // Gehsteige neben den Hauptstraßen
+function lineOf(u, w) { const c = [['w', SIDE, Math.abs(w - SIDE)], ['w', -SIDE, Math.abs(w + SIDE)], ['u', SIDE, Math.abs(u - SIDE)], ['u', -SIDE, Math.abs(u + SIDE)]]; c.sort((a, b) => a[2] - b[2]); return { ax: c[0][0], v: c[0][1] }; }
+const projL = (p, L) => (L.ax === 'w' ? { u: p.u, w: L.v } : { u: L.v, w: p.w });
+function walkRoute(A, B) {
+  const LA = lineOf(A.u, A.w), LB = lineOf(B.u, B.w), pa = projL(A, LA), pb = projL(B, LB);
+  let mid = [];
+  if (LA.ax === LB.ax && LA.v === LB.v) mid = [];
+  else if (LA.ax !== LB.ax) mid = [LA.ax === 'w' ? { u: LB.v, w: LA.v } : { u: LA.v, w: LB.v }];
+  else { const c = (LA.ax === 'w' ? Math.sign(pa.u + pb.u) : Math.sign(pa.w + pb.w)) * SIDE || SIDE; mid = LA.ax === 'w' ? [{ u: c, w: LA.v }, { u: c, w: LB.v }] : [{ u: LA.v, w: c }, { u: LB.v, w: c }]; }
+  return [pa, ...mid, pb, B].map((p) => iso(p.u, p.w));
+}
+function walkTo(x, y, place) {
+  const a = uwOf(WALK.me), b = uwOf({ x, y });
+  WALK.path = walkRoute(a, b); WALK.dest = place || null; WALK.follow = true; walkStopShift();
+}
+function walkStopShift() { if (WALK.shift) { WALK.shift = null; toast('Schicht beendet.'); } }
+// Bewegung: Gehsteig entlang, wartet, wenn ein Auto kommt (Autos halten ihrerseits für Fußgänger, siehe personAhead)
+function walkTick(dt) {
+  if (!WALK.on) return;
+  const m = WALK.me; m.moving = false;
+  if (WALK.path.length) {
+    const t = WALK.path[0], dx = t.x - m.x, dy = t.y - m.y, d = Math.hypot(dx, dy), sp = 260 * dt;
+    if (d < 4) WALK.path.shift();
+    else {
+      const nx = m.x + dx / d * Math.min(sp, d), ny = m.y + dy / d * Math.min(sp, d);
+      let block = false;
+      for (const c of vehicles()) { if (c.hidden || c.inHall) continue; const now = Math.hypot(c.x - m.x, 2 * (c.y - m.y)), nxt = Math.hypot(c.x - nx, 2 * (c.y - ny)); if (nxt < now && (nxt < 95 || ((c.v || 0) > 20 && nxt < 150))) { block = true; break; } }
+      if (block) WALK.wait += dt; else { WALK.wait = 0; m.x = nx; m.y = ny; m.moving = true; m.flip = dx > 0; }
+      if (WALK.wait > 6) { WALK.wait = 0; WALK.path.shift(); } // nie ewig festhängen
+    }
+    if (!WALK.path.length && WALK.dest) { const p = WALK.dest; WALK.dest = null; openPlace(p); }
+  }
+  if (WALK.follow && !ptrs.size) { view.cx += (m.x - view.cx) * Math.min(1, dt * 2.5); view.cy += (m.y - 80 - view.cy) * Math.min(1, dt * 2.5); clampView(); }
+  // Schicht läuft: alle 20 s abrechnen, solange man dort steht
+  const s = WALK.shift;
+  if (s) { s.t += dt; if (s.t >= 20 && !s.busy) { s.busy = true; workShift().finally(() => { if (WALK.shift === s) { s.t = 0; s.busy = false; } }); } }
+  walkPins(); walkHud();
+}
+async function workShift() {
+  try {
+    const r = await sbRpc('work_shift');
+    const rk = rankOf(r.xp), next = RANKS[rk + 1];
+    sfx.cash(); toast(`+${fmt(r.pay)} · ${RANKS[rk][0]}${next ? ` · noch ${next[1] - r.xp} Schichten bis ${next[0]}` : ' – ganz oben!'}`);
+    if (rk > rankOf(r.xp - 1)) { sfx.goal(); toast(`🎉 Aufgestiegen: Du bist jetzt ${RANKS[rk][0]}! Lohn pro Schicht ${fmt(RANK_PAY[rk])}.`); }
+    cityLoad();
+  } catch (e) { WALK.shift = null; toast(e.message.includes('no job') ? 'Du hast hier keine Arbeit – frag zuerst nach.' : 'Schicht konnte nicht abgerechnet werden.'); }
+}
+function drawMe() {
+  const m = WALK.me, bob = m.moving ? Math.abs(Math.sin(performance.now() / 90)) * 8 : WALK.shift ? Math.abs(Math.sin(performance.now() / 170)) * 6 : 0;
+  if (!IMG.geselle) return;
+  shadow(m.x, m.y, 26, 11); drawSprite(tinted('geselle', 0, 1.15, 1.2), m.x, m.y - bob, m.w, m.flip, 1, 0.97);
+  const s = toScreen(m.x, m.y - 110); ctx.save(); ctx.font = '800 13px system-ui, sans-serif'; ctx.textAlign = 'center';
+  const name = (CITY.me && CITY.me.name) || myName(); const w = ctx.measureText(name).width + 16;
+  ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(s.x - w / 2, s.y - 22, w, 22, 11) : ctx.rect(s.x - w / 2, s.y - 22, w, 22); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#1b1b1b'; ctx.fillText(name, s.x, s.y - 6);
+  if (WALK.shift) { const k = WALK.shift.t / 20; ctx.lineWidth = 6; ctx.strokeStyle = '#3bb36b'; ctx.beginPath(); ctx.arc(s.x, s.y - 40, 14, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke(); ctx.font = '18px system-ui'; ctx.fillText('🔧', s.x, s.y - 33); }
+  ctx.restore();
+}
+// Schilder an allen Orten, an denen man etwas tun kann
+function walkPlaces() {
+  const out = TOWN_PLACES.filter((p) => p.ep <= TOWN_EP && (p.id !== 'feuerwehr' || true)).map((p) => ({ ...p, kind: 'town', ...iso(p.u, p.w) }));
+  ((CITY.state && CITY.state.plots) || []).forEach((p) => out.push({ id: 'plot_' + p.id, kind: 'plot', plot: p, icon: p.biz ? KIND_ICON[p.biz.kind] || '🏢' : '🪧', name: p.biz ? p.biz.name : p.label, ...iso(p.u, p.w) }));
+  return out;
+}
+function walkPins() {
+  const seen = {};
+  for (const p of walkPlaces()) {
+    seen[p.id] = 1; let el = WALK.pins[p.id];
+    if (!el) { el = document.createElement('button'); el.type = 'button'; el.className = 'pin walkpin'; layer.appendChild(el); WALK.pins[p.id] = el; el.addEventListener('click', () => { const q = walkPlaces().find((x) => x.id === el._id); if (q) walkTo(q.x, q.y, q); }); }
+    el._id = p.id; const mine = WALK.job === p.id;
+    const h = `<b>${p.icon} ${esc(p.name)}</b><span>${p.kind === 'town' ? (mine ? 'deine Arbeit' : 'sucht Leute') : p.plot.biz ? (p.plot.owner === (ONLINE.sess && ONLINE.sess.uid) ? 'dein Betrieb' : 'Arbeit anfragen') : p.plot.owner ? 'Grundstück' : 'zu verkaufen'}</span>`;
+    if (el._h !== h) { el._h = h; el.innerHTML = h; el.classList.toggle('mine', mine); }
+    const s = toScreen(p.x, p.y - 150); setPos(el, s.x, s.y);
+  }
+  for (const id in WALK.pins) if (!seen[id]) { WALK.pins[id].remove(); delete WALK.pins[id]; }
+}
+function walkHud() {
+  const me = (CITY.state && CITY.state.me) || {}, cash = CITY.me ? CITY.me.cash : me.cash, xp = me.xp || 0, rk = rankOf(xp), next = RANKS[rk + 1];
+  const prof = ((CITY.state && CITY.state.professions) || []).find((x) => x.id === me.profession);
+  WALK.job = me.townJob || (me.employer ? 'plot_' + (((CITY.state && CITY.state.plots) || []).find((p) => p.biz && p.biz.id === me.employer) || {}).id : null);
+  const h = `<b>💰 ${fmt(cash || 0)}</b><span>${RANKS[rk][0]}${prof ? ' · ' + prof.icon + ' ' + esc(prof.label) : ' · arbeitslos'}${next ? ` · ${xp}/${next[1]} bis ${next[0]}` : ''}</span>`;
+  if ($('walkInfo')._h !== h) { $('walkInfo')._h = h; $('walkInfo').innerHTML = h; }
+}
+// Ort antippen → kleines Fenster: Arbeit anfragen, Schicht arbeiten, Grundstück kaufen …
+function openPlace(p) {
+  const st = CITY.state || {}, me = st.me || {}, uid = ONLINE.sess && ONLINE.sess.uid, rk = rankOf(me.xp || 0);
+  const list = $('placeList'); list.innerHTML = ''; shopBtns = []; $('placeH').textContent = `${p.icon} ${p.name}`;
+  const workHere = () => { $('place').hidden = true; WALK.shift = { t: 0, busy: false }; WALK.follow = true; toast('Schicht läuft – alle 20 Sekunden gibt’s Lohn. Zum Aufhören einfach woanders hintippen.'); };
+  const take = (args, okMsg) => async () => { try { await sbRpc('take_job', args); sfx.goal(); toast(okMsg); await cityLoad(); openPlace(p); } catch (e) { sfx.nope(); toast(cityErr(e.message || '')); } };
+  if (p.kind === 'town') {
+    const mine = me.townJob === p.id;
+    list.appendChild(li('hint', `${p.by ? `Wunsch von @${p.by}. ` : ''}Hier wird ${p.job} gesucht.`));
+    if (mine) list.appendChild(card('Du arbeitest hier', `Als ${RANKS[rk][0]} bekommst du ${fmt(RANK_PAY[rk])} pro Schicht. Mit jeder Schicht steigst du auf.`, '', 'Schicht starten', () => true, 'owned', workHere));
+    else list.appendChild(card(`Arbeit als ${p.job}`, `Start als ${RANKS[rk][0]} mit ${fmt(RANK_PAY[rk])} pro Schicht (20 s). Später als Geselle, Meister, Chef mehr.`, me.townJob || me.employer ? 'Dein alter Job endet dann.' : '', 'Arbeit anfragen', () => true, '', take({ p_business: null, p_town: p.id }, `Eingestellt als ${p.job}! Tippe auf „Schicht starten“.`)));
+  } else {
+    const pl = p.plot, b = pl.biz, mineBiz = pl.owner === uid;
+    if (b) {
+      const staff = b.staff || [], here = me.employer === b.id;
+      list.appendChild(li('hint', `${mineBiz ? 'Dein Betrieb' : 'Gehört ' + (pl.ownerName || '?')} · Stufe ${b.level} · Team ${staff.length}/${b.slots}${staff.length ? ': ' + staff.join(', ') : ''}`));
+      if (mineBiz || here) list.appendChild(card(mineBiz ? 'Selbst mitarbeiten' : 'Du arbeitest hier', `${fmt(RANK_PAY[rk])} pro Schicht${here ? `, ${pl.ownerName || 'der Chef'} bekommt 25 % obendrauf` : ''}.`, '', 'Schicht starten', () => true, 'owned', workHere));
+      else if (staff.length >= b.slots) list.appendChild(li('hint', 'Alle Stellen sind besetzt. Schau später wieder vorbei – oder mach dem Besitzer in der Stadt-Übersicht ein Kaufangebot.'));
+      else list.appendChild(card('Arbeit anfragen', `Du wirst ${KIND_ICON[b.kind] || ''} Fachkraft im Betrieb von ${esc(pl.ownerName || '?')}. Dein Lohn: ${fmt(RANK_PAY[rk])} pro Schicht.`, '', 'Anfragen', () => true, '', take({ p_business: b.id, p_town: null }, 'Du hast die Stelle! Tippe auf „Schicht starten“.')));
+    } else if (!pl.owner && !pl.auction) {
+      const cash = (CITY.me && CITY.me.cash) || 0;
+      list.appendChild(card('Grundstück kaufen', `Preis ${fmt(pl.price)} · Pacht ${fmt(pl.rent)}/Tag. Passt für: ${pl.kinds.map((k) => KIND_ICON[k] || k).join(' ')}`, cash < pl.price ? `Dir fehlen noch ${fmt(pl.price - cash)} – arbeite dich hoch!` : '', fmt(pl.price), () => cash >= pl.price, '', async () => { await cityAct('buy_plot', { p_plot: pl.id }, 'Grundstück gekauft! Gründe jetzt einen Betrieb (ab Geselle).'); openPlace(p); }));
+    } else if (pl.auction) list.appendChild(li('hint', 'Wird gerade versteigert – mitbieten in der Stadt-Übersicht (🏙️).'));
+    else if (mineBiz) list.appendChild(li('hint', rk >= 2 ? 'Dein Grundstück. Gründe in der Stadt-Übersicht (🏙️) einen Betrieb.' : `Dein Grundstück. Einen Betrieb gründen kannst du ab Geselle (noch ${15 - (me.xp || 0)} Schichten).`));
+    else list.appendChild(li('hint', `Gehört ${pl.ownerName || '?'}.`));
+  }
+  list.appendChild(li('hint', `Karriere: ${RANKS.map(([n, x], i) => (i === rk ? `»${n}«` : n) + ` (${x})`).join(' → ')} Schichten`));
+  $('place').hidden = false;
+}
+async function startWalk() {
+  if (!ONLINE.sess) { $('login').hidden = false; loginUi(); toast('Für den Mehrspieler bitte zuerst anmelden.'); return; }
+  if (!running) startGame();
+  WALK.on = true; document.body.classList.add('walking'); $('hud').hidden = true; $('bottom').hidden = true; $('walkBar').hidden = false;
+  const sp = iso(-200, -260); WALK.me.x = sp.x; WALK.me.y = sp.y; WALK.path = []; WALK.shift = null; view.cx = sp.x; view.cy = sp.y; setZoom(1.1); clampView();
+  await cityLoad();
+  toast('Willkommen in Schrauberstadt! Tippe auf ein Schild und frag nach Arbeit.');
+}
+function endWalk() {
+  WALK.on = false; WALK.shift = null; document.body.classList.remove('walking'); $('walkBar').hidden = true; $('hud').hidden = false; $('bottom').hidden = false;
+  for (const id in WALK.pins) WALK.pins[id].remove(); WALK.pins = {};
+}
+// Tippen auf den Boden (kein Ziehen) = dorthin gehen
+{ let down = null;
+  canvas.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  canvas.addEventListener('pointerup', (e) => {
+    if (!WALK.on || !down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), quick = performance.now() - down.t < 450; down = null;
+    if (moved > 10) { WALK.follow = false; return; } if (!quick) return;
+    const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left - VW / 2) / view.s + view.cx, y = (e.clientY - r.top - VH / 2) / view.s + view.cy;
+    walkTo(x, y, null);
+  });
+}
+$('walkCity').addEventListener('click', () => { $('city').hidden = false; renderCity(); cityLoad(); });
+$('walkExit').addEventListener('click', endWalk);
+$('placeClose').addEventListener('click', () => { $('place').hidden = true; });
 /* ---------------- Schleife ---------------- */
 let last = performance.now(), loopOn = false;
 // Sicherheitsnetz: eine Exception in Update oder Zeichnen darf die Schleife nie anhalten. Jede Meldung nur einmal loggen.
@@ -3415,12 +3589,13 @@ function frame(dt, now) {
   for (const k in patchAnim) if (patchAnim[k] < 1) patchAnim[k] = Math.min(1, patchAnim[k] + dt / 0.7);
   for (const w of crew) if (w.pop < 1) w.pop = Math.min(1, w.pop + dt / 0.5);
   const guest = NET.mode === 'guest';
-  if (running && !guest) safe('economy', updateEconomy, dt);
+  if (running && !guest && !WALK.on) safe('economy', updateEconomy, dt); // im Mehrspieler ruht die eigene Werkstatt
   if (guest) safe('guest', guestTick, dt); else safe('cars', updateCars, dt);
   if (NET.mode === 'host') safe('host', hostTick, dt);
   const ps = toScreen(DEALER.x, DEALER.y); setPos(dealerPin, ps.x, ps.y);
   const busy = van.active > 0; if (dealerPin._busy !== busy) { dealerPin.classList.toggle('busy', busy); dealerPin._busy = busy; }
   safe('city', cityTick, dt);
+  safe('walk', walkTick, dt);
   if (running && !guest) safe('goal', checkGoal);
 }
 function loop(now) {
