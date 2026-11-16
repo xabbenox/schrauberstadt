@@ -873,7 +873,7 @@ const van = { kind: 'van', active: 0, x: VAN_HOME.x, y: VAN_HOME.y, trip: 'parke
 /* ---------------- Stadt (wächst mit jeder Folge) ---------------- */
 // Jede Instagram/TikTok-Folge trägt hier ein, was in der Stadt neu gebaut wurde. Die Regie-Engine (director/)
 // nutzt dieselben Koordinaten, damit Video und Spiel immer dieselbe Stadt zeigen.
-const TOWN_EP = 3;
+const TOWN_EP = 4;
 const TOWN = [
   { ep: 3, news: 'Folge 3: Neubausiedlung mit 8 Häusern und das Café sind fertig!', items: [
     ['h_house', 713, 80, 250],
@@ -892,6 +892,12 @@ const TOWN = [
     [-150, 1700, -1300, 1700, 85], [-1300, 1700, -1300, 1970, 85], [-2400, 1970, -1300, 1970, 85],
     [-150, 1300, -500, 1300, 75], // Zufahrt Café
     [-1471, 150, -1471, 330, 70], // Zufahrt Grundstück „Was bauen wir hier?“
+  ] },
+  { ep: 4, news: 'Folge 4: Metzgerei, Parkplatz und Ampel sind fertig – jetzt fehlt nur noch die Feuerwehr!', items: [
+    ['b_metzgerei', -606, 2006, 640], // Wunsch von @jonas.cbg2 (gleiche Stelle wie im Video, director/ep04.js)
+    ['b_parkplatz', -1083, 1765, 700], // Wunsch von @mx_fly_high
+  ], roads: [
+    [-1150, -160, -1150, -300, 62], [-1680, -160, -1680, -280, 72], // Zufahrten von der Hauptstraße
   ] },
 ];
 // Betriebe auf den Grundstücken an der Tankstelle: „Zu verkaufen“, bis der Betrieb gebaut ist
@@ -2231,7 +2237,7 @@ const COMMUNITY = [
   { id: 'parkplatz', ep: 4, name: 'Parkplatz', by: 'mx_fly_high', desc: 'Platz für die Schlange vor der Werkstatt.', fx: 'Kunden warten 25 % länger' },
   { id: 'metzgerei', ep: 4, name: 'Metzgerei', by: 'jonas.cbg2', desc: 'Mittagessen für die ganze Truppe.', fx: 'Team arbeitet 5 % schneller' },
   { id: 'ampel', ep: 4, name: 'Ampel an der Kreuzung', by: 'gabsi', desc: 'Endlich geregelter Verkehr vor der Werkstatt.', fx: 'Weniger Chaos an der Kreuzung' },
-  { id: 'hausboot', ep: 4, name: 'Hausboot am Bach', by: 'fraya1985', desc: 'Das Finanzamt wohnt jetzt ruhig am Wasser.', fx: 'Ab und zu ein Stammkunde mit Dienstwagen' },
+  { id: 'hausboot', ep: 5, name: 'Hausboot am Bach', by: 'fraya1985', desc: 'Das Finanzamt wohnt jetzt ruhig am Wasser.', fx: 'Ab und zu ein Stammkunde mit Dienstwagen' },
 ];
 const townHas = (id) => COMMUNITY.some((c) => c.id === id && c.ep <= TOWN_EP);
 function townPat() { return (townHas('cafe') ? 1.1 : 1) * (townHas('parkplatz') ? 1.25 : 1); }
