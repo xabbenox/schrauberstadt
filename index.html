@@ -162,7 +162,7 @@ button:focus-visible { outline: 4px solid var(--navy); outline-offset: 3px; }
 #towCall b { font-family: var(--display); font-weight: normal; color: var(--sun); margin-left: 4px; }
 #bizList { list-style: none; margin: 12px 0 0; padding: 0 2px 4px; overflow-y: auto; display: grid; gap: 10px; }
 #cityList { list-style: none; margin: 12px 0 0; padding: 0 2px 4px; overflow-y: auto; display: grid; gap: 10px; }
-#cityList .item { flex-wrap: wrap; } .beta { display: inline-block; background: var(--red); color: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 0 6px; font-size: .7em; vertical-align: middle; transform: rotate(-4deg); } .auc { color: #a05cff; font-weight: 800; } .bidIn { width: 110px; font: inherit; font-weight: 800; padding: 4px 6px; border: 2px solid var(--ink); border-radius: 8px; } #cityList .bar { height: 10px; background: #e6e0cf; border: 2px solid var(--ink); border-radius: 6px; margin-top: 6px; overflow: hidden; } #cityList .bar i { display: block; height: 100%; background: #d9342b; } .offIn { width: 110px; font: inherit; font-weight: 800; padding: 4px 6px; border: 2px solid var(--ink); border-radius: 8px; } .offNo { background: #e6e0cf !important; } .profBtn.on { background: #1f9a52 !important; color: #fff; } .fireVote.on { background: #d9342b !important; color: #fff; } #cityList .hint .buy { font-size: 14px !important; } #cityList .found { font-size: 14px !important; }
+#cityList .item { flex-wrap: wrap; } .beta { display: inline-block; background: var(--red); color: #fff; border: 2px solid var(--ink); border-radius: 8px; padding: 0 6px; font-size: .7em; vertical-align: middle; transform: rotate(-4deg); } .auc { color: #a05cff; font-weight: 800; } .bidIn { width: 110px; font: inherit; font-weight: 800; padding: 4px 6px; border: 2px solid var(--ink); border-radius: 8px; } #cityList .bar { height: 10px; background: #e6e0cf; border: 2px solid var(--ink); border-radius: 6px; margin-top: 6px; overflow: hidden; } #cityList .bar i { display: block; height: 100%; background: #d9342b; } .offIn { width: 110px; font: inherit; font-weight: 800; padding: 4px 6px; border: 2px solid var(--ink); border-radius: 8px; } .offNo { background: #e6e0cf !important; } .chip { cursor: default; font-size: 13px !important; } .chip.off { opacity: .55; } .profBtn.on { background: #1f9a52 !important; color: #fff; } .fireVote.on { background: #d9342b !important; color: #fff; } #cityList .hint .buy { font-size: 14px !important; } #cityList .found { font-size: 14px !important; }
 #bizList .item { flex-wrap: wrap; } .offers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; } .offer { font-size: 15px !important; background: #3bb36b !important; color: #fff; }
 #shop .tab { font-size: 13px; }
 #shop .tabs, #biz .tabs { flex-wrap: wrap; row-gap: 6px; }
@@ -285,7 +285,7 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
 </div>
 
 <div id="decide" hidden role="dialog" aria-labelledby="decT"><h3 id="decT"></h3><p id="decX"></p><div class="dbar"><i id="decBar"></i></div><div class="actions"><button class="big no" id="decB" type="button"></button><button class="big go" id="decA" type="button"></button></div></div>
-<div id="walkBar" hidden><div class="vb" id="walkInfo"></div><button class="big go" id="walkCity" type="button">🏙️ Stadt</button><button class="big no" id="walkExit" type="button">🔧 Werkstatt</button></div>
+<div id="walkBar" hidden><div class="vb" id="walkInfo"></div><button class="big go" id="walkCity" type="button">🏙️ Stadt</button><button class="big no" id="walkExit" type="button">☰ Menü</button></div>
 <div class="sheet" id="place" hidden>
   <div class="panel" role="dialog" aria-labelledby="placeH">
     <div class="panel-head"><h2 id="placeH">Ort</h2><button class="x" id="placeClose" type="button">Schließen</button></div>
@@ -360,9 +360,9 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
       <h3>Kunden</h3><p>Tippe auf die Sprechblase über einem Auto und nimm den Auftrag an. Fehlen Teile, tippe auf „Teile holen“. Ist das Auto fertig, tippe auf „Kassieren“.</p>
       <h3>Team</h3><p>Lehrlinge und Mechaniker schrauben mit. Der Serviceberater nimmt einfache Aufträge selbst an und kassiert. VIPs, Termine und große Arbeiten bleiben Chefsache (⭐).</p>
       <h3>Aufgaben im Hof</h3><p>Immer wieder taucht etwas auf: Ölfleck, Lieferung, Telefon, Kaffee. Schnell antippen, sonst ist die Chance weg. Dazu kommen Entscheidungen mit zwei Antworten und Zusatzverkäufe beim Abholen (orange).</p>
-      <h3>Gemeinsame Stadt</h3><p>Melde dich an (Menü → Anmelden). Dann hast du eine eigene Stadt-Kasse mit 50.000 €: Grundstück kaufen, Betrieb gründen (Tankstelle, Metzgerei, Taxi …), ausbauen, anderen Spielern Kaufangebote machen oder bei Versteigerungen mitbieten. Alle 30 Minuten ist Tagesabrechnung: Einnahmen, Pacht, Lebensunterhalt und Steuer.</p>
-      <h3>Dein Beruf</h3><p>In der gemeinsamen Stadt suchst du dir einen Beruf aus: Mechaniker, Lackierer, Landwirt, Metzger, Tankwart, Feuerwehr … Du bekommst Lohn bei jeder Abrechnung. Hast du selbst einen passenden Betrieb, bringt er 25 % mehr; arbeitest du bei einem Mitspieler, bekommst du 30 % mehr Lohn und sein Betrieb läuft besser. Fehlt dein Beruf? Schreib’s uns in die Kommentare!</p>
-      <h3>Feuerwehr</h3><p>Ohne Feuerwehr brennt es öfter. Alle Spieler legen zusammen – bei 60.000 € steht sie, und ihr wählt den Kommandanten.</p>
+      <h3>Mehrspieler: Die Stadt</h3><p>„Werkstatt eröffnen“ ist dein Einzelspiel. Im Mehrspieler läufst du als eigene Figur durch die gemeinsame Stadt – mit eigener Kasse (Start: 2.000 €) und siehst die anderen Spieler live. Geh zu einem Betrieb, frag nach Arbeit und arbeite Schichten: Mit jeder Schicht steigst du auf (Aushilfe → Lehrling → Geselle → Meister → Chef) und verdienst mehr. Spar auf ein Grundstück, gründe ab Geselle deinen eigenen Betrieb und stell Mitspieler ein. Alle 30 Minuten ist Abrechnung: Einnahmen deiner Betriebe (nur wenn jemand da ist), Pacht, Lebensunterhalt und 10 % Steuer für die Stadtkasse.</p>
+      <h3>Dein Beruf</h3><p>Dein Beruf ergibt sich aus deinem Job: in der Werkstatt Mechaniker, in der Metzgerei Metzger, auf dem Bauernhof Landwirt … Arbeitest du bei einem Mitspieler, verdient sein Betrieb mit (die Hälfte deines Lohns obendrauf). Mit eigenem passenden Betrieb (z. B. Landwirt mit Bauernhof) gibt’s +25 % Einnahmen. Fehlt dein Beruf? Schreib’s uns in die Kommentare!</p>
+      <h3>Feuerwehr</h3><p>Ohne Feuerwehr brennt es öfter. Sobald 60.000 € in der Stadtkasse sind, wird sie gebaut. Wer als Feuerwehr arbeitet, rückt bei Bränden aus, halbiert den Schaden und bekommt Einsatzgeld. Den Kommandanten wählt ihr.</p>
       <h3>Beta</h3><p>Das Spiel wächst mit jeder Folge auf Instagram und TikTok (@schrauberstadt). Wenn etwas hakt: schreib’s uns in die Kommentare!</p>
     </div>
   </div>
@@ -374,7 +374,7 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
     <div class="title-btns">
       <button class="big cont" id="continue" type="button" hidden>Weiterspielen<span id="contInfo"></span></button>
       <button class="big start" id="newGame" type="button">Werkstatt eröffnen</button>
-      <button class="big mp" id="menuMp" type="button">Mehrspieler</button>
+      <button class="big mp" id="menuMp" type="button">🏙️ Mehrspieler: Die Stadt</button>
       <button class="big no" id="menuKoop" type="button" hidden>Koop verlassen</button>
       <div class="row2"><button class="big sm" id="menuBoard" type="button">Bestenliste</button><button class="big sm" id="menuSettings" type="button">Einstellungen</button></div>
       <button class="big sm" id="menuHelp" type="button">So geht’s</button>
@@ -1114,7 +1114,7 @@ function scanAhead(A, V) {
 const PR = 24;
 const c_atWork = (w) => cars.some((c) => c.worker === w && c.station && c.state !== 'toStation' && Math.hypot(w.x - c.station.wx, w.y - c.station.wy) < 8);
 function personAhead(A) {
-  A.pw = null; const PPL = WALK.on ? crew.concat([WALK.me]) : crew; if (!PPL.length) return Infinity; // auch die eigene Figur im Mehrspieler
+  A.pw = null; const PPL = WALK.on ? crew.concat([WALK.me], presPeople()) : crew; if (!PPL.length) return Infinity; // auch die eigene Figur im Mehrspieler
   const range = A.v * A.v / (2 * DEC) + 160; let s = 0, px = A.x, py = A.y, best = Infinity;
   for (let i = 0; i < A.path.length && i < 12 && s < range; i++) {
     const q = A.path[i], sx = q.x - px, sy = q.y - py, ls = Math.hypot(sx, sy);
@@ -1123,7 +1123,7 @@ function personAhead(A) {
     const sxy = sx * sy, diag = Math.abs(sxy) > 0.02 * ls * ls ? sxy > 0 : A.flip;
     const eAu = extA(CAR_L, diag, ux, uy), eAn = extA(CAR_L, diag, nx, ny);
     for (const w of PPL) {
-      if (!w.me && w.busy && !w.moving && c_atWork(w)) continue; // wer an seinem Arbeitsplatz arbeitet, steht abseits
+      if (!w.me && !w.peer && w.busy && !w.moving && c_atWork(w)) continue; // wer an seinem Arbeitsplatz arbeitet, steht abseits
       const bx = w.x - px, by = 2 * (w.y - py), t = bx * ux + by * uy;
       if (i === 0 ? t <= -0.3 * eAu : t < -20) continue;
       if (t > lg + eAu + PR) continue;
@@ -3194,7 +3194,7 @@ const kindOf = (k) => ((CITY.state && CITY.state.kinds) || []).find((x) => x.kin
 const KIND_ICON = { werkstatt: '🔧', tankstelle: '⛽', autohandel: '🚗', abschlepp: '🚛', reifenhotel: '🛞', waschanlage: '🧽', taxi: '🚕', hotel: '🏨', metzgerei: '🥩', parkplatz: '🅿️', restauration: '🏎️', bauernhof: '🚜', autokino: '🎬' };
 // Bild auf der Karte je Betrieb (sonst Laden)
 const KIND_IMG = { tankstelle: 'b_tank', taxi: 'b_taxi', reifenhotel: 'b_rhotel', waschanlage: 'b_wash', autohandel: 'b_dealer', abschlepp: 'b_tow', metzgerei: 'b_metzgerei', parkplatz: 'b_parkplatz', restauration: 'b_resto', bauernhof: 'b_farm', autokino: 'b_kino', hotel: 'h_inn' };
-const fireOn = () => !!(CITY.state && CITY.state.town && CITY.state.town.fire_fund >= CITY.state.town.fire_goal);
+const fireOn = () => !!(CITY.state && CITY.state.town && CITY.state.town.fire_built);
 function renderCity() {
   const list = $('cityList'); list.innerHTML = ''; shopBtns = [];
   if (!ONLINE.sess) { list.appendChild(li('hint', 'Melde dich zuerst an (Menü → Anmelden), dann kannst du in der gemeinsamen Stadt Grundstücke kaufen und Betriebe gründen.')); return; }
@@ -3202,50 +3202,21 @@ function renderCity() {
   const me = CITY.me || {}, uid = ONLINE.sess.uid, town = st.town || {};
   list.appendChild(li('hint', `🏙️ ${town.residents} Einwohner · Stadtkasse ${fmt(town.fund)} · alle 30 Minuten ist Tagesabrechnung.`));
   list.appendChild(li('hint', `💼 Deine Stadt-Kasse: ${fmt(me.cash || 0)}${me.last_tick_net ? ` · letzte Abrechnung ${me.last_tick_net > 0 ? '+' : ''}${fmt(me.last_tick_net)}` : ''}`));
-  // Berufe: jeder Spieler übt seinen eigenen Beruf aus (Wünsche aus den Instagram-/TikTok-Kommentaren)
-  const profs = st.professions || [], my = st.me || {}, myP = profs.find((x) => x.id === my.profession);
-  list.appendChild(li('sec', '👷 Dein Beruf'));
-  if (myP) {
-    const fits = (st.plots || []).filter((p) => p.biz && p.owner !== uid && myP.kinds.includes(p.biz.kind));
-    list.appendChild(card(`${myP.icon} ${esc(myP.label)}${my.employerName ? ` <small class="cnt">bei ${esc(my.employerName)}</small>` : ''}`,
-      `${esc(myP.descr)} Lohn ${fmt(myP.wage * (my.employer ? 1.3 : 1))} pro Abrechnung${my.employer ? ' (+30 % als Angestellte/r)' : ''}.${myP.kinds.length ? ' Eigener passender Betrieb: +25 % Einnahmen.' : ''}`,
-      '', my.employer ? 'Kündigen' : 'Aktiv', () => !!my.employer, 'owned', () => cityAct('quit_job', {}, 'Gekündigt – du arbeitest jetzt selbstständig.'),
-      !my.employer && fits.length ? '<div class="offers">' + fits.map((p) => { const full = (p.biz.staff || []).length >= p.biz.slots; return `<button type="button" class="buy jobBtn" data-b="${p.biz.id}" ${full ? 'disabled' : ''}>Bewerben: ${KIND_ICON[p.biz.kind] || ''} ${esc(p.biz.name)} (${(p.biz.staff || []).length}/${p.biz.slots})</button>`; }).join('') + '</div>' : ''));
-  } else list.appendChild(li('hint', 'Such dir einen Beruf aus! Du bekommst bei jeder Abrechnung Lohn – und mit eigenem passenden Betrieb oder als Angestellte/r bei einem Mitspieler gibt es Bonus.'));
+  // Karriere: Job bekommt man vor Ort (Figur hingehen → „Arbeit anfragen“), Lohn gibt es pro Schicht
+  const profs = st.professions || [], my = st.me || {}, myP = profs.find((x) => x.id === my.profession), rk = rankOf(my.xp || 0), nextR = RANKS[rk + 1];
+  list.appendChild(li('sec', '👷 Deine Karriere'));
+  list.appendChild(card(`${RANKS[rk][0]}${myP ? ` · ${myP.icon} ${esc(myP.label)}` : ''}`,
+    `${my.employerName ? `Du arbeitest bei ${esc(my.employerName)}.` : my.townJob ? 'Du arbeitest für die Stadt.' : 'Du hast noch keinen Job – geh zu einem Betrieb und frag nach Arbeit.'} Lohn pro Schicht: ${fmt(RANK_PAY[rk])}.${nextR ? ` Noch ${nextR[1] - (my.xp || 0)} Schichten bis ${nextR[0]}${nextR[0] === 'Geselle' ? ' (dann darfst du einen eigenen Betrieb gründen)' : ''}.` : ''}`,
+    '', my.employer || my.townJob ? 'Kündigen' : '–', () => !!(my.employer || my.townJob), my.employer || my.townJob ? 'owned' : '', () => cityAct('quit_job', {}, 'Gekündigt.')));
+  list.appendChild(li('hint', `So läuft’s: Schichten arbeiten → aufsteigen (${RANKS.map(([n, x]) => `${n} ${x}`).join(' · ')}) → Geld sparen → Grundstück kaufen → ab Geselle eigenen Betrieb gründen → Leute einstellen. Ein Betrieb verdient nur, wenn du oder deine Leute da sind.`));
   const profBox = document.createElement('li'); profBox.className = 'hint';
-  profBox.innerHTML = '<div class="offers">' + profs.map((x) => x.active
-    ? `<button type="button" class="buy profBtn${x.id === my.profession ? ' on' : ''}" data-p="${esc(x.id)}" title="${esc(x.descr)}">${x.icon} ${esc(x.label)}${x.n ? ` · ${x.n}` : ''}</button>`
-    : `<button type="button" class="buy" disabled title="${esc(x.descr)}">${x.icon} ${esc(x.label)} – bald${x.by ? ` (Wunsch von ${esc(x.by)})` : ''}</button>`).join('') + '</div>';
+  profBox.innerHTML = '<div class="offers">' + profs.map((x) => `<span class="buy chip${x.active ? '' : ' off'}" title="${esc(x.descr)}">${x.icon} ${esc(x.label)}${x.active ? (x.n ? ` · ${x.n}` : '') : ' – bald'}${!x.active && x.by ? ` (Wunsch von ${esc(x.by)})` : ''}</span>`).join('') + '</div>';
   list.appendChild(profBox);
   list.appendChild(li('hint', 'Fehlt dein Beruf? Schreib ihn bei @schrauberstadt auf Instagram oder TikTok in die Kommentare – die beliebtesten Wünsche kommen in die nächste Folge und ins Spiel!'));
-  const left = (iso) => { const m = Math.max(0, (new Date(iso) - Date.now()) / 60000); return m > 120 ? `noch ${Math.round(m / 60)} Std.` : `noch ${Math.max(1, Math.round(m))} Min.`; };
-  const aucs = st.auctions || [];
-  if (aucs.length) {
-    list.appendChild(li('sec', '🔨 Versteigerungen'));
-    aucs.forEach((a) => {
-      const minBid = Math.max(a.min, a.top ? a.top + 500 : 0), sug = Math.ceil(minBid / 500) * 500;
-      const head = `${KIND_ICON[a.kind] || ''} ${esc(a.name)} <small class="cnt">${a.seller ? 'von ' + esc(a.seller) : 'Startbetrieb der Stadt'}</small>`;
-      const desc = `${a.top ? `Höchstgebot ${fmt(a.top)} von ${esc(a.topName || '?')}` : `Mindestgebot ${fmt(a.min)}`} · <span class="auc">${left(a.ends)}</span>${a.seller ? '' : ' · Erlös geht in die Stadtkasse'}`;
-      if (a.mineSell) list.appendChild(card(head, desc, 'Dein Betrieb wird versteigert.', 'Läuft', () => false, 'owned', () => {}));
-      else if (a.mineTop) list.appendChild(card(head, desc, 'Du bietest am höchsten! 🎉', 'Führend', () => false, 'owned', () => {}));
-      else list.appendChild(card(head, desc, '', 'Bieten', () => true, '', () => { const v = Math.round(+$('bid_' + a.id).value || 0); cityAct('bid', { p_auction: a.id, p_amount: v }, `Gebot über ${fmt(v)} abgegeben!`); },
-        `<div class="offers"><input type="number" class="bidIn" id="bid_${a.id}" min="${minBid}" step="500" value="${sug}"> <small>dein Gebot</small></div>`));
-    });
-    list.appendChild(li('hint', 'Wer am Ende das höchste Gebot hat und genug Geld in der Stadt-Kasse, bekommt den Betrieb samt Grundstück. Bieten kurz vor Schluss verlängert um 5 Minuten.'));
-  }
-  const offs = st.offers || [];
-  if (offs.length) {
-    list.appendChild(li('sec', 'Kaufangebote'));
-    offs.forEach((o) => {
-      if (o.incoming) list.appendChild(card(`${esc(o.buyer)} will ${esc(o.bizName)} kaufen`, `Angebot: ${fmt(o.amount)}. Wenn du annimmst, gehören Betrieb und Grundstück dem Käufer.`, '', 'Annehmen', () => true, '', () => cityAct('answer_offer', { p_offer: o.id, p_accept: true }, `Verkauft für ${fmt(o.amount)}!`),
-        `<div class="offers"><button type="button" class="buy offNo" data-o="${o.id}">Ablehnen</button></div>`));
-      else list.appendChild(card(`Dein Angebot für ${esc(o.bizName)}`, `${fmt(o.amount)} an ${esc(o.seller)} · wartet auf Antwort`, '', 'Zurückziehen', () => true, '', () => cityAct('cancel_offer', { p_offer: o.id }, 'Angebot zurückgezogen.')));
-    });
-  }
   // Freiwillige Feuerwehr: Gemeinschaftsprojekt (Wunsch von @nicokofe)
-  const fire = st.fire || {}, ff = town.fire_fund || 0, fg = town.fire_goal || 60000, built = ff >= fg;
+  const fire = st.fire || {}, fg = town.fire_goal || 60000, built = !!town.fire_built, ff = built ? fg : Math.min(fg, town.fund || 0);
   list.appendChild(li('sec', '🚒 Freiwillige Feuerwehr'));
-  list.appendChild(card(built ? 'Feuerwehr steht!' : `Spenden: ${fmt(ff)} von ${fmt(fg)}`, built ? 'Brände sind jetzt selten und richten kaum Schaden an.' : 'Ohne Feuerwehr brennt es öfter und teurer (2 % pro Betrieb und Abrechnung, 4 Tage Betriebskosten Schaden). Alle Spieler legen zusammen.',
+  list.appendChild(card(built ? 'Feuerwehr steht!' : `Stadtkasse: ${fmt(ff)} von ${fmt(fg)}`, built ? 'Brände sind jetzt selten und richten kaum Schaden an.' : 'Ohne Feuerwehr brennt es öfter und teurer. Die Feuerwehr wird automatisch gebaut, sobald 60.000 € in der Stadtkasse sind – sie füllt sich mit Steuern, Versteigerungen und euren Spenden.',
     '', built ? 'Steht' : 'Spenden', () => false, built ? 'owned' : '', () => {},
     built ? '' : `<div class="bar"><i style="width:${Math.min(100, ff / fg * 100).toFixed(1)}%"></i></div><div class="offers">${[500, 1000, 5000].map((v) => `<button type="button" class="buy fireDon" data-v="${v}" ${(me.cash || 0) < v ? 'disabled' : ''}>${fmt(v)}</button>`).join('')}</div>`));
   const donors = fire.donors || [], votes = fire.votes || [];
@@ -3289,8 +3260,6 @@ function renderCity() {
     } else { desc = 'Gehört ' + esc(p.ownerName || '?'); btn = 'Verkauft'; }
     list.appendChild(card(title, desc, note, btn, can, free ? (locked ? 'locked' : '') : 'owned', fn, extra));
   });
-  list.querySelectorAll('.profBtn').forEach((b) => b.addEventListener('click', () => { const x = profs.find((y) => y.id === b.dataset.p); cityAct('choose_profession', { p_id: b.dataset.p }, `Du bist jetzt ${x ? x.label : 'im neuen Beruf'}!`); }));
-  list.querySelectorAll('.jobBtn').forEach((b) => b.addEventListener('click', () => cityAct('apply_job', { p_business: +b.dataset.b }, 'Eingestellt! Ab der nächsten Abrechnung gibt es mehr Lohn.')));
   list.querySelectorAll('.aucBtn').forEach((b) => b.addEventListener('click', () => { const v = Math.round(+$('auc_' + b.dataset.b).value || 0); cityAct('start_auction', { p_business: +b.dataset.b, p_min: v }, 'Versteigerung gestartet – läuft 1 Tag.'); }));
   list.querySelectorAll('.offBtn').forEach((b) => b.addEventListener('click', () => { const v = Math.round(+$('off_' + b.dataset.b).value || 0); cityAct('make_offer', { p_business: +b.dataset.b, p_amount: v }, 'Angebot abgeschickt. Der Besitzer hat 1 Tag Zeit.'); }));
   list.querySelectorAll('.found').forEach((b) => b.addEventListener('click', () => { const kd = kindOf(b.dataset.k) || {}; cityAct('found_business', { p_kind: b.dataset.k, p_plot: b.dataset.p, p_name: myName() + ' ' + (kd.label || '') }, (kd.label || 'Betrieb') + ' gegründet!'); }));
@@ -3413,9 +3382,9 @@ function draw(now) {
   if (van.trip && van.front) ents.push(van);
   for (const w of crew) ents.push(w);
   if (ampelOn()) for (const a of AMPELN) ents.push(a);
-  if (WALK.on) ents.push(WALK.me);
+  if (WALK.on) { ents.push(WALK.me); for (const o of presPeople()) ents.push(o); }
   ents.sort(byY);
-  for (const e of ents) { if (e.me) drawMe(); else if (e.amp) drawAmpel(e); else if (e.role) drawCrew(e, now); else drawCar(e); }
+  for (const e of ents) { if (e.peer) drawPeer(e); else if (e.me) drawMe(); else if (e.amp) drawAmpel(e); else if (e.role) drawCrew(e, now); else drawCar(e); }
   ents.length = 0; // keine Referenzen auf entfernte Autos festhalten
 }
 /* ---------------- Mehrspieler: als eigene Figur durch die Stadt laufen, Arbeit suchen, hocharbeiten ---------------- */
@@ -3514,7 +3483,8 @@ function walkHud() {
   const me = (CITY.state && CITY.state.me) || {}, cash = CITY.me ? CITY.me.cash : me.cash, xp = me.xp || 0, rk = rankOf(xp), next = RANKS[rk + 1];
   const prof = ((CITY.state && CITY.state.professions) || []).find((x) => x.id === me.profession);
   WALK.job = me.townJob || (me.employer ? 'plot_' + (((CITY.state && CITY.state.plots) || []).find((p) => p.biz && p.biz.id === me.employer) || {}).id : null);
-  const h = `<b>💰 ${fmt(cash || 0)}</b><span>${RANKS[rk][0]}${prof ? ' · ' + prof.icon + ' ' + esc(prof.label) : ' · arbeitslos'}${next ? ` · ${xp}/${next[1]} bis ${next[0]}` : ''}</span>`;
+  const online = Object.keys(PRES.peers).length;
+  const h = `<b>💰 ${fmt(cash || 0)}</b><span>${online ? `👥 ${online} online · ` : ''}${RANKS[rk][0]}${prof ? ' · ' + prof.icon + ' ' + esc(prof.label) : ' · arbeitslos'}${next ? ` · ${xp}/${next[1]} bis ${next[0]}` : ''}</span>`;
   if ($('walkInfo')._h !== h) { $('walkInfo')._h = h; $('walkInfo').innerHTML = h; }
 }
 // Ort antippen → kleines Fenster: Arbeit anfragen, Schicht arbeiten, Grundstück kaufen …
@@ -3533,7 +3503,7 @@ function openPlace(p) {
     if (b) {
       const staff = b.staff || [], here = me.employer === b.id;
       list.appendChild(li('hint', `${mineBiz ? 'Dein Betrieb' : 'Gehört ' + (pl.ownerName || '?')} · Stufe ${b.level} · Team ${staff.length}/${b.slots}${staff.length ? ': ' + staff.join(', ') : ''}`));
-      if (mineBiz || here) list.appendChild(card(mineBiz ? 'Selbst mitarbeiten' : 'Du arbeitest hier', `${fmt(RANK_PAY[rk])} pro Schicht${here ? `, ${pl.ownerName || 'der Chef'} bekommt 25 % obendrauf` : ''}.`, '', 'Schicht starten', () => true, 'owned', workHere));
+      if (mineBiz || here) list.appendChild(card(mineBiz ? 'Selbst mitarbeiten' : 'Du arbeitest hier', `${fmt(mineBiz ? Math.round(RANK_PAY[rk] * 1.5) : RANK_PAY[rk])} pro Schicht${here ? `, der Betrieb von ${esc(pl.ownerName || 'deinem Chef')} verdient die Hälfte davon zusätzlich` : ' (Lohn + Betriebsanteil)'}.`, '', 'Schicht starten', () => true, 'owned', workHere));
       else if (staff.length >= b.slots) list.appendChild(li('hint', 'Alle Stellen sind besetzt. Schau später wieder vorbei – oder mach dem Besitzer in der Stadt-Übersicht ein Kaufangebot.'));
       else list.appendChild(card('Arbeit anfragen', `Du wirst ${KIND_ICON[b.kind] || ''} Fachkraft im Betrieb von ${esc(pl.ownerName || '?')}. Dein Lohn: ${fmt(RANK_PAY[rk])} pro Schicht.`, '', 'Anfragen', () => true, '', take({ p_business: b.id, p_town: null }, 'Du hast die Stelle! Tippe auf „Schicht starten“.')));
     } else if (!pl.owner && !pl.auction) {
@@ -3552,7 +3522,7 @@ async function startWalk() {
   WALK.on = true; document.body.classList.add('walking'); $('hud').hidden = true; $('bottom').hidden = true; $('walkBar').hidden = false;
   const sp = iso(-200, -260); WALK.me.x = sp.x; WALK.me.y = sp.y; WALK.path = []; WALK.shift = null; view.cx = sp.x; view.cy = sp.y; setZoom(1.1); clampView();
   await cityLoad();
-  toast('Willkommen in Schrauberstadt! Tippe auf ein Schild und frag nach Arbeit.');
+  toast((CITY.state && CITY.state.me && (CITY.state.me.townJob || CITY.state.me.employer)) ? 'Zurück in Schrauberstadt! Geh zu deiner Arbeit und starte eine Schicht.' : 'Willkommen in Schrauberstadt! Tippe auf ein Schild und frag nach Arbeit.');
 }
 function endWalk() {
   WALK.on = false; WALK.shift = null; document.body.classList.remove('walking'); $('walkBar').hidden = true; $('hud').hidden = false; $('bottom').hidden = false;
@@ -3569,8 +3539,59 @@ function endWalk() {
   });
 }
 $('walkCity').addEventListener('click', () => { $('city').hidden = false; renderCity(); cityLoad(); });
-$('walkExit').addEventListener('click', endWalk);
+$('walkExit').addEventListener('click', () => { endWalk(); showTitle(); });
 $('placeClose').addEventListener('click', () => { $('place').hidden = true; });
+/* ---------------- Mehrspieler live: andere Spieler als Figuren sehen (Supabase Realtime, Broadcast) ---------------- */
+// Jede Figur schickt 2× pro Sekunde Position, Name, Rang und Job an den Kanal „realtime:stadt“.
+// Wer 8 s nichts schickt, verschwindet. Keine Datenbank nötig – rein live.
+const PRES = { ws: null, ok: false, ref: 1, peers: {}, sendT: 0, hb: 0, retry: 0, topic: 'realtime:stadt' };
+function presSend(event, payload) { if (PRES.ws && PRES.ws.readyState === 1) PRES.ws.send(JSON.stringify({ topic: event === 'heartbeat' ? 'phoenix' : PRES.topic, event, payload, ref: String(PRES.ref++) })); }
+async function presConnect() {
+  if (PRES.ws || !ONLINE.sess) return;
+  const tok = await sbToken(); if (!tok) return;
+  try {
+    const ws = new WebSocket(SB_URL.replace('https', 'wss') + '/realtime/v1/websocket?apikey=' + encodeURIComponent(SB_KEY) + '&vsn=1.0.0');
+    PRES.ws = ws;
+    ws.onopen = () => { presSend('phx_join', { config: { broadcast: { self: false, ack: false }, presence: { key: '' }, private: false }, access_token: tok }); PRES.ok = true; PRES.retry = 0; };
+    ws.onmessage = (m) => {
+      let j; try { j = JSON.parse(m.data); } catch (e) { return; }
+      if (j.event !== 'broadcast' || !j.payload || j.payload.event !== 'pos') return;
+      const p = j.payload.payload; if (!p || typeof p.id !== 'string' || p.id === (ONLINE.sess && ONLINE.sess.uid)) return;
+      const x = Number(p.x), y = Number(p.y); if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+      let o = PRES.peers[p.id]; if (!o) o = PRES.peers[p.id] = { x, y, peer: true };
+      Object.assign(o, { tx: x, ty: y, n: str(p.n, 20), r: Math.max(0, Math.min(4, p.r | 0)), j: str(p.j, 24), w: !!p.w, t: performance.now() });
+    };
+    ws.onclose = () => { PRES.ws = null; PRES.ok = false; PRES.retry = Math.min(30, (PRES.retry || 1) * 2); };
+    ws.onerror = () => { try { ws.close(); } catch (e) { /* egal */ } };
+  } catch (e) { PRES.ws = null; }
+}
+function presTick(dt) {
+  if (!WALK.on || !ONLINE.sess) { if (PRES.ws && !WALK.on) { try { PRES.ws.close(); } catch (e) { /* egal */ } PRES.ws = null; PRES.peers = {}; } return; }
+  if (!PRES.ws) { PRES.retry -= dt; if (PRES.retry <= 0) { PRES.retry = 5; presConnect(); } return; }
+  PRES.hb += dt; if (PRES.hb > 25) { PRES.hb = 0; presSend('heartbeat', {}); }
+  PRES.sendT += dt;
+  if (PRES.ok && PRES.sendT > 0.5) {
+    PRES.sendT = 0; const me = (CITY.state && CITY.state.me) || {}, prof = ((CITY.state && CITY.state.professions) || []).find((x) => x.id === me.profession);
+    presSend('broadcast', { type: 'broadcast', event: 'pos', payload: { id: ONLINE.sess.uid, x: Math.round(WALK.me.x), y: Math.round(WALK.me.y), n: (CITY.me && CITY.me.name) || myName(), r: rankOf(me.xp || 0), j: prof ? prof.icon + ' ' + prof.label : '', w: !!WALK.shift } });
+  }
+  const now = performance.now();
+  for (const id in PRES.peers) {
+    const o = PRES.peers[id]; if (now - o.t > 8000) { delete PRES.peers[id]; continue; }
+    const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy); o.moving = d > 3; o.flip = dx > 0 ? true : dx < 0 ? false : o.flip;
+    if (d > 600) { o.x = o.tx; o.y = o.ty; } else { const k = Math.min(1, dt * 6); o.x += dx * k; o.y += dy * k; }
+  }
+}
+function presPeople() { return Object.values(PRES.peers); }
+function drawPeer(o) {
+  if (!IMG.geselle) return;
+  const t = performance.now(), bob = o.moving ? Math.abs(Math.sin(t / 90)) * 8 : o.w ? Math.abs(Math.sin(t / 170)) * 6 : 0;
+  shadow(o.x, o.y, 24, 10); drawSprite(tinted('geselle', 140, 0.9, 1.1), o.x, o.y - bob, 52, o.flip, 1, 0.97);
+  const s = toScreen(o.x, o.y - 105); ctx.save(); ctx.font = '800 12px system-ui, sans-serif'; ctx.textAlign = 'center';
+  const label = `${o.n} · ${RANKS[o.r][0]}`; const w = ctx.measureText(label).width + 14;
+  ctx.fillStyle = 'rgba(255,253,246,0.95)'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(s.x - w / 2, s.y - 20, w, 20, 10) : ctx.rect(s.x - w / 2, s.y - 20, w, 20); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#1b1b1b'; ctx.fillText(label, s.x, s.y - 6); if (o.w) { ctx.font = '16px system-ui'; ctx.fillText('🔧', s.x, s.y - 26); }
+  ctx.restore();
+}
 /* ---------------- Schleife ---------------- */
 let last = performance.now(), loopOn = false;
 // Sicherheitsnetz: eine Exception in Update oder Zeichnen darf die Schleife nie anhalten. Jede Meldung nur einmal loggen.
@@ -3601,6 +3622,7 @@ function frame(dt, now) {
   const busy = van.active > 0; if (dealerPin._busy !== busy) { dealerPin.classList.toggle('busy', busy); dealerPin._busy = busy; }
   safe('city', cityTick, dt);
   safe('walk', walkTick, dt);
+  safe('presence', presTick, dt);
   if (running && !guest) safe('goal', checkGoal);
 }
 function loop(now) {
