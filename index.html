@@ -248,6 +248,39 @@ body.visiting #towCall, body.menu #towCall, body.visiting #bizBtn, body.visiting
 body.menu .say, body.walking .say, body.visiting .say { display: none !important; }
 @media (prefers-reduced-motion: reduce) { .say, .confetti, #achPop.show, .task, #decide,  #event, .sbub, .bubble.ready, .float, .panel, #toast.show, #goalDone { animation: none; } }
 @media (max-width: 420px) { .hud-row { gap: 5px; } #moneyChip small, #repChip small { display: none; } .chip { font-size: 17px; padding: 4px 8px 2px; gap: 5px; border-width: 3px; box-shadow: 0 4px 0 var(--ink); } .chip small { font-size: 9px; letter-spacing: .04em; } #rep { letter-spacing: 0; font-size: 15px; } #daily, #event { font-size: 12px; } .tab { font-size: 13px; } .item h3 { font-size: 18px; } .buy { font-size: 16px; padding: 6px 9px 3px; } #moneyChip { font-size: 19px; } #lvChip small { letter-spacing: 0; } #goal { font-size: 12px; } #shopBtn { font-size: 24px; padding: 8px 20px 4px; } }
+/* Runde 3: Live-Ticker, Combo, Tagessieger (66_ticker.js), Einstiegs-Hinweis (61_walk.js), Ereignis-Teilaufgaben (64_events.js) */
+#tkBar { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 6px); left: max(8px, env(safe-area-inset-left, 0px)); right: max(8px, env(safe-area-inset-right, 0px)); height: 32px; display: flex; gap: 6px; align-items: center; z-index: 9; pointer-events: none; max-width: 560px; margin: 0 auto; }
+#tkBar > * { pointer-events: auto; }
+.tkpts { flex: none; height: 32px; display: flex; align-items: center; gap: 3px; background: var(--paper); border: 3px solid var(--ink); border-radius: 16px; padding: 0 9px 0 6px; font: normal 15px var(--display); color: var(--ink); box-shadow: 0 3px 0 var(--ink); cursor: pointer; }
+.tkpts b { font-weight: normal; font-variant-numeric: tabular-nums; } .tkpts.pop { animation: pop .35s ease-out; }
+.tkline { flex: 1; min-width: 0; height: 32px; box-sizing: border-box; overflow: hidden; background: rgba(27,27,27,.84); color: #fff; border-radius: 16px; padding: 0 12px; display: flex; align-items: center; font-weight: 800; font-size: 12.5px; white-space: nowrap; pointer-events: none !important; }
+.tktxt { display: inline-block; will-change: transform; }
+.tkline.in .tktxt { animation: tkin .35s ease-out; } .tkline.run .tktxt { animation: tkin .35s ease-out, tkrun var(--tkdur, 4s) linear 1.4s forwards; }
+.tkline.new { animation: tknew 1.6s ease-out; }
+@keyframes tkin { from { transform: translateY(14px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes tkrun { to { transform: translateX(var(--tkrun, 0)); } }
+@keyframes tknew { 0%, 40% { background: #e63b2e; } 100% { background: rgba(27,27,27,.84); } }
+.tkcombo { flex: none; position: relative; width: 38px; height: 38px; border-radius: 50%; background: var(--sun); border: 3px solid var(--ink); box-sizing: border-box; display: grid; place-items: center; box-shadow: 0 3px 0 var(--ink); }
+.tkcombo svg { position: absolute; inset: -3px; width: 38px; height: 38px; transform: rotate(-90deg); }
+.tkcombo circle { fill: none; stroke-width: 4; } .tkcombo .bg { stroke: rgba(27,27,27,.15); } .tkcombo .fg { stroke: #e63b2e; stroke-linecap: round; transition: stroke-dashoffset .25s linear; }
+.tkcombo b { position: relative; font: normal 14px var(--display); color: var(--ink); } .tkcombo.pop { animation: pop .4s ease-out; } .tkcombo.low { animation: tklow .6s ease-in-out infinite alternate; }
+@keyframes tklow { to { transform: scale(1.12); } }
+.tktop { position: absolute; top: 40px; left: 0; width: min(270px, 100%); box-sizing: border-box; background: var(--paper); border: 3px solid var(--ink); border-radius: 16px; box-shadow: 0 4px 0 var(--ink); padding: 8px 12px 10px; animation: pop .25s ease-out; }
+.tktop p { margin: 0 0 4px; font: normal 16px var(--display); } .tktop ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.tktop li { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; font-weight: 800; font-size: 14px; padding: 2px 4px; border-radius: 8px; } .tktop li i { font-style: normal; } .tktop li b { font-family: var(--display); font-weight: normal; }
+.tktop li.me { background: #ffe9a8; } .tktop li.none { display: block; color: var(--mute); font-size: 13px; } .tktop small { display: block; margin-top: 6px; font-weight: 800; font-size: 12px; color: var(--mute); }
+body.tkon #evBanner { top: calc(env(safe-area-inset-top, 0px) + 46px); }
+#walkHint { position: fixed; left: 50%; top: max(calc(env(safe-area-inset-top, 0px) + 150px), calc(50% - 215px)); transform: translateX(-50%); width: min(320px, calc(100% - 32px)); box-sizing: border-box; z-index: 8; background: var(--paper); border: 4px solid var(--ink); border-radius: 20px; box-shadow: 0 5px 0 var(--ink); padding: 10px 12px 12px; display: grid; gap: 4px; justify-items: center; text-align: center; }
+#walkHint.show { animation: pop .35s ease-out; }
+#walkHint::after { content: ""; position: absolute; left: 50%; bottom: -13px; width: 16px; height: 16px; background: var(--paper); border-right: 4px solid var(--ink); border-bottom: 4px solid var(--ink); transform: translateX(-50%) rotate(45deg); }
+#walkHint b { font: normal 22px var(--display); } #walkHint span { font-weight: 800; font-size: 13px; color: var(--mute); }
+#walkHint div { display: flex; gap: 8px; margin-top: 4px; } #walkHint .big { font-size: 16px; padding: 7px 12px 4px; } #walkHint .big.no { font-size: 13px; }
+.pin.walkpin.evtask { background: #e63b2e; color: #fff; padding: 2px 8px 3px; border-radius: 11px; z-index: 2; box-shadow: 0 3px 0 var(--ink); }
+.pin.walkpin.evtask b { color: #fff; font-size: 13px; white-space: nowrap; } .pin.walkpin.evtask span { font-size: 9px; }
+.pin.walkpin.evtask.x2 { background: #f08a1c; } .pin.walkpin.evtask.lock { background: #8a8f99; } .pin.walkpin.evtask.evdest { background: #1f9a52; } .pin.walkpin.evtask.evdest b { color: #ffd23f; font-size: 15px; }
+.pin.walkpin.evtask.near, .pin.walkpin.evtask.evdest { animation: evbob .7s ease-in-out infinite alternate; }
+@keyframes evbob { to { margin-top: -6px; } }
+@media (prefers-reduced-motion: reduce) { .tkline .tktxt, .tkline.new, .tkcombo.low, #walkHint.show, .pin.walkpin.evtask { animation: none !important; } }
 </style>
 
 <canvas id="scene" aria-label="Deine Werkstatt in Schrauberstadt"></canvas>
@@ -1011,7 +1044,7 @@ TOWN.forEach((t) => (t.animals || []).forEach(([img, x, fy, w, after]) => {
 // Gemeinschafts-Grundstück: Platzhalter, bis die Feuerwehr steht (Folge 5 oder Server meldet fire_built); das Haus steht wie im Video bei u -1471, w 430
 const fireShown = () => TOWN_EP >= 5 || (typeof fireOn === 'function' && fireOn());
 SCENERY.forEach((d) => { if (d.img === 'b_plot' && d.x === -184) d.need = () => !fireShown(); });
-SCENERY.push({ img: 'b_fire', x: -123, y: 1415, w: 600, ep: 5, alt: 1, need: fireShown });
+SCENERY.push({ img: 'b_fire', x: -123, y: 1415, w: 600, ep: 5, alt: 1, need: fireShown, plaque: { dx: -240, dy: -112, post: 1, lines: ['GEGRÜNDET VON', '@nicokofe'] } }); // offizieller Gründer der FF Schrauberstadt
 Object.entries(BIZ_SPOT).forEach(([id, [x, y, w]]) => {
   SCENERY.push({ img: 'b_plot', x, y, w: w * 0.85, need: () => !S.owned[id] });
   SCENERY.push({ img: id === 'dealer' ? 'b_dealer' : 'b_tow', x, y, w, need: () => !!S.owned[id] });
@@ -2613,7 +2646,7 @@ const COMMUNITY = [
   { id: 'metzgerei', ep: 4, name: 'Metzgerei', by: 'jonas.cbg2', desc: 'Mittagessen für die ganze Truppe.', fx: 'Team arbeitet 5 % schneller' },
   { id: 'ampel', ep: 4, name: 'Ampel an der Kreuzung', by: 'gabsi', desc: 'Endlich geregelter Verkehr an der Kreuzung.', fx: 'Autos halten bei Rot' },
   { id: 'bauernhof', ep: 5, name: 'Bauernhof', by: 'simon_real1104', desc: 'Die Landwirte @lukas36312, @finni6805 und @nico__n.h melken, stapeln Heu und tuckern mit dem grünen Traktor über Straße B.', fx: 'Ab und zu ein Traktor im Verkehr – Geduld, bitte' },
-  { id: 'feuerwehr', ep: 5, name: 'Freiwillige Feuerwehr', by: 'nicokofe', desc: 'Die Kasse war mit 60.000 € voll! Maschinist @chrisi.125, Gruppenführer @maximilian90026, Angriffstrupp @svenrckert und @mattsi2015. Das LF 16/12 (Wunsch von @rotor950) rückt mit Blaulicht aus. Seit Folge 6 ist @nico__n.h Kommandant.', fx: 'Im Mehrspieler kannst du mitlöschen' },
+  { id: 'feuerwehr', ep: 5, name: 'Freiwillige Feuerwehr', by: 'nicokofe', desc: 'Die Kasse war mit 60.000 € voll! Maschinist @chrisi.125, Gruppenführer @maximilian90026, Angriffstrupp @svenrckert und @mattsi2015. Das LF 16/12 (Wunsch von @rotor950) rückt mit Blaulicht aus. Offizieller Gründer der FF Schrauberstadt: @nicokofe. Seit Folge 6 ist @nico__n.h Kommandant.', fx: 'Im Mehrspieler kannst du mitlöschen' },
   { id: 'einsatz', ep: 6, name: 'Erster Einsatz: Heustadl brennt!', by: 'nico__n.h', desc: 'Kommandant @nico__n.h, Stellvertreter @leo.blai und Wassertrupp @mariogerlach47 löschen den Heustadl am Bauernhof. Dorfbulle @justin.rmers blitzt dabei das LF, der Rettungswagen mit @mandelyves und @moritz.schlarmann2211 kommt dazu – alle Tiere gerettet!', fx: 'Rettungswagen mit Blaulicht im Verkehr, im Mehrspieler: Sanitäter werden' },
   { id: 'tierheim', ep: 6, name: 'Tierheim', by: 'ossi_kahn', desc: 'Abstimmungssieger B! Die geretteten Tiere vom Hof sind eingezogen, Tierpfleger @ossi_kahn hat alle Hände voll zu tun.', fx: 'Im Mehrspieler: Gassi gehen, Katzen füttern, Ziege einfangen' },
   { id: 'ansturm', ep: 6, name: 'Ansturm am Ortsschild', by: '', desc: 'Über 100 neue Einwohner kommen mit Bussen und Umzugswagen – Stau bis zum gelben Ortsschild, die Stadtkasse explodiert. Gewünschte Jobs: 6× Landwirt, Eishockey- und Fußball-Trainer, LKW- und Busfahrer.', fx: 'Mehr Kunden für alle, ab und zu ein Bus im Verkehr' },
@@ -3700,7 +3733,7 @@ function renderWorld(k) {
     g.globalAlpha = clamp(t * 1.6); g.drawImage(img, px, py - (1 - eob(clamp(t))) * 60); g.globalAlpha = 1;
   }
   // Deko: Häuser, Werbung (statisch)
-  SCENERY.forEach((d) => { if (d.need && !d.need()) return; const img = IMG[d.img]; if (!img || !img.width) return; const w = d.w, h = img.height * w / img.width; g.drawImage(img, d.x - w / 2, d.y - h * (d.ay || 0.85), w, h); });
+  SCENERY.forEach((d) => { if (d.need && !d.need()) return; const img = IMG[d.img]; if (!img || !img.width) return; const w = d.w, h = img.height * w / img.width; g.drawImage(img, d.x - w / 2, d.y - h * (d.ay || 0.85), w, h); if (d.plaque) drawPlaque(g, d.x + d.plaque.dx, d.y + d.plaque.dy, d.plaque.lines, d.plaque.post); });
   mapSig = sceneSig();
 }
 function renderBg() {
@@ -3751,6 +3784,15 @@ function draw(now) {
   for (const e of ents) { if (e.evd) e.evd(e, now); else if (e.peer) drawPeer(e); else if (e.me) drawMe(); else if (e.amp) drawAmpel(e); else if (e.role) drawCrew(e, now); else drawCar(e); }
   ents.length = 0; // keine Referenzen auf entfernte Autos festhalten
 }
+
+// Ehrentafel an einem Gebäude (z. B. Gründer der Feuerwehr)
+function drawPlaque(g, x, y, lines, post) {
+  g.save(); if (post) { g.fillStyle = '#5b4632'; g.fillRect(x - 22, y + 20, 6, 46); g.fillRect(x + 16, y + 20, 6, 46); g.fillStyle = 'rgba(0,0,0,.22)'; g.beginPath(); g.ellipse(x, y + 66, 34, 7, 0, 0, 7); g.fill(); } g.font = 'bold 15px system-ui, sans-serif'; const w = Math.max(...lines.map((l) => g.measureText(l).width)) + 24, h = 14 + lines.length * 19;
+  g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x - w / 2 + 3, y + 3, w, h);
+  g.fillStyle = '#b3171f'; g.fillRect(x - w / 2, y, w, h); g.strokeStyle = '#f2c94c'; g.lineWidth = 3; g.strokeRect(x - w / 2 + 1.5, y + 1.5, w - 3, h - 3);
+  g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'top'; lines.forEach((l, i) => { g.font = (i ? 'bold 15px' : '600 12px') + ' system-ui, sans-serif'; g.fillText(l, x, y + 8 + i * 19); });
+  g.restore();
+}
 /* ---------------- Mehrspieler: als eigene Figur durch die Stadt laufen, Arbeit suchen, hocharbeiten ---------------- */
 // Tippen auf den Boden = hingehen (über die Gehsteige), Tippen auf ein Schild = zum Betrieb gehen und dort fragen.
 // Lohn, Erfahrung und Käufe rechnet der Server (Supabase-RPCs take_job, work_shift, buy_plot …).
@@ -3764,7 +3806,7 @@ const TOWN_PLACES = [
   { id: 'metzgerei', name: 'Metzgerei', icon: '🥩', u: -1150, w: -300, job: 'Metzger', by: 'jonas.cbg2', ep: 4 },
   { id: 'parkplatz', name: 'Parkplatz', icon: '🅿️', u: -1680, w: -290, job: 'Parkwächter', by: 'mx_fly_high', ep: 4 },
   { id: 'tankstelle', name: 'Tankstelle', icon: '⛽', u: 420, w: -330, job: 'Tankwart', ep: 1 },
-  { id: 'feuerwehr', name: 'Freiwillige Feuerwehr', icon: '🚒', u: -1471, w: 300, job: 'Feuerwehr (Ehrenamt)', by: 'nicokofe', ep: 4, work: 'feuerwehr', note: 'Kommandant @nico__n.h, Stellvertreter @leo.blai, Wassertrupp @mariogerlach47, Ortsbrandmeister @nick_voigt11 (mit dem neuen ELW). Dazu @chrisi.125, @maximilian90026, @svenrckert und @mattsi2015.' },
+  { id: 'feuerwehr', name: 'Freiwillige Feuerwehr', icon: '🚒', u: -1471, w: 300, job: 'Feuerwehr (Ehrenamt)', by: 'nicokofe', ep: 4, work: 'feuerwehr', note: 'Gegründet von @nicokofe. Kommandant @nico__n.h, Stellvertreter @leo.blai, Wassertrupp @mariogerlach47, Ortsbrandmeister @nick_voigt11 (mit dem neuen ELW). Dazu @chrisi.125, @maximilian90026, @svenrckert und @mattsi2015.' },
   // Folge 5: Hof an der Zufahrt von Straße B (u 160 … 520, w -1250); Landwirte im Video: @lukas36312, @finni6805, @nico__n.h
   { id: 'bauernhof', name: 'Bauernhof', icon: '🚜', u: 520, w: -1250, job: 'Landwirt', by: 'simon_real1104', ep: 5, work: 'landwirt', note: 'Hier arbeiten schon @lukas36312, @finni6805 und @nico__n.h – und die Kuh Resi.', soon: 'Der Bauer sortiert noch die Kühe – Anstellungen gibt’s, sobald der Stadt-Server den Hof kennt. Schau bald wieder vorbei!' },
   // Folge 6 (Eingänge am Ende der neuen Zufahrten, siehe 32_town.js): Tierheim (Abstimmung, Wunsch von @ossi_kahn), Rettungswache beim Feuerwehrhaus, Landmaschinen-Halle
@@ -3814,7 +3856,9 @@ function walkTick(dt) {
     }
     if (!WALK.path.length && WALK.dest) { const p = WALK.dest; WALK.dest = null; openPlace(p); }
   }
-  if (WALK.follow && !ptrs.size) { view.cx += (m.x - view.cx) * Math.min(1, dt * 2.5); view.cy += (m.y - 80 - view.cy) * Math.min(1, dt * 2.5); clampView(); }
+  walkIntroTick(dt);
+  if (WALK.pan) walkPanTick(dt);
+  else if (WALK.follow && !ptrs.size) { view.cx += (m.x - view.cx) * Math.min(1, dt * 2.5); view.cy += (m.y - 80 - view.cy) * Math.min(1, dt * 2.5); clampView(); }
   // Schicht läuft: alle 20 s abrechnen, solange man dort steht
   const s = WALK.shift;
   if (s) s.t = (s.t + dt) % 20; // nur für die Arbeits-Animation; abgerechnet wird pro erledigtem Auftrag (63_work.js)
@@ -3837,6 +3881,12 @@ function drawMe() {
   const name = (CITY.me && CITY.me.name) || myName(); const w = ctx.measureText(name).width + 16;
   ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(s.x - w / 2, s.y - 22, w, 22, 11) : ctx.rect(s.x - w / 2, s.y - 22, w, 22); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#1b1b1b'; ctx.fillText(name, s.x, s.y - 6);
+  const I = WALK.intro; if (I && I.tg && I.phase === 'pan' && !WALK.pan) { // Pfeil am Boden Richtung Geschehen
+    const a = toScreen(m.x, m.y), b = toScreen(I.tg.x, I.tg.y), an = Math.atan2(b.y - a.y, b.x - a.x), ph = (performance.now() / 600) % 1;
+    ctx.save(); ctx.translate(a.x, a.y); ctx.rotate(an); ctx.lineWidth = 5; ctx.strokeStyle = '#1b1b1b'; ctx.fillStyle = '#ffd23f';
+    for (let i = 0; i < 3; i++) { const r = 46 + (i + ph) * 26; ctx.globalAlpha = 1 - (i + ph) / 3; ctx.beginPath(); ctx.moveTo(r, -13); ctx.lineTo(r + 16, 0); ctx.lineTo(r, 13); ctx.lineTo(r + 6, 0); ctx.closePath(); ctx.stroke(); ctx.fill(); }
+    ctx.restore();
+  }
   if (WALK.shift) { const k = WALK.shift.t / 20; ctx.lineWidth = 6; ctx.strokeStyle = '#3bb36b'; ctx.beginPath(); ctx.arc(s.x, s.y - 40, 14, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke(); ctx.font = '18px system-ui'; ctx.fillText('🔧', s.x, s.y - 33); }
   ctx.restore();
 }
@@ -3900,21 +3950,76 @@ async function startWalk() {
   if (!running) startGame();
   WALK.on = true; document.body.classList.add('walking'); $('hud').hidden = true; $('bottom').hidden = true; $('walkBar').hidden = false;
   const sp = iso(-200, -260); WALK.me.x = sp.x; WALK.me.y = sp.y; WALK.path = []; WALK.shift = null; view.cx = sp.x; view.cy = sp.y; setZoom(1.1); clampView();
+  WALK.intro = { t: 0, phase: 'wait', told: false }; WALK.pan = null; walkHintHide(); EV.polled = false; if (!EV.back) EV.t = 99; // Groß-Ereignisse gleich abfragen
   await cityLoad();
-  toast((CITY.state && CITY.state.me && (CITY.state.me.townJob || CITY.state.me.employer)) ? 'Zurück in Schrauberstadt! Geh zu deiner Arbeit und starte eine Schicht.' : 'Willkommen in Schrauberstadt! Tippe auf ein Schild und frag nach Arbeit.');
+  if (WALK.intro && WALK.intro.phase === 'wait') { WALK.intro.t = Math.max(WALK.intro.t, 0); walkIntroTry(); }
 }
+const walkWelcome = () => toast((CITY.state && CITY.state.me && (CITY.state.me.townJob || CITY.state.me.employer)) ? 'Zurück in Schrauberstadt! Geh zu deiner Arbeit und starte eine Schicht.' : 'Willkommen in Schrauberstadt! Tippe auf ein Schild und frag nach Arbeit.');
+/* ---- Einstieg: statt Menü erst mal zeigen, wo gerade was los ist (Incidents aus 65_incidents.js oder Groß-Ereignis) ---- */
+// Wartet bis zu 9 s auf window.INC_STATE / ein Ereignis. Dann kurzer Kameraschwenk hin und zurück, Sprechblase + Pfeil.
+// Ist nichts los: alles wie bisher (Begrüßung, Schild antippen, Arbeit suchen).
+const INC_ICON = { panne: '🚗', reifen: '🛞', unfall: '💥', kuh: '🐄', winker: '🙋', starthilfe: '🔋' };
+function walkIntroTarget() {
+  const m = WALK.me, out = [], S = window.INC_STATE;
+  const e = typeof evCur === 'function' ? evCur() : null;
+  if (e) { const v = evVis(e).filter((t) => !evLocked(t)).sort((a, b) => Math.hypot(a.x - m.x, a.y - m.y) - Math.hypot(b.x - m.x, b.y - m.y)); const p = v[0] || evStand(e); out.push({ x: p.x, y: p.y, icon: EV_KIND[e.kind].icon, title: evSpot(e).title, ev: e.id, big: 1 }); }
+  if (S && Array.isArray(S.incidents)) for (const i of S.incidents) {
+    if (!i || typeof i !== 'object' || !Number.isFinite(Number(i.u)) || !Number.isFinite(Number(i.w)) || (i.status === 'claimed' && !i.mine)) continue;
+    const p = iso(Number(i.u), Number(i.w)); out.push({ x: p.x, y: p.y, icon: INC_ICON[i.kind] || '❗', title: str(i.title, 48) || 'Da braucht wer Hilfe!', big: 0 });
+  }
+  if (!out.length) return null;
+  out.sort((a, b) => b.big - a.big || Math.hypot(a.x - m.x, a.y - m.y) - Math.hypot(b.x - m.x, b.y - m.y));
+  return out[0];
+}
+function walkIntroTry() {
+  const I = WALK.intro; if (!I || I.phase !== 'wait' || !WALK.on) return;
+  if (!EV.polled && I.t < 4) return; // erst wissen, ob ein Groß-Ereignis läuft (das hat Vorrang)
+  const tg = walkIntroTarget(); if (!tg) return;
+  I.tg = tg; I.phase = 'pan'; I.t = 0; const far = Math.hypot(tg.x - WALK.me.x, tg.y - WALK.me.y) > 260;
+  if (far) WALK.pan = { t: 0, a: { x: view.cx, y: view.cy }, b: { x: tg.x, y: tg.y - 60 } };
+  walkHintShow(tg); sfx.event();
+}
+function walkIntroTick(dt) {
+  const I = WALK.intro; if (!I) return; I.t += dt;
+  if (I.phase === 'wait') {
+    if (Math.floor(I.t * 2.5) !== Math.floor((I.t - dt) * 2.5)) walkIntroTry(); // alle 0,4 s nachsehen
+    if (I.phase === 'wait' && !I.told && I.t > 2.5) { I.told = true; walkWelcome(); }
+    if (I.phase === 'wait' && I.t > 9) { WALK.intro = null; if (!I.told) walkWelcome(); }
+  } else if (I.t > 11 || WALK.path.length) { WALK.intro = null; walkHintHide(); }
+}
+// Schwenk: 1,1 s hin, 1,5 s schauen, 0,9 s zurück. Ziehen/Tippen bricht ab.
+function walkPanTick(dt) {
+  const P = WALK.pan; P.t += dt; const m = WALK.me, back = { x: m.x, y: m.y - 80 }; let k, A, B;
+  if (P.t < 1.1) { k = eob(clamp(P.t / 1.1)); A = P.a; B = P.b; } else if (P.t < 2.6) { k = 1; A = P.a; B = P.b; } else if (P.t < 3.5) { k = 1 - Math.pow(1 - (P.t - 2.6) / 0.9, 2); A = P.b; B = back; } else { WALK.pan = null; return; }
+  view.cx = A.x + (B.x - A.x) * k; view.cy = A.y + (B.y - A.y) * k; clampView();
+}
+function walkHintShow(tg) {
+  let el = $('walkHint');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'walkHint'; el.setAttribute('role', 'status'); document.body.appendChild(el);
+    el.addEventListener('click', (ev) => {
+      const b = ev.target.closest('button'); if (!b) return; const I = WALK.intro, t = I && I.tg; WALK.pan = null; walkHintHide(); WALK.intro = null;
+      if (b.dataset.k === 'go' && t) { const e = t.ev && typeof evById === 'function' ? evById(t.ev) : null; if (e) evGo(e); else walkTo(t.x, t.y, null); }
+      else toast('Alles klar – tipp auf ein Schild und frag nach Arbeit. 🔧');
+    });
+  }
+  el.innerHTML = `<b>👀 Da vorne ist was los!</b><span>${tg.icon} ${esc(tg.title)}</span><div><button type="button" class="big go" data-k="go">Hin!</button><button type="button" class="big no" data-k="job">Lieber Job suchen</button></div>`;
+  el.hidden = false; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+function walkHintHide() { const el = $('walkHint'); if (el) el.hidden = true; }
 function endWalk() {
   if (WK.on) closeWork(); $('place').hidden = true; // offene Schicht/Ortsfenster nicht in die Werkstatt mitnehmen
-  WALK.on = false; WALK.shift = null; document.body.classList.remove('walking'); $('walkBar').hidden = true; $('hud').hidden = false; $('bottom').hidden = false;
+  WALK.on = false; WALK.shift = null; WALK.intro = null; WALK.pan = null; walkHintHide(); document.body.classList.remove('walking'); $('walkBar').hidden = true; $('hud').hidden = false; $('bottom').hidden = false;
   for (const id in WALK.pins) WALK.pins[id].remove(); WALK.pins = {};
 }
 // Tippen auf den Boden (kein Ziehen) = dorthin gehen
 { let down = null;
-  canvas.addEventListener('pointerdown', (e) => { down = ptrs.size > 1 ? null : { x: e.clientX, y: e.clientY, t: performance.now() }; }); // zweiter Finger (Zoomen) = kein Tippen
+  canvas.addEventListener('pointerdown', (e) => { down = ptrs.size > 1 ? null : { x: e.clientX, y: e.clientY, t: performance.now() }; if (WALK.pan) WALK.pan = null; }); // zweiter Finger (Zoomen) = kein Tippen
   canvas.addEventListener('pointerup', (e) => {
     if (!WALK.on || !down) return; const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), quick = performance.now() - down.t < 450; down = null;
     if (moved > 10) { WALK.follow = false; return; } if (!quick) return;
     const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left - VW / 2) / view.s + view.cx, y = (e.clientY - r.top - VH / 2) / view.s + view.cy;
+    if (typeof evTapAt === 'function' && evTapAt(x, y)) return; // Teilaufgabe eines Stadt-Ereignisses / Raser (64_events.js)
     walkTo(x, y, null);
   });
 }
@@ -4286,25 +4391,27 @@ $('workStop').addEventListener('click', () => closeWork(WK.done ? `Feierabend! $
 window.__walk = { WALK, PRES, WK, WORK, walkPlaces, openPlace, nextTask, walkTo, view, setZoom, redraw: () => { dirty = true; }, TOWN_EP: () => TOWN_EP, TOWN_TEST, spawnTraffic, traffic };
 window.__city = { ONLINE, CITY, cityPinsBuild, renderCity, citySceneSync, fireOn: () => fireOn() };
 /* ---------------- Stadt-Ereignisse im Mehrspieler: Brand, Ansturm, Blitzer-Aktion, Kühe ausgebüxt ---------------- */
-// Der Server (server/events.sql) startet ab und zu ein Ereignis; alle, die gerade in der Stadt sind, helfen zusammen.
-// Der Client fragt alle ~10 s events_active(), zeigt Banner, Pfeil und das Ereignis auf der Karte und schickt Beiträge
-// über event_help(p_event, p_amount) – Fortschritt, Abrechnung und Belohnung rechnet nur der Server.
-// Fehlt die Funktion am Server (404) oder ist man offline, bleibt alles still aus (nächster Versuch erst nach Minuten).
+// Der Server (server/events.sql) startet ab und zu ein Groß-Ereignis; alle, die gerade in der Stadt sind, helfen zusammen.
+// Statt eines Klickzählers gibt es viele echte Teilaufgaben, verteilt über den Ort (Flammen, Verletzte, Gaffer, Hydrant,
+// Neue zum Haus führen, Koffer, Bus, Raser, Kühe …). Man läuft hin, erledigt ein kurzes Minispiel (Engine aus 63_work.js)
+// und manche Dinge trägt/führt man danach zu einem Ziel. Jede erledigte Teilaufgabe = event_help(p_event, 1..5).
+// Die Teilaufgaben werden aus der Ereignis-Id ausgewürfelt (alle Spieler sehen dieselben). Was andere schaffen, verschwindet
+// vorne aus der Liste (Flammen werden kleiner, Kühe sind weg) – genau über evh-Broadcasts, sonst über den Server-Fortschritt.
 const EV_KIND = {
-  brand: { icon: '🔥', label: 'Brand', cls: 'brand', part: 'gelöscht', job: 'Feuerwehr', sub: 'Feuerwehr und alle in der Nähe: hin und löschen!', hint: 'Flammen antippen – schneller, als sie sich ausbreiten!',
+  brand: { icon: '🔥', label: 'Brand', cls: 'brand', part: 'gelöscht', job: 'Feuerwehr', sub: 'Flammen löschen, Verletzte zum RTW, Gaffer wegschicken!',
     ok: (s) => `🚒 Feuer aus! ${s.name} ist gerettet. Die Versicherung spendiert der Stadtkasse 300 €.`,
     fail: (s) => `🔥 Zu spät … ${s.name} ist angekokelt und riecht jetzt nach Grillfest. Wiederaufbau zahlt die Stadtkasse.` },
-  ansturm: { icon: '🚌', label: 'Ansturm', cls: 'bus', part: 'der Neuen eingewiesen', sub: 'Zwei Busse voller Neuer am Ortsschild – zeigt ihnen den Weg!', hint: 'Wohin will der Neue? Richtig zeigen!',
+  ansturm: { icon: '🚌', label: 'Ansturm', cls: 'bus', part: 'geschafft', sub: 'Zwei Busse voller Neuer! Führt sie zu ihren Häusern.',
     ok: () => '🚌 Alle Neuen sind gut angekommen! +3 Einwohner und 200 € Kurtaxe für die Stadtkasse.',
     fail: () => '🚌 Ein paar Neue sind beleidigt wieder heimgefahren. Die Busfahrer hupen zum Abschied.' },
-  blitzer: { icon: '📸', label: 'Blitzer-Aktion', cls: 'cop', part: 'der Raser erwischt', sub: 'Der Dorfbulle braucht Adleraugen: Raser antippen!', hint: '50er-Zone! Nur die Raser antippen – nicht den Pfarrer.',
-    ok: (s, e) => `📸 Blitzer-Aktion vorbei: ${e.progress} Punkte, ${fmt(e.fund_delta || 0)} Strafzettel für die Stadtkasse. Der Dorfbulle grinst.`,
+  blitzer: { icon: '📸', label: 'Blitzer-Aktion', cls: 'cop', part: 'geschafft', sub: 'Der Dorfbulle braucht Hilfe: Raser antippen, Fahrer anhalten!',
+    ok: (s, e) => `📸 Blitzer-Aktion vorbei: ${fmt(e.fund_delta || 0)} Strafzettel für die Stadtkasse. Der Dorfbulle grinst.`,
     fail: () => '📸 Die Raser waren schneller als ihr. Der Dorfbulle isst frustriert ein Leberkässemmerl.' },
-  kuehe: { icon: '🐄', label: 'Kühe ausgebüxt', cls: 'cow', part: 'der Kühe eingefangen', job: 'Landwirt', sub: 'Die Resi und ihre Bande sind ausgebüxt – einfangen!', hint: 'Kühe antippen! Die Ziege gehört dem Nachbarn.',
-    ok: () => '🐄 Alle Kühe wieder im Stall! Die Resi schaut, als wär nix gewesen. Der Bauer spendiert 150 €.',
+  kuehe: { icon: '🐄', label: 'Kühe ausgebüxt', cls: 'cow', part: 'zurück auf der Weide', job: 'Landwirt', sub: 'Die Resi und ihre Bande stehen überall in der Stadt – heimtreiben!',
+    ok: () => '🐄 Alle Kühe wieder auf der Weide! Die Resi schaut, als wär nix gewesen. Der Bauer spendiert 150 €.',
     fail: () => '🐄 Die Kühe grasen jetzt gemütlich im Kreisverkehr. Der Bauer seufzt.' },
 };
-// Orte (müssen zu den Standplätzen in server/events.sql passen). u/w = Standplatz für Helfer, fire = Flammen am Gebäude (Weltpunkt)
+// Orte (müssen zu den Standplätzen in server/events.sql passen). u/w = Standplatz, fire = Flammen am Gebäude (Weltpunkt)
 const EV_SPOTS = {
   cafe: { title: 'Das Café brennt!', name: 'Das Café', u: -470, w: 1300, fire: [1470, 1190] },
   metzgerei: { title: 'Die Metzgerei brennt!', name: 'Die Metzgerei', u: -1150, w: -300, fire: [-585, 1767] },
@@ -4315,20 +4422,32 @@ const EV_SPOTS = {
   ortsschild: { title: 'Ansturm am Ortsschild!', name: 'Das Ortsschild', u: 1250, w: -215 },
   blitzer_a: { title: 'Blitzer-Aktion an der Hauptstraße!', name: 'Die Hauptstraße', u: 900, w: 215, radar: [900, 290] },
   blitzer_b: { title: 'Blitzer-Aktion auf Straße B!', name: 'Straße B', u: -215, w: 900, radar: [-320, 900] },
-  weide: { title: 'Kühe ausgebüxt!', name: 'Der Bauernhof', u: 520, w: -1250, cows: [450, 1000, -1450, -2050] },
+  weide: { title: 'Kühe ausgebüxt!', name: 'Der Bauernhof', u: 520, w: -1250 },
 };
 const EV_DEF_SPOT = { brand: 'cafe', ansturm: 'ortsschild', blitzer: 'blitzer_a', kuehe: 'weide' };
-const EV = { list: [], t: 8, back: 0, busy: false, skew: 0, open: null, goto: null, pend: 0, sendT: 9, sending: false, seen: {}, told: {}, flash: null,
-  mock: null, ui: null, anim: null, game: null, fx: [], cows: [], ents: [], img: {}, errs: 0, flashT: 0 };
+// Rollen: [Stadt-Job-Ort, Beruf, Name]. Feuerwehr beim Brand und Landwirte bei den Kühen verdoppelt der Server,
+// die anderen Spezialaufgaben verdoppelt der Client (Beitrag × 2, höchstens 5 – mehr nimmt der Server eh nicht).
+const EV_ROLES = { feuerwehr: ['feuerwehr', 'feuerwehr', 'Feuerwehr', 'die Feuerwehr'], sanitaeter: ['rettung', 'sanitaeter', 'Sanitäter', 'die Sanitäter'], landwirt: ['bauernhof', 'landwirt', 'Landwirt', 'die Landwirte vom Bauernhof'],
+  tierpfleger: ['tierheim', 'tierpfleger', 'Tierpfleger', 'die Tierpfleger'], parkwaechter: ['parkplatz', 'parkwaechter', 'Parkwächter', 'die Parkwächter'], aushilfe: ['cafe', 'aushilfe', 'Café-Team', 'das Café-Team'] };
+const EV_SRV2 = { brand: 'feuerwehr', kuehe: 'landwirt' };
+// Plätze, an denen schon etwas steht (Incident-Spots von 65_incidents.js, Werkstatt, RTW-Stellplatz): dort keine eigenen Fahrzeuge parken
+const EV_BUSY = [[700, 275], [1100, 275], [1700, 275], [-2300, 275], [-2650, 275], [800, -275], [-2300, -275], [2300, -275], [-1950, -275], [275, 1700], [275, -800], [275, -1550],
+  [-275, -1600], [-275, 1000], [-275, -2400], [-275, 2300], [-275, -650], [-900, 330], [-1800, 260]];
+const EV_RTW_HOME = { u: -1800, w: 262 }; // RTW der Rettungswache (Folge 6) – steht schon dort
+const EV = { list: [], t: 8, back: 0, busy: false, skew: 0, goto: null, q: [], sendT: 9, sending: false, seen: {}, told: {}, flash: null,
+  mock: null, ui: null, fx: [], pops: [], ents: [], img: {}, errs: 0, flashT: 0, sub: {}, mk: {}, carry: null, mini: null, near: null, tapT: 0 };
 // eigene Bilder (Bus, Kühe), ohne die gemeinsame Bilderliste anzufassen
 ['v_bus', 'an_cow1', 'an_cow2'].forEach((n) => { const i = new Image(); i.onload = () => { EV.img[n] = i; }; i.src = (window.__ASSETS && window.__ASSETS[n]) || (n + '.webp?v=2'); });
 const evSpot = (e) => EV_SPOTS[e.spot] || { ...EV_SPOTS[EV_DEF_SPOT[e.kind]], u: e.u, w: e.w };
-const evStand = (e) => { const s = evSpot(e); return iso(Number.isFinite(e.u) ? e.u : s.u, Number.isFinite(e.w) ? e.w : s.w); };
+const evStandUW = (e) => { const s = evSpot(e); return { u: Number.isFinite(e.u) ? e.u : s.u, w: Number.isFinite(e.w) ? e.w : s.w }; };
+const evStand = (e) => { const p = evStandUW(e); return iso(p.u, p.w); };
 const evLeft = (e) => (Date.parse(e.ends_at) - (Date.now() + EV.skew)) / 1000;
 const evK = (e) => clamp(1 - (e.sp == null ? e.progress : e.sp) / Math.max(1, e.goal)); // 1 = alles offen, 0 = geschafft
 const evCur = () => EV.list.find((e) => !e.done && evLeft(e) > -5) || null;
 const evById = (id) => EV.list.find((e) => e.id === id) || null;
-function evMyJob(e) { const me = (CITY.state && CITY.state.me) || {}; return e.kind === 'brand' ? me.townJob === 'feuerwehr' || me.profession === 'feuerwehr' : e.kind === 'kuehe' ? me.townJob === 'bauernhof' || me.profession === 'landwirt' : false; }
+const evDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+function evHas(role) { const me = (CITY.state && CITY.state.me) || {}, r = EV_ROLES[role]; return !!r && (me.townJob === r[0] || me.profession === r[1]); }
+function evMyJob(e) { return !!EV_SRV2[e.kind] && evHas(EV_SRV2[e.kind]); }
 function evNear(e) { const p = evStand(e), m = WALK.me; return Math.hypot(m.x - p.x, m.y - p.y) < 300; }
 async function evRpc(fn, args) { return EV.mock ? evMockRpc(fn, args || {}) : sbRpc(fn, args); }
 // Server-Antwort säubern: nur bekannte Arten, Zahlen als Zahlen
@@ -4354,8 +4473,9 @@ async function evPoll() {
     if (r.now && Number.isFinite(Date.parse(r.now))) EV.skew = Date.parse(r.now) - Date.now();
     const ids = {}; r.events.forEach((x) => { const e = evPut(x); if (e) ids[e.id] = 1; });
     EV.list = EV.list.filter((e) => ids[e.id]).slice(0, 4); EV.back = 0;
-  } catch (e) { EV.back = Math.min(600, Math.max(60, EV.back * 2)); EV.list = []; if (EV.open) evClose(); } // fehlt am Server / offline: still aus
-  EV.busy = false;
+  } catch (e) { EV.back = Math.min(600, Math.max(60, EV.back * 2)); EV.list = []; evMiniClose(); EV.carry = null; } // fehlt am Server / offline: still aus
+  for (const id in EV.sub) if (!evById(Number(id))) delete EV.sub[id];
+  EV.busy = false; EV.polled = true;
 }
 function evOnJoin() { if (EV.t > 3 && !EV.back) EV.t = 99; } // neuer Mitspieler: gleich nachsehen
 function evStart(e) {
@@ -4363,154 +4483,286 @@ function evStart(e) {
   sfx.event(); toast(`${k.icon} ${s.title} ${k.sub}`);
 }
 function evDone(e) {
+  if (EV.carry && EV.carry.eid === e.id) EV.carry = null;
+  if (EV.mini && EV.mini.eid === e.id && !WK.busy) evMiniClose();
   if (EV.told[e.id]) return; EV.told[e.id] = 1; e.doneAt = performance.now();
   if (!EV.seen[e.id] && !(e.mine > 0)) return; // vor meiner Zeit beendet: nichts melden
   const k = EV_KIND[e.kind], s = evSpot(e), head = (e.outcome === 'ok' ? k.ok : k.fail)(s, e);
   let mine = '';
   if (e.mine > 0) {
     const pct = Math.max(1, Math.min(100, Math.round(e.mine / Math.max(1, e.progress) * 100)));
-    mine = `Du hast ${pct} % ${k.part} → +${fmt(e.reward_cash || 0)}${e.reward_xp ? `, +${e.reward_xp} XP` : ''}`;
+    mine = `Dein Anteil: ${pct} % → +${fmt(e.reward_cash || 0)}${e.reward_xp ? `, +${e.reward_xp} XP` : ''}`;
     sfx.cash(); setTimeout(() => { if (typeof cityLoad === 'function') cityLoad(); }, 400);
   } else if (e.outcome === 'ok') sfx.goal();
   const by = e.top.length ? ` Danke an ${e.top.join(', ')}${e.helpers > e.top.length ? ` und ${e.helpers - e.top.length} weitere` : ''}!` : '';
   EV.flash = { k, head, mine, by, until: performance.now() + 9000, ok: e.outcome === 'ok' };
-  if (EV.open === e.id) evShowResult(e, head, mine, by); else toast(mine ? `${k.icon} ${mine}` : head);
-}
-function evGo(e) {
-  const p = evStand(e); $('place').hidden = true;
-  if (evNear(e)) { evOpen(e); return; }
-  walkTo(p.x, p.y, null); EV.goto = e.id; toast(`${EV_KIND[e.kind].icon} Auf geht’s zum Einsatz!`);
-}
-// Beitrag schicken: höchstens alle 1,2 s, höchstens 5 Punkte (der Server prüft beides nochmal)
-async function evSend() {
-  const e = evById(EV.open); if (!e || e.done || EV.sending) return;
-  const n = Math.min(5, EV.pend); if (n <= 0) return; EV.pend -= n; EV.sending = true; EV.sendT = 0;
-  try {
-    const r = evPut(await evRpc('event_help', { p_event: e.id, p_amount: n }));
-    if (r && !r.done && EV.open === r.id) evRes(`+${n}${r.mine ? ` · dein Anteil ${r.mine} von ${r.progress}` : ''}`);
-    if (typeof presSend === 'function' && PRES.ok) presSend('broadcast', { type: 'broadcast', event: 'evh', payload: { id: ONLINE.sess.uid, e: e.id } });
-  } catch (err) {
-    const m = String((err && err.message) || '');
-    if (/no event/.test(m)) { evClose(); EV.t = 99; } else EV.pend = Math.min(10, EV.pend + n); // zu schnell / kurz offline: später nochmal
-    if (/not active/.test(m)) { evRes('Kurz in der Stadt ankommen …'); sbRpc('ping').catch(() => {}); }
-  }
-  EV.sending = false;
-}
-function evScore(n, msg) {
-  if (n > 0) { EV.pend = Math.min(10, EV.pend + n); sfx.pop(); EV.fx.push({ me: true, t: performance.now() }); } else { EV.pend = Math.max(0, EV.pend + n); sfx.nope(); }
-  if (msg) evRes(msg);
-}
-function evRes(t) { const el = $('evRes'); if (el && el.textContent !== t) el.textContent = t; }
-// Mitspieler hilft gerade: an seiner Figur kurz mitanimieren
-function evPeerHelp(p) {
-  if (!p || typeof p.id !== 'string') return; const o = PRES.peers[p.id]; if (!o) return;
-  o.evh = performance.now(); if (!EV.list.some((e) => e.id === Number(p.e))) EV.t = Math.max(EV.t, 6); // unbekanntes Ereignis: bald nachfragen
+  toast(mine ? `${k.icon} ${mine}` : head);
 }
 
-/* ---- Fenster mit Mitmach-Minispiel ---- */
-function evOpen(e) {
-  if (!e || e.done) return; evUiBuild(); if (WK.on) closeWork(); $('place').hidden = true;
-  EV.open = e.id; EV.pend = 0; EV.goto = null; const k = EV_KIND[e.kind], s = evSpot(e);
-  $('evTitle').textContent = `${k.icon} ${k.label}`; $('evSub').textContent = k.job ? `${k.sub} ${evMyJob(e) ? `Als ${k.job} zählt jeder Treffer doppelt!` : `${k.job}-Leute zählen doppelt.`}` : k.sub; evRes('');
-  const A = $('evArea'); A.innerHTML = ''; A.className = ''; clearInterval(EV.anim);
-  EV.game = ({ brand: evGameBrand, ansturm: evGameBus, blitzer: evGameCop, kuehe: evGameCow }[e.kind])(A, k);
-  let t0 = performance.now();
-  EV.anim = setInterval(() => { const t = performance.now(), dt = Math.min(0.1, (t - t0) / 1000); t0 = t; if (EV.game && EV.game.step) { try { EV.game.step(dt); } catch (err) { evErr(err); } } }, 50);
-  $('evSheet').hidden = false;
+/* ---- Teilaufgaben: aus der Ereignis-Id ausgewürfelt, damit alle Spieler dieselben sehen ---- */
+function evRng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+// Punkt auf einem Gehsteig (|v| = 215) oder am Straßenrand (|v| = 275) entlang der Hauptstraße/Straße B nahe (u, w).
+// Nie in der Kreuzung, nie hinter dem Straßenende.
+function evSide(u, w, off, opp, edge) {
+  const L = lineOf(u, w), v = (opp ? -1 : 1) * Math.sign(L.v) * (edge ? 275 : 225);
+  let a = (L.ax === 'w' ? u : w) + off; if (Math.abs(a) < 320) a = (Math.sign(a) || 1) * 320; a = clamp(a, -2550, 2550);
+  return L.ax === 'w' ? { u: a, w: v } : { u: v, w: a };
 }
-function evClose() { clearInterval(EV.anim); EV.anim = null; EV.game = null; EV.open = null; EV.pend = 0; if ($('evSheet')) $('evSheet').hidden = true; }
-function evShowResult(e, head, mine, by) {
-  clearInterval(EV.anim); EV.game = null; const A = $('evArea');
-  A.innerHTML = `<div class="evdone"><b>${e.outcome === 'ok' ? '🎉' : '😬'}</b><p>${esc(head)}</p>${mine ? `<p class="evmine">${esc(mine)}</p>` : ''}${by ? `<p>${esc(by)}</p>` : ''}<button type="button" class="big go" id="evOk">Weiter</button></div>`;
-  A.querySelector('#evOk').addEventListener('click', evClose); evRes('');
-}
-// Gitter-Positionen (4×3), damit sich nichts überdeckt – wie in 63_work.js
-const evCell = (i) => ({ l: 14 + (i % 4) * 24, t: 30 + Math.floor(i / 4) * 22 });
-// 🔥 Fenster brennen auf, antippen löscht; nasse Fenster trocknen wieder
-function evGameBrand(A, k) {
-  A.innerHTML = `<p class="whint">${k.hint} <small></small></p>`; A.classList.add('evhouse');
-  const st = Array(12).fill(0), wet = Array(12).fill(0), cells = []; let acc = 0.6, combo = 0;
-  const look = ['🪟', '🔥', '💦'];
-  for (let i = 0; i < 12; i++) {
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'wtap'; const c = evCell(i); b.style.left = c.l + '%'; b.style.top = c.t + '%';
-    b.addEventListener('click', () => { if (st[i] !== 1) return; st[i] = 2; wet[i] = 1.4; combo++; evScore(1, combo % 5 === 0 ? pick(['Wasser marsch!', 'Der Schlauch ist dein Freund.', 'Zisch! 💨', 'Mehr Druck am Verteiler!']) : ''); draw(); });
-    cells.push(b); A.appendChild(b);
+const evFree = (p) => !EV_BUSY.some(([u, w]) => Math.hypot(p.u - u, p.w - w) < 230);
+// Ziele für die Neuen (Ansturm): Gehsteig vor echten Häusern/Betrieben
+const EV_HOMES = [
+  { u: 335, w: 228, n: 'Hauptstraße 7', who: 'Ich zieh in die Hauptstraße 7 – das Haus mit dem Grillgeruch.' },
+  { u: 420, w: -228, n: 'Tankstelle', who: 'Ich bin der neue Tankwart! Wo ist die Zapfsäule?' },
+  { u: 228, w: -1250, n: 'Bauernhof', who: 'Ich mach Praktikum bei der Kuh Resi!' },
+  { u: -228, w: 1300, n: 'Café', who: 'Ich wohn überm Café. Hoffentlich riecht’s nach Kipferl.' },
+  { u: -650, w: -228, n: 'Landmaschinen-Halle', who: 'Ich bin der neue Lehrling vom Riesentraktor!' },
+];
+const EV_NAMES_COW = ['Resi', 'Berta', 'Lotte', 'Erna', 'Fini', 'Gerti', 'Milka', 'Susi', 'Heidi', 'Liesl'];
+const EV_GUESTS = ['Herr Huber', 'Frau Gruber', 'Kevin', 'Oma Traudl', 'Familie Maier', 'Jacqueline', 'Herr Doktor Pichler', 'Chantal'];
+const EV_GAWK = [['Ich film nur kurz für Insta!', '🚶 Weitergehen, bitte!', ['🚶 Weitergehen, bitte!', '🤳 Gemeinsames Selfie', '🍿 Popcorn holen']],
+  ['Brennt’s da echt? Ich muss das sehen!', '🙅 Ja – und du stehst im Weg!', ['🙅 Ja – und du stehst im Weg!', '🔥 Komm näher, ist warm', '📸 Mach ein Foto für mich']],
+  ['Darf ich mal den Schlauch halten?', '🚒 Nein, das macht die Feuerwehr', ['🚒 Nein, das macht die Feuerwehr', '💦 Klar, spritz los', '🧯 Nur am Wochenende']],
+  ['Ich wohn da drüben, ich darf hier stehen!', '🏠 Dann geh heim und mach die Fenster zu', ['🏠 Dann geh heim und mach die Fenster zu', '👀 Ok, schau ruhig zu', '🎤 Gib ein Interview']],
+  ['Der Leo hat gesagt, hier gibt’s Würstel!', '🌭 Die gibt’s erst beim Feuerwehrfest', ['🌭 Die gibt’s erst beim Feuerwehrfest', '🔥 Grill dir eins am Feuer', '🍺 Frag den Mario']],
+  ['Ist das die Feuerwehrübung?', '🚨 Nein, das ist echt – bitte Abstand!', ['🚨 Nein, das ist echt – bitte Abstand!', '🎭 Ja, applaudier mal', '🧘 Ganz ruhig hinsetzen']]];
+const EV_EXCUSE = [['„Ich hab nur den Föhn gegen den Rückenwind getestet!“', '📝 Strafzettel, 70 €', ['📝 Strafzettel, 70 €', '🤝 Gute Fahrt!', '🍦 Eis spendieren']],
+  ['„Meine Oma hat Geburtstag und der Kuchen schmilzt!“', '🎂 Glückwunsch – trotzdem 50 €', ['🎂 Glückwunsch – trotzdem 50 €', '🚨 Mit Blaulicht hinbringen', '🍰 Kuchen konfiszieren']],
+  ['„Ich bin der Justin, ich kenn den Bürgermeister!“', '📝 Der zahlt auch, 60 €', ['📝 Der zahlt auch, 60 €', '🙇 Entschuldigung, Herr Justin', '📞 Den Bürgermeister anrufen']],
+  ['„Mein Tacho ist kaputt, war beim Mario in der Werkstatt!“', '🔧 Ab zum Mario – plus 40 €', ['🔧 Ab zum Mario – plus 40 €', '🔨 Tacho selber reparieren', '👍 Glaub ich sofort']],
+  ['„Die Kuh Resi hat mich angeschaut, ich musste weg!“', '🐄 Resi zahlt nix – du schon', ['🐄 Resi zahlt nix – du schon', '🏃 Verständlich, fahr weiter', '🧀 Mit der Kuh reden']],
+  ['„Ich wollt nur schnell zum Ossi, der hat Leberkäs!“', '🥖 Leberkäs läuft nicht weg, 50 €', ['🥖 Leberkäs läuft nicht weg, 50 €', '🍽️ Mitfahren', '🚔 Eskorte zum Leberkäs']]];
+// Bauplan je Ereignis: Reihenfolge der Teilaufgaben (wiederholt sich; dieselbe Stelle kann wieder aufflammen)
+const EV_PLAN = {
+  brand: ['f0', 'hurt', 'f1', 'gawk', 'hyd', 'f2', 'hurt', 'gawk', 'f1', 'hurt', 'f0', 'gawk', 'f2', 'hyd', 'hurt'],
+  ansturm: ['guest', 'bag', 'guest', 'bus', 'guest', 'coffee', 'bag', 'guest', 'bus', 'bag', 'guest', 'coffee'],
+  blitzer: ['radar', 'stop', 'stop', 'ticket', 'radar', 'stop', 'stop', 'radar', 'ticket', 'stop'],
+  kuehe: ['cow', 'cow', 'fence', 'cow', 'goat', 'cow', 'cow', 'fence', 'cow', 'cow', 'cow', 'fence'],
+};
+const EV_FLAME_OFF = [[-78, 6], [70, -28], [4, -96]]; // Flammen-Stellen am Gebäude (Bildschirm-Welt)
+function evGen(e) {
+  const R = evRng(e.id * 2654435761 + e.kind.length * 97), s = evSpot(e), st = evStandUW(e), plan = EV_PLAN[e.kind], out = [];
+  const pt = (u, w) => ({ u, w, ...iso(u, w) }), rr = (a, b) => a + R() * (b - a);
+  const side = (o, opp, edge) => evSide(st.u, st.w, o, opp, edge);
+  // RTW für den Brand: am Straßenrand neben dem Einsatzort (oder der echte, wenn die Rettungswache gleich ums Eck ist)
+  let rtw = null;
+  if (e.kind === 'brand') {
+    if (Math.hypot(st.u - EV_RTW_HOME.u, st.w - EV_RTW_HOME.w) < 700) rtw = { ...pt(EV_RTW_HOME.u, EV_RTW_HOME.w), own: true };
+    else for (const o of [520, -520, 680, -680, 380, -380, 840, -840]) { const p = side(o, false, true); if (evFree(p)) { rtw = pt(p.u, p.w); break; } }
+    if (!rtw) { const p = side(520, true, true); rtw = pt(p.u, p.w); }
   }
-  const draw = () => { cells.forEach((b, i) => { b.textContent = look[st[i]]; b.classList.toggle('ok', st[i] === 2); b.classList.toggle('hot', st[i] === 1); }); A.querySelector('small').textContent = `(${st.filter((v) => v === 1).length} brennt)`; };
-  draw();
-  return { step(dt) {
-    acc += dt; let ch = false;
-    for (let i = 0; i < 12; i++) if (st[i] === 2 && (wet[i] -= dt) <= 0) { st[i] = 0; ch = true; }
-    if (acc > 0.55) { acc = 0; const free = st.map((v, i) => (v === 0 ? i : -1)).filter((i) => i >= 0); if (free.length && st.filter((v) => v === 1).length < 6) { st[pick(free)] = 1; ch = true; } }
-    if (ch) draw();
-  } };
+  let cows = 0, gawk = 0, exc = 0, guests = 0;
+  for (let i = 0; i < 40; i++) {
+    const ty = plan[i % plan.length], t = { i, ty, amt: 3 };
+    if (e.kind === 'brand') {
+      if (ty[0] === 'f') { const j = +ty[1], p = side([-170, 170, 10][j] + rr(-30, 30)); Object.assign(t, pt(p.u, p.w), { site: j, mx: s.fire[0] + EV_FLAME_OFF[j][0], my: s.fire[1] + EV_FLAME_OFF[j][1] - 60, icon: '🔥', label: 'Löschen', amt: 4, mini: BLAZE('Flammen löschen', 'Flammen antippen, bevor sie überspringen!'), ok: ['Zisch! Eine Stelle weniger.', 'Wasser marsch! 💦', 'Das Feuer hat Respekt vor dir.'] }); }
+      else if (ty === 'hurt') { const p = side(pick2(R, [-1, 1]) * rr(260, 480), R() < 0.4); Object.assign(t, pt(p.u, p.w), { icon: '🤕', label: 'Verletzt', amt: 3, dbl: 'sanitaeter', look: Math.floor(R() * 5),
+        mini: TIMING('Puls fühlen', '💓', 3, '🩺 Jetzt!', 'Ruhig bleiben – im grünen Bereich tippen', { pot: '🩺', hit: '💓', miss: ['Das war dein eigener Puls. 🫀', '„Bin i scho tot?“ – Nein, nur daneben.', 'Der Patient schaut skeptisch. 🤨'], clean: 'Stabil! Ab zum RTW.' }),
+        carry: { to: rtw, icon: '🚑', label: 'Zum RTW', title: 'Verletzten zum RTW bringen', ok: ['Im RTW gibt’s Decke und Gummibärli. 🧸', 'Der Patient fragt nach dem WLAN-Passwort. Gutes Zeichen!', '„Danke! Sagt’s meiner Mama nix.“'] } }); }
+      else if (ty === 'gawk') { const p = side(pick2(R, [-1, 1]) * rr(220, 520), R() < 0.5); const q = EV_GAWK[gawk++ % EV_GAWK.length]; Object.assign(t, pt(p.u, p.w), { icon: '🤳', label: 'Gaffer', amt: 2, look: 2 + Math.floor(R() * 3), say: q[0],
+        mini: PICK('Gaffer wegschicken', [q]), ok: ['Der Gaffer geht. Sein Akku war eh leer.', 'Weg ist er – filmt jetzt die Kühe.', 'Er postet: „Wurde weggeschickt 😤“.'] }); }
+      else { const p = side(R() < 0.5 ? 300 : -300, false); Object.assign(t, pt(p.u, p.w), { icon: '🚰', label: 'Hydrant', amt: 4, role: 'feuerwehr', mini: SEQ('Hydrant anschließen', '🧯', 5, 9, 'Kupplungen der Reihe nach: 1, 2, 3 …'), ok: ['Volle Kanne! Der Druck passt.', 'Der Maschinist nickt anerkennend.'] }); }
+    } else if (e.kind === 'ansturm') {
+      const home = EV_HOMES[Math.floor(R() * EV_HOMES.length)], dest = { ...pt(home.u, home.w), n: home.n };
+      if (ty === 'guest') { const p = side(rr(-650, 250), R() < 0.4); const name = EV_GUESTS[guests++ % EV_GUESTS.length]; Object.assign(t, pt(p.u, p.w), { icon: '🧳', label: name.split(' ').pop(), name, amt: 3, look: Math.floor(R() * 5), say: home.who,
+        mini: { t: 'ask', title: `${name} ist neu hier`, who: name, say: home.who, right: home.n, opts: EV_HOMES.map((h) => h.n) },
+        carry: { to: dest, icon: '🏠', label: home.n, title: `${name} → ${home.n}`, follow: 'guest', ok: ['„Schön hier! Wo ist der nächste Leberkäs?“', '„Danke! Kommst du zur Einweihungsparty?“', '„Ohne dich hätt ich mich beim Kreisverkehr verlaufen.“'] } }); }
+      else if (ty === 'bag') { const p = side(rr(-400, -150), true); Object.assign(t, pt(p.u, p.w), { icon: '🧳', label: 'Koffer', amt: 2, mini: MASH('Koffer schleppen', '🧳', 8, 'Wie wild tippen – da sind sicher Ziegelsteine drin!'),
+        carry: { to: dest, icon: '🏠', label: home.n, title: `Koffer → ${home.n}`, follow: 'bag', ok: ['Koffer abgeliefert. Es war tatsächlich eine Bowlingkugel drin.', '„Vorsicht, da ist mein Gartenzwerg drin!“'] } }); }
+      else if (ty === 'bus') { const p = side(rr(-450, -250), true); Object.assign(t, pt(p.u, p.w), { icon: '🚌', label: 'Bus einweisen', amt: 4, dbl: 'parkwaechter',
+        mini: TIMING('Bus einweisen', '🚌', 4, '✋ Stopp!', 'Rückwärts einparken – im grünen Bereich „Stopp“!', { pot: '🚌', hit: '👍', miss: ['Bumm. Das war der Blumentrog.', 'Der Busfahrer hupt beleidigt. 📯', 'Noch a bissl … zu weit!'], clean: 'Zentimetergenau! Der Busfahrer salutiert.' }), ok: ['Bus steht. Applaus von den Neuen!'] }); }
+      else { const p = side(rr(-120, 180), false); Object.assign(t, pt(p.u, p.w), { icon: '☕', label: 'Willkommens-Kaffee', amt: 3, dbl: 'aushilfe',
+        mini: ORDER('Willkommens-Kaffee', ['☕ Melange', '🥐 Kipferl', '🍰 Sachertorte', '🥤 Almdudler'], '🧳', 'Für mich bitte <b>%</b>!'), ok: ['Die Neuen lieben Schrauberstadt schon jetzt.'] }); }
+    } else if (e.kind === 'blitzer') {
+      if (ty === 'radar') { const p = side(0, false); Object.assign(t, pt(p.u, p.w), { icon: '📸', label: 'Radar', amt: 3, mini: { t: 'radar', title: 'Radar bedienen' }, ok: ['Der Dorfbulle klopft dir auf die Schulter.'] }); }
+      else if (ty === 'stop') { const p = side(pick2(R, [-1, 1]) * rr(280, 640), R() < 0.35); const q = EV_EXCUSE[exc++ % EV_EXCUSE.length]; Object.assign(t, pt(p.u, p.w), { icon: '🚗', label: 'Raser', amt: 3, look: Math.floor(R() * 5), say: q[0].replace(/[„“]/g, ''),
+        mini: PICK('Fahrer angehalten', [q]), ok: ['Strafzettel kassiert. Er fährt jetzt 49,9.', 'Er grummelt und zahlt. Der Dorfbulle grinst.'] }); }
+      else { const p = side(pick2(R, [-1, 1]) * rr(200, 350), false); Object.assign(t, pt(p.u, p.w), { icon: '📝', label: 'Strafzettel', amt: 4, role: 'parkwaechter',
+        mini: STEPS('Strafzettel schreiben', ['🔢 Kennzeichen', '🕒 Uhrzeit', '📏 Tempo', '✍️ Unterschrift'], 9, 'Ordnung muss sein – der Reihe nach', { show: true, wrong: ['Ohne Kennzeichen gilt das nicht!', 'Der Dorfbulle hebt eine Augenbraue.'], done: 'Amtlich! Mit Stempel.' }), ok: ['Der Zettel klebt. Der Raser weint.'] }); }
+    } else {
+      if (ty === 'cow' || ty === 'goat') {
+        // überall in der Stadt: an Straße B (u ±225, w −2300 … −400) oder an der Hauptstraße (w ±225), höchstens ~1700 vom Hof
+        let p; for (let k = 0; k < 8; k++) { p = R() < 0.6 ? { u: (R() < 0.5 ? -1 : 1) * 225, w: rr(-2300, -420) } : { u: rr(-900, 1700), w: (R() < 0.5 ? -1 : 1) * 225 }; if (Math.abs(p.u) < 320 && Math.abs(p.w) < 320) continue; if (Math.hypot(p.u - st.u, p.w - st.w) < 1700 && Math.hypot(p.u - st.u, p.w - st.w) > 300) break; }
+        if (ty === 'cow') { const name = EV_NAMES_COW[cows++ % EV_NAMES_COW.length]; Object.assign(t, pt(p.u, p.w), { icon: '🐄', label: name, name, amt: 4, img: cows % 3 ? 'an_cow1' : 'an_cow2',
+          mini: TIMING(`${name} anlocken`, '🌾', 3, '🌾 Heu hinhalten!', `Im grünen Bereich Heu hinhalten – ${name} ist heikel`, { pot: '🐄', hit: '🌾', miss: [`Muh! ${name} will lieber Klee.`, `${name} schaut dich an wie einen kaputten Traktor.`, 'Daneben – das Heu landet im Kanaldeckel.'], clean: `${name} trottet brav hinterher!` }),
+          carry: { to: { ...pt(st.u, st.w) }, icon: '🌾', label: 'Zur Weide', title: `${name} zur Weide treiben`, follow: 'cow', ok: [`${name} ist daheim. Muh!`, `${name} beschwert sich über das Gras. Typisch.`, 'Der Bauer winkt mit der Mistgabel. Das heißt Danke.'] } }); }
+        else { Object.assign(t, pt(p.u, p.w), { icon: '🐐', label: 'Gretl', name: 'Ziege Gretl', amt: 3, dbl: 'tierpfleger', img: 'an_goat',
+          mini: CATCH('Ziege Gretl einfangen', '🐐', 4, 11, 'Die Gretl ist mit ausgebüxt – erwisch sie!'),
+          carry: { to: { ...pt(228, -2130) }, icon: '🐾', label: 'Zum Tierheim', title: 'Gretl ins Tierheim bringen', follow: 'goat', ok: ['Die Gretl ist im Tierheim. Für genau fünf Minuten.', 'Der Ossi sagt Danke und versteckt die Schuhe.'] } }); }
+      } else { const p = side(R() < 0.5 ? -160 : 160, false); Object.assign(t, pt(p.u, p.w), { icon: '🪵', label: 'Zaun flicken', amt: 4, role: 'landwirt', mini: MASH('Zaun flicken', '🪵', 9, 'Pfosten einschlagen – bevor die nächste abhaut!'), ok: ['Der Zaun hält. Zumindest bis morgen.'] }); }
+    }
+    out.push(t);
+  }
+  return { tasks: out, rtw };
 }
-// 🚌 Neue wollen irgendwohin: das richtige Ziel antippen
-const EV_DEST = [['☕ Café', 'Wo krieg ich hier eine Melange?'], ['🔧 Werkstatt', 'Mein Auto macht so klonk-klonk.'], ['🥩 Metzgerei', 'Ich hab Hunger auf eine Leberkässemmel!'], ['🚜 Bauernhof', 'Ich will die berühmte Kuh Resi sehen!'],
-  ['🚒 Feuerwehr', 'Ich möcht zur Freiwilligen Feuerwehr!'], ['⛽ Tankstelle', 'Mein Tank ist leerer als mein Kühlschrank.'], ['🅿️ Parkplatz', 'Wo stell ich meinen Wohnwagen ab?']];
-const EV_WHO = ['🧳🧑', '🧳👵', '🧳🧔', '🧳👩‍🦰', '🧳👨‍🦳', '🎒🧒', '🧳🧑‍🦱'];
-function evGameBus(A, k) {
-  let n = 0;
-  const show = () => {
-    const [want, say] = pick(EV_DEST), opts = [want, ...EV_DEST.map((d) => d[0]).filter((d) => d !== want).sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
-    A.innerHTML = `<p class="whint">${k.hint} <small>(${n} eingewiesen)</small></p><div class="evwho">${pick(EV_WHO)}</div><p class="evsay">„${say}“</p><div class="wgrid">${opts.map((o) => `<button type="button" class="buy wopt">${o}</button>`).join('')}</div>`;
-    A.querySelectorAll('.wopt').forEach((b) => b.addEventListener('click', () => {
-      if (b.textContent === want) { n++; evScore(2, pick(['Willkommen in Schrauberstadt!', 'Danke, sehr nett hier!', 'Er winkt fröhlich und geht los.', 'Sie ist begeistert.'])); }
-      else evScore(0, pick(['Falsch abgebogen – jetzt winkt er vom Kreisverkehr.', 'Landet in der Metzgerei. Isst trotzdem was.', 'Sie fragt lieber den Traktorfahrer.']));
-      if (EV.game) show();
-    }));
-  };
-  show();
-  return { step() {} };
+const pick2 = (R, arr) => arr[Math.floor(R() * arr.length)];
+function evSub(e) { let S = EV.sub[e.id]; if (!S || S.kind !== e.kind) { const g = evGen(e); S = EV.sub[e.id] = { kind: e.kind, tasks: g.tasks, rtw: g.rtw, done: new Set(), peer: new Map(), mineTry: 0 }; } return S; }
+// sichtbare Teilaufgaben: vorne verbraucht, was andere geschafft haben (genau gemeldet oder über den Server-Fortschritt geschätzt)
+function evVis(e, all) {
+  if (!e || e.done) return [];
+  const S = evSub(e); let peerPts = 0; S.peer.forEach((a) => { peerPts += a; });
+  let rest = Math.max(0, e.progress - e.mine - peerPts), left = Math.max(0, e.goal - e.progress); const out = [];
+  for (const t of S.tasks) {
+    if (S.done.has(t.i) || S.peer.has(t.i)) continue;
+    const held = (EV.carry && EV.carry.eid === e.id && EV.carry.t === t) || (EV.mini && EV.mini.eid === e.id && EV.mini.t === t);
+    if (!held && rest > 0) { rest -= t.amt; continue; }
+    if (left <= 0 && !held) break; left -= t.amt;
+    out.push(t); if (!all && out.length >= 6) break;
+  }
+  return out;
 }
-// 📸 Autos rauschen vorbei: nur die über 50 antippen
-function evGameCop(A, k) {
-  A.innerHTML = `<p class="whint" style="padding-right:52px">${k.hint} <small></small></p><div class="evroad"><i class="evsign">50</i></div><div class="evflash"></div>`;
-  const road = A.querySelector('.evroad'), flash = A.querySelector('.evflash'), cars = []; let acc = 0.4, caught = 0;
+const evLocked = (t) => !!t.role && !evHas(t.role);
+// Wirkung einer Teilaufgabe für mich: Server-Verdopplung (Feuerwehr/Landwirt) oder Spezialrolle (Client, höchstens 5)
+function evAmt(e, t, q) {
+  let a = Math.max(1, Math.round(t.amt * (0.5 + 0.5 * clamp(q))));
+  if (t.dbl && evHas(t.dbl) && !evMyJob(e)) a = Math.min(5, a * 2);
+  return a;
+}
+
+/* ---- Hingehen und erledigen ---- */
+function evGo(e) {
+  if (!e) return; $('place').hidden = true;
+  if (EV.carry && EV.carry.eid === e.id) { const d = EV.carry.t.carry.to; if (evDist(WALK.me, d) < 130) evDeliver(); else { walkTo(d.x, d.y, null); EV.goto = { eid: e.id, dest: true }; } return; }
+  const vis = evVis(e).filter((t) => !evLocked(t)), m = WALK.me;
+  if (!vis.length) { const p = evStand(e); walkTo(p.x, p.y, null); return; }
+  vis.sort((a, b) => evDist(a, m) - evDist(b, m)); evTaskGo(e, vis[0]);
+}
+function evTaskGo(e, t) {
+  if (!e || !t || e.done) return;
+  if (evLocked(t)) { sfx.nope(); toast(`${t.icon} Das ist ein Job für ${EV_ROLES[t.role][3]} – frag dort nach Arbeit!`); return; }
+  if (EV.carry && EV.carry.eid === e.id && EV.carry.t !== t) { toast(`Du hast schon ${EV.carry.t.follow === 'bag' ? 'einen Koffer' : 'wen'} dabei – zuerst abliefern!`); evGo(e); return; }
+  if (evDist(WALK.me, t) < 140) { evAct(e, t); return; }
+  walkTo(t.x, t.y, null); EV.goto = { eid: e.id, t }; sfx.pop();
+}
+function evAct(e, t) {
+  EV.goto = null; if (WK.on && !EV.mini) closeWork();
+  if (EV.carry && EV.carry.t === t) { evGo(e); return; }
+  const role = t.dbl && evHas(t.dbl) ? EV_ROLES[t.dbl][2] : evMyJob(e) ? EV_KIND[e.kind].job : '';
+  evMini(e, t, role ? `⭐ Als ${role} zählt das doppelt!` : '');
+}
+function evDeliver() {
+  const C = EV.carry; if (!C) return; const e = evById(C.eid); EV.carry = null; EV.goto = null; if (!e || e.done) return;
+  const S = evSub(e); S.done.add(C.t.i); evHelp(e, C.t, evAmt(e, C.t, C.q)); sfx.goal(); toast(`${C.t.carry.icon} ${pick(C.t.carry.ok)}`);
+}
+
+/* ---- Minispiele: Engine aus 63_work.js (taskTap, taskMilk, taskBlaze …) im Arbeitsfenster, Abrechnung aber über event_help ---- */
+// finishTask/closeWork werden umhüllt: läuft gerade ein Ereignis-Minispiel (EV.mini), geht das Ergebnis an evMiniEnd statt an work_task.
+let evFinishOrig = null, evCloseOrig = null;
+function evMiniHook() {
+  if (evFinishOrig) return; evFinishOrig = finishTask; evCloseOrig = closeWork;
+  finishTask = function (q, note) { return EV.mini ? evMiniEnd(q, note) : evFinishOrig(q, note); }; // eslint-disable-line no-func-assign
+  closeWork = function (msg) { if (EV.mini) { evMiniClose(); return; } return evCloseOrig(msg); }; // eslint-disable-line no-func-assign
+}
+const EV_ENGINE = () => ({ tap: taskTap, gauge: taskGauge, order: taskOrder, pick: taskPick, timing: taskMilk, stack: taskStack, blaze: taskBlaze, seq: taskChain, steps: taskSteps, gassi: taskGassi, catch: taskCatch, mash: taskMash, radar: evTaskRadar, ask: evTaskAsk });
+function evMini(e, t, note) {
+  evMiniHook(); if (WK.on) closeWork();
+  const fn = EV_ENGINE()[t.mini.t]; if (!fn) return;
+  EV.mini = { eid: e.id, t }; WK.on = true; WK.seq = (WK.seq || 0) + 1; WK.busy = false; WK.task = t.mini; clearInterval(WK.timer); clearInterval(WK.anim);
+  const A = $('workArea'); A.innerHTML = ''; $('workTitle').textContent = `${t.icon} ${t.mini.title}`; $('workRes').textContent = note || ''; $('workStop').textContent = 'Zurück';
+  $('work').classList.add('evmode'); $('work').hidden = false;
+  try { fn(t.mini, A); } catch (err) { evErr(err); evMiniClose(); }
+}
+function evMiniEnd(q, note) {
+  const M = EV.mini; if (!M || WK.busy) return; WK.busy = true; const seq = WK.seq; clearInterval(WK.timer); clearInterval(WK.anim);
+  $('workArea').querySelectorAll('button').forEach((b) => { b.disabled = true; });
+  q = clamp(q); const e = evById(M.eid), t = M.t, stars = q >= 0.9 ? '⭐⭐⭐' : q >= 0.65 ? '⭐⭐' : q >= 0.35 ? '⭐' : '😬';
+  let msg = `${stars} ${note || ''}`;
+  if (!e || e.done) msg += ' · Einsatz ist schon vorbei.';
+  else if (q < 0.3) { msg += ' · Nochmal probieren!'; sfx.nope(); }
+  else if (t.carry) { EV.carry = { eid: e.id, t, q, x: t.x, y: t.y }; msg += ` · ${t.carry.icon} Jetzt: ${t.carry.label}!`; sfx.pop(); }
+  else { evSub(e).done.add(t.i); const a = evAmt(e, t, q); evHelp(e, t, a); msg += ` · ${pick(t.ok || ['Erledigt!'])}`; }
+  $('workRes').textContent = msg;
+  setTimeout(() => { if (EV.mini && WK.seq === seq) { evMiniClose(); if (EV.carry && EV.carry.t === t) toast(`${t.carry.icon} ${t.carry.title || t.carry.label} – folge dem Pfeil!`); } }, q < 0.3 ? 1500 : 1300);
+}
+function evMiniClose() {
+  if (!EV.mini) return; EV.mini = null; clearInterval(WK.timer); clearInterval(WK.anim); WK.on = false; WK.busy = false;
+  const w = $('work'); if (w) { w.hidden = true; w.classList.remove('evmode'); } const b = $('workStop'); if (b) b.textContent = 'Feierabend';
+}
+// Engine-Erweiterung 1: Radar – Autos rauschen vorbei, nur die über 50 antippen (gleiche Regeln wie die 63_work-Aufgaben: bar() + finishTask)
+function evTaskRadar(d, A) {
+  A.innerHTML = '<p class="whint" style="padding-right:52px">50er-Zone! Nur Raser antippen – nicht den Pfarrer. <small></small></p><div class="evroad"><i class="evsign">50</i></div><div class="evflash"></div>';
+  const road = A.querySelector('.evroad'), flash = A.querySelector('.evflash'), msg = A.querySelector('.whint small'), cars = []; let acc = 0.3, caught = 0, wrong = 0;
   const spawn = () => {
     const fast = Math.random() < 0.55, v = fast ? 56 + Math.floor(Math.random() * 44) : 38 + Math.floor(Math.random() * 13), lane = Math.floor(Math.random() * 3);
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'evcar'; b.innerHTML = `<span>${pick(['🚗', '🚙', '🏎️', '🚕', '🛻'])}</span><small>${v}</small>`;
-    const c = { b, x: -18, v, fast, sp: 18 + v * 0.35, hit: false }; b.style.top = (14 + lane * 30) + '%'; b.style.left = c.x + '%';
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'evcar'; b.innerHTML = `<span>${pick(['🚗', '🚙', '🏎️', '🚕', '🛻', '🚜'])}</span><small>${v}</small>`;
+    const c = { b, x: -18, fast, sp: 18 + v * 0.35, hit: false }; b.style.top = (14 + lane * 30) + '%'; b.style.left = c.x + '%';
     b.addEventListener('click', () => {
-      if (c.hit) return; c.hit = true; b.classList.add('ok'); flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
-      if (c.fast) { caught++; evScore(1, `Geblitzt mit ${v}! ${Math.round((v - 50) * 2.5 + 20)} € ${pick(['fürs Feuerwehrfest', 'für neue Blumentröge', 'für den Dorfbrunnen', 'für Resis neues Halsband', 'für die Ortstafel'])}.`); }
-      else evScore(-1, pick([`Der Pfarrer fuhr brav ${v}. Peinlich!`, `Oma Gerti mit ${v} – Entschuldigung, Gerti!`, `${v} km/h – das war der Bürgermeister. Ups.`]));
-      A.querySelector('small').textContent = `(${caught} erwischt)`;
+      if (c.hit || WK.busy) return; c.hit = true; b.classList.add('ok'); flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+      if (c.fast) { caught++; sfx.pop(); msg.textContent = `(${caught}/5) Geblitzt mit ${v}!`; if (caught >= 5) finishTask(Math.max(0.3, 1 - wrong * 0.15), wrong ? `${wrong}× den Falschen geblitzt` : 'Adleraugen!'); }
+      else { wrong++; sfx.nope(); msg.textContent = pick([`Der Pfarrer fuhr brav ${v}. Peinlich!`, `Oma Gerti mit ${v} – Entschuldigung, Gerti!`, `${v} km/h – das war der Bürgermeister. Ups.`]); }
     });
     road.appendChild(b); cars.push(c);
   };
-  return { step(dt) {
-    acc += dt; if (acc > 0.75 + Math.random() * 0.5) { acc = 0; spawn(); }
+  bar(12, () => finishTask(caught / 5 * 0.8 - wrong * 0.1, `${caught} Raser erwischt`));
+  let t0 = performance.now();
+  WK.anim = setInterval(() => {
+    const t = performance.now(), dt = Math.min(0.1, (t - t0) / 1000); t0 = t; if (WK.busy) return;
+    acc += dt; if (acc > 0.7 + Math.random() * 0.5) { acc = 0; spawn(); }
     for (let i = cars.length - 1; i >= 0; i--) { const c = cars[i]; c.x += c.sp * dt; c.b.style.left = c.x + '%'; if (c.x > 108) { c.b.remove(); cars.splice(i, 1); } }
-  } };
+  }, 40);
 }
-// 🐄 Kühe laufen herum: antippen = eingefangen. Die Ziege gehört dem Nachbarn.
-function evGameCow(A, k) {
-  A.innerHTML = `<p class="whint">${k.hint} <small></small></p>`; A.classList.add('evmeadow');
-  const herd = []; let caught = 0;
-  const place = (c) => { c.x = 10 + Math.random() * 80; c.y = 30 + Math.random() * 60; c.tx = c.x; c.ty = c.y; c.goat = !herd.some((h) => h !== c && h.goat) && Math.random() < 0.25; c.life = c.goat ? 2.5 : 0; c.b.textContent = c.goat ? '🐐' : '🐄'; c.b.classList.remove('ok'); c.away = 0; };
-  for (let i = 0; i < 4; i++) {
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'wtap'; const c = { b }; herd.push(c); place(c);
-    b.addEventListener('click', () => {
-      if (c.away > 0) return;
-      if (c.goat) { evScore(0, pick(['Mäh! Das ist die Ziege vom Nachbarn.', 'Die Ziege frisst dir den Schuhbandl an.'])); place(c); return; }
-      caught++; c.away = 0.7; b.classList.add('ok'); evScore(1, caught % 4 === 0 ? pick(['Muh! Ab in den Stall.', 'Die Resi lässt sich nur mit Heu überreden.', 'Eingefangen – fast elegant.']) : '');
-      A.querySelector('small').textContent = `(${caught} eingefangen)`;
-    });
-    A.appendChild(b);
-  }
-  return { step(dt) {
-    herd.forEach((c) => {
-      if (c.away > 0) { c.away -= dt; if (c.away <= 0) place(c); }
-      if (c.goat && (c.life -= dt) <= 0) place(c); // die Ziege hüpft wieder zum Nachbarn
-      const dx = c.tx - c.x, dy = c.ty - c.y, d = Math.hypot(dx, dy);
-      if (d < 2) { c.tx = 10 + Math.random() * 80; c.ty = 30 + Math.random() * 60; } else { const s = Math.min(d, 26 * dt); c.x += dx / d * s; c.y += dy / d * s; }
-      c.b.style.left = c.x + '%'; c.b.style.top = c.y + '%'; c.b.style.transform = `translate(-50%, -50%) scaleX(${dx > 0 ? -1 : 1})`;
-    });
-  } };
+// Engine-Erweiterung 2: Fragen – ein Neuer sagt, wohin er will; das richtige Ziel antippen
+function evTaskAsk(d, A) {
+  const opts = [d.right, ...d.opts.filter((o) => o !== d.right).sort(() => Math.random() - 0.5).slice(0, 2)].sort(() => Math.random() - 0.5);
+  A.innerHTML = `<div class="evwho">🧳🧑</div><p class="evsay">„${esc(d.say)}“</p><p class="whint" style="text-align:center">Wo muss ${esc(d.who)} hin? <small></small></p><div class="wgrid">${opts.map((o) => `<button type="button" class="buy wopt">🏠 ${esc(o)}</button>`).join('')}</div>`;
+  let miss = 0; const leftK = bar(10, () => finishTask(0.3, 'Zu lang überlegt – er geht trotzdem mit.'));
+  A.querySelectorAll('.wopt').forEach((b) => b.addEventListener('click', () => {
+    if (WK.busy || b.disabled) return;
+    if (b.textContent === '🏠 ' + d.right) { sfx.pop(); finishTask(Math.max(0.35, 0.6 + 0.4 * leftK() - miss * 0.25), miss ? 'Na also, im zweiten Anlauf.' : 'Genau dorthin!'); }
+    else { miss++; b.disabled = true; sfx.nope(); A.querySelector('.whint small').textContent = pick(['Da wohnt der Pfarrer!', 'Dort ist nur die Kuh Resi.', 'Er schaut dich verwirrt an.']); }
+  }));
 }
 
-/* ---- Banner, Pin, Pfeil (DOM) ---- */
+/* ---- Beiträge an den Server: Warteschlange, höchstens alle 1,15 s (der Server prüft Abstand + Budget nochmal) ---- */
+function evHelp(e, t, amt) {
+  amt = clamp(Math.round(amt), 1, 5); EV.q.push({ eid: e.id, amt, i: t ? t.i : -1, tries: 0 });
+  const m = WALK.me, srv = EV_SRV2[e.kind] && evHas(EV_SRV2[e.kind]) ? 2 : 1;
+  EV.pops.push({ x: t && !t.carry ? t.x : m.x, y: (t && !t.carry ? t.y : m.y) - 120, t: performance.now(), txt: `+${amt * srv}` }); EV.fx.push({ me: true, t: performance.now(), tg: t && !t.carry ? t : null });
+}
+async function evSend() {
+  const it = EV.q[0]; if (!it || EV.sending) return; const e = evById(it.eid);
+  if (!e || e.done) { EV.q.shift(); return; }
+  EV.sending = true; EV.sendT = 0;
+  try {
+    const r = evPut(await evRpc('event_help', { p_event: e.id, p_amount: it.amt })); EV.q.shift();
+    if (typeof presSend === 'function' && PRES.ok) presSend('broadcast', { type: 'broadcast', event: 'evh', payload: { id: ONLINE.sess.uid, e: e.id, t: it.i, a: r ? Number(r.added) || it.amt : it.amt } });
+  } catch (err) {
+    const m = String((err && err.message) || '');
+    if (/no event/.test(m)) { EV.q = EV.q.filter((x) => x.eid !== it.eid); EV.t = 99; }
+    else if (/not active/.test(m)) { sbRpc('ping').catch(() => {}); if (++it.tries > 4) EV.q.shift(); }
+    else if (!/too fast/.test(m) && ++it.tries > 4) EV.q.shift(); // zu schnell / kurz offline: später nochmal
+  }
+  EV.sending = false;
+}
+// Mitspieler hilft gerade: an seiner Figur mitanimieren und genau diese Teilaufgabe bei uns verschwinden lassen
+function evPeerHelp(p) {
+  if (!p || typeof p.id !== 'string') return; const o = PRES.peers[p.id]; if (o) o.evh = performance.now();
+  const e = evById(Number(p.e)); if (!e) { EV.t = Math.max(EV.t, 6); return; } // unbekanntes Ereignis: bald nachfragen
+  const i = Number(p.t), a = clamp(Number(p.a) || 0, 0, 10);
+  if (Number.isInteger(i) && i >= 0 && i < 40) { const S = evSub(e); if (!S.done.has(i) && !(EV.carry && EV.carry.t.i === i && EV.carry.eid === e.id)) S.peer.set(i, (S.peer.get(i) || 0) + a); }
+  if (o) o.evt = Number.isInteger(i) ? evSub(e).tasks[i] : null;
+}
+// Antippen auf der Karte (aus 61_walk.js): Teilaufgabe oder – bei der Blitzer-Aktion – ein vorbeifahrendes Auto
+function evTapAt(x, y) {
+  const e = evCur(); if (!e || !WALK.on) return false;
+  if (e.kind === 'blitzer') {
+    const r = evRadarPt(e), m = WALK.me;
+    for (const c of traffic) {
+      if (c.hidden || Math.hypot(c.x - x, 2 * (c.y - 30 - y)) > 90 || evDist(c, r) > 750) continue;
+      if (c._evhit === e.id) return true;
+      if (evDist(m, r) > 650) { toast('📸 Stell dich zum Dorfbullen an die Straße – von hier siehst du den Tacho nicht!'); return true; }
+      c._evhit = e.id; const v = evCarV(c); EV.flashT = performance.now();
+      if (v > 50) { evHelp(e, null, 1); toast(`📸 Geblitzt mit ${v}! ${pick(['Das Geld geht ans Feuerwehrfest.', 'Dafür gibt’s neue Blumentröge.', 'Resi kriegt ein neues Halsband.'])}`); }
+      else { sfx.nope(); toast(pick([`Der fuhr brav ${v}. Das war der Pfarrer!`, `${v} km/h – Oma Gerti winkt dir freundlich.`, `${v}! Der Mario im Abschleppwagen ist unschuldig.`])); }
+      return true;
+    }
+  }
+  for (const t of evVis(e)) if (Math.hypot(t.x - x, t.y - 40 - y) < 75 || (t.mx != null && Math.hypot(t.mx - x, t.my + 40 - y) < 80)) { evTaskGo(e, t); return true; }
+  return false;
+}
+const evCarV = (c) => { if (!c._evv) { const h = ((c._tid || (c._tid = ++window.__tid)) * 2654435761) >>> 0; c._evv = h % 100 < 55 ? 56 + (h >>> 8) % 40 : 38 + (h >>> 8) % 13; } return c._evv; };
+const evRadarPt = (e) => { const s = evSpot(e), r = s.radar || [evStandUW(e).u, evStandUW(e).w + 75]; return iso(r[0], r[1]); };
+
+/* ---- Banner, Markierungen, Pfeil (DOM) ---- */
 function evUiBuild() {
   if (EV.ui) return EV.ui;
   const st = document.createElement('style');
@@ -4520,122 +4772,149 @@ function evUiBuild() {
 #evBanner .evbar{grid-column:1/-1;height:10px;background:#e6e0cf;border:2px solid #1b1b1b;border-radius:6px;overflow:hidden}#evBanner .evbar i{display:block;height:100%;width:0;background:#3bb36b;transition:width .4s}
 #evBanner button{grid-column:2;grid-row:1/3;font-family:var(--display);font-size:17px;padding:7px 12px 4px;border:3px solid #1b1b1b;border-radius:14px;box-shadow:0 4px 0 #1b1b1b;background:#e63b2e;color:#fff;cursor:pointer}
 #evBanner button.go{background:#3bb36b}#evBanner .evmine{color:#1f7a4a}
-.pin.walkpin.evpin{background:#e63b2e;color:#fff;z-index:2}.pin.walkpin.evpin b{color:#ffd23f}
 .evarrow{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:#e63b2e;border:3px solid #1b1b1b;box-shadow:0 3px 0 #1b1b1b;display:grid;place-items:center;font-size:20px;pointer-events:auto;cursor:pointer;padding:0}
+.evarrow.dest{background:#3bb36b}
 .evarrow i{position:absolute;left:50%;top:50%;width:0;height:0;margin:-8px 0 0 -8px;border:8px solid transparent;border-left:13px solid #1b1b1b}
-#evArea{position:relative;min-height:300px;background:#f3efe2;border:3px solid #1b1b1b;border-radius:18px;padding:10px;touch-action:manipulation;user-select:none;-webkit-user-select:none;overflow:hidden}
-#evArea.evhouse{background:linear-gradient(#f6d9b8,#f3c99a 72%,#8fbf57 72%)}#evArea.evmeadow{background:linear-gradient(#cfe8f7,#e9f3d8 26%,#9fcf66 26%)}
-#evArea .wtap.hot{background:#ffd9c2;animation:evhot .5s ease-in-out infinite alternate}@keyframes evhot{to{box-shadow:0 4px 0 #1b1b1b,0 0 18px #ff7a1a}}
-.evsub{font-weight:800;font-size:13px;color:#5b6270;margin:0 0 6px}.evprog{margin:0 0 10px}.evprog i{background:#e63b2e !important;transition:width .4s}
-.evres{font-weight:800;min-height:1.4em;text-align:center;margin:10px 0 0}
-.evwho{font-size:64px;text-align:center;line-height:1.1}.evsay{font-weight:800;text-align:center;margin:4px 0 10px}
+#work.evmode #workArea{background:#fdf1e4}
 .evroad{position:absolute;left:0;right:0;top:56px;bottom:12px;background:repeating-linear-gradient(90deg,transparent 0 30px,rgba(255,255,255,.55) 30px 52px) 0 33%/100% 4px no-repeat,repeating-linear-gradient(90deg,transparent 0 30px,rgba(255,255,255,.55) 30px 52px) 0 66%/100% 4px no-repeat,#68666c}
 .evsign{position:absolute;right:8px;top:-46px;width:38px;height:38px;border-radius:50%;background:#fff;border:6px solid #d9342b;display:grid;place-items:center;font:normal 17px var(--display);color:#1b1b1b}
 .evcar{position:absolute;transform:translate(-50%,0);font-size:34px;line-height:1;background:none;border:0;padding:2px 4px;cursor:pointer;display:grid;justify-items:center}.evcar small{font:800 12px system-ui,sans-serif;background:#fffdf6;border:2px solid #1b1b1b;border-radius:8px;padding:0 5px;color:#1b1b1b}.evcar span{display:block;transform:scaleX(-1)}.evcar.ok{opacity:.35}
 .evflash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}.evflash.on{animation:evfl .35s ease-out}@keyframes evfl{from{opacity:.9}to{opacity:0}}
-.evdone{display:grid;gap:8px;justify-items:center;text-align:center;padding-top:16px}.evdone b{font-size:56px;line-height:1}.evdone p{margin:0;font-weight:800}.evdone .evmine{font-family:var(--display);font-weight:normal;font-size:22px;color:#1f7a4a}.evdone .big{width:100%;margin-top:8px}`;
+.evwho{font-size:56px;text-align:center;line-height:1.1}.evsay{font-weight:800;text-align:center;margin:4px 0 6px}`;
   document.head.appendChild(st);
   const ban = document.createElement('div'); ban.id = 'evBanner'; ban.hidden = true; ban.innerHTML = '<b></b><span></span><div class="evbar"><i></i></div><button type="button"></button>'; document.body.appendChild(ban);
   ban.querySelector('button').addEventListener('click', () => { const e = evCur(); if (e) evGo(e); else { EV.flash = null; ban.hidden = true; } });
-  const sh = document.createElement('div'); sh.className = 'sheet'; sh.id = 'evSheet'; sh.hidden = true;
-  sh.innerHTML = '<div class="panel" role="dialog" aria-labelledby="evTitle"><div class="panel-head"><h2 id="evTitle">Einsatz</h2><button class="x" id="evClose" type="button">Zurück</button></div><p class="evsub" id="evSub"></p><div class="wtime evprog"><i id="evProg"></i></div><div id="evArea"></div><p class="evres" id="evRes"></p></div>';
-  document.body.appendChild(sh); sh.querySelector('#evClose').addEventListener('click', evClose);
-  const pin = document.createElement('button'); pin.type = 'button'; pin.className = 'pin walkpin evpin'; pin.hidden = true; layer.appendChild(pin);
-  pin.addEventListener('click', () => { const e = evCur(); if (e) evGo(e); });
   const arr = document.createElement('button'); arr.type = 'button'; arr.className = 'evarrow'; arr.hidden = true; arr.innerHTML = '<i></i><span></span>'; layer.appendChild(arr);
   arr.addEventListener('click', () => { const e = evCur(); if (e) evGo(e); });
-  EV.ui = { ban, pin, arr, sh }; return EV.ui;
+  const dest = document.createElement('button'); dest.type = 'button'; dest.className = 'pin walkpin evtask evdest'; dest.hidden = true; layer.appendChild(dest);
+  dest.addEventListener('click', () => { const e = evCur(); if (e) evGo(e); });
+  EV.ui = { ban, arr, dest }; return EV.ui;
 }
 const mmss = (s) => { s = Math.max(0, Math.ceil(s)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
 function evSet(el, prop, v) { if (el['_' + prop] !== v) { el['_' + prop] = v; if (prop === 'html') el.innerHTML = v; else if (prop === 'hidden') el.hidden = v; else if (prop === 'cls') el.className = v; else if (prop === 'w') el.style.width = v; else el.textContent = v; } }
-function evUi(cur, near) {
+function evMarkers(cur, vis) {
+  const seen = {}, m = WALK.me;
+  const list = cur && !EV.mini ? vis.filter((t) => !(EV.carry && EV.carry.t === t) && (!evLocked(t) || evDist(m, t) < 500)).sort((a, b) => evDist(a, m) - evDist(b, m)).slice(0, 4) : [];
+  for (const t of list) {
+    const id = cur.id + ':' + t.i; seen[id] = 1; let el = EV.mk[id];
+    if (!el) { el = document.createElement('button'); el.type = 'button'; el.className = 'pin walkpin evtask'; layer.appendChild(el); EV.mk[id] = el; el.addEventListener('click', () => { const e = evById(el._e), tt = e && evSub(e).tasks[el._i]; if (tt) evTaskGo(e, tt); }); }
+    el._e = cur.id; el._i = t.i; const lock = evLocked(t), x2 = !lock && t.dbl && evHas(t.dbl) && !evMyJob(cur), near = evDist(m, t) < 140;
+    evSet(el, 'html', `<b>${lock ? '🔒' : t.icon} ${esc(t.label)}${x2 ? ' ⭐×2' : ''}</b>`);
+    evSet(el, 'cls', `pin walkpin evtask${lock ? ' lock' : ''}${x2 ? ' x2' : ''}${near ? ' near' : ''}`); evSet(el, 'hidden', false);
+    const s = t.mx != null ? toScreen(t.mx, t.my) : toScreen(t.x, t.y - (t.look != null ? 150 : t.img ? 120 : 95)); setPos(el, s.x, s.y);
+  }
+  for (const id in EV.mk) if (!seen[id]) { EV.mk[id].remove(); delete EV.mk[id]; }
+}
+function evUi(cur, vis) {
   const U = evUiBuild(), now = performance.now(), fl = EV.flash && EV.flash.until > now ? EV.flash : null;
   const b = U.ban, B = b.querySelector('b'), S = b.querySelector('span'), I = b.querySelector('.evbar i'), btn = b.querySelector('button');
+  const C = EV.carry && cur && EV.carry.eid === cur.id ? EV.carry : null, m = WALK.me;
+  const nearT = cur && !C ? vis.find((t) => !evLocked(t) && evDist(m, t) < 140) : null; EV.near = nearT;
   if (cur) {
-    const k = EV_KIND[cur.kind], s = evSpot(cur), pct = Math.round((1 - evK(cur)) * 100), left = evLeft(cur);
-    evSet(b, 'cls', k.cls); evSet(B, 'text', `${k.icon} ${s.title}`);
-    evSet(S, 'text', `${left > 0 ? `Noch ${mmss(left)}` : 'Zeit um …'} · ${pct} % ${k.part}${cur.helpers ? ` · ${cur.helpers} helfen` : ''}${cur.mine ? ` · du: ${cur.mine}` : ''}`);
-    evSet(I, 'w', pct + '%'); evSet(btn, 'text', near ? 'Helfen!' : 'Hin!'); btn.classList.toggle('go', !!near); evSet(btn, 'hidden', false);
-    evSet(b, 'hidden', false);
+    const k = EV_KIND[cur.kind], s = evSpot(cur), pct = Math.round((1 - evK(cur)) * 100), left = evLeft(cur), open = evVis(cur, true).length;
+    evSet(b, 'cls', k.cls); evSet(B, 'text', C ? `${C.t.carry.icon} ${C.t.carry.title || C.t.carry.label}!` : `${k.icon} ${s.title}`);
+    evSet(S, 'text', `${left > 0 ? `Noch ${mmss(left)}` : 'Zeit um …'} · ${pct} % ${k.part}${open ? ` · ${open} Aufgaben` : ''}${cur.helpers > 1 ? ` · ${cur.helpers} helfen` : ''}${evMyJob(cur) ? ` · ⭐ ${k.job}: alles ×2` : ''}`);
+    evSet(I, 'w', pct + '%'); evSet(btn, 'text', C ? (evDist(m, C.t.carry.to) < 130 ? 'Abgeben!' : 'Hin!') : nearT ? 'Los!' : 'Hin!'); btn.classList.toggle('go', !!(nearT || C)); evSet(btn, 'hidden', false);
+    evSet(b, 'hidden', !!EV.mini);
   } else if (fl) {
     evSet(b, 'cls', 'res'); evSet(B, 'text', fl.head); evSet(S, 'html', fl.mine ? `<em class="evmine">${esc(fl.mine)}</em>${esc(fl.by)}` : esc(fl.by)); evSet(I, 'w', fl.ok ? '100%' : '0%');
     evSet(btn, 'text', 'OK'); btn.classList.add('go'); evSet(btn, 'hidden', false); evSet(b, 'hidden', false);
   } else evSet(b, 'hidden', true);
-  // Pin über dem Standplatz + Pfeil am Rand, wenn er außerhalb des Bildschirms liegt
-  if (cur && !EV.open) {
-    const k = EV_KIND[cur.kind], p = evStand(cur), sp = toScreen(p.x, p.y - 150);
-    evSet(U.pin, 'html', `<b>${k.icon} ${near ? 'Hier helfen!' : 'Einsatz!'}</b><span>${esc(evSpot(cur).name)}</span>`); setPos(U.pin, clamp(sp.x, 95, VW - 95), sp.y);
-    const m = 34, top = 96, bot = 120, off = sp.x < m || sp.x > VW - m || sp.y < top + 30 || sp.y > VH - bot;
+  evMarkers(cur, vis);
+  // Ziel beim Tragen/Führen
+  if (C) { const d = C.t.carry.to, s = toScreen(d.x, d.y - 150); evSet(U.dest, 'html', `<b>${C.t.carry.icon} ${esc(C.t.carry.label)}</b><span>hier abgeben</span>`); setPos(U.dest, s.x, s.y); evSet(U.dest, 'hidden', false); }
+  else evSet(U.dest, 'hidden', true);
+  // Pfeil am Rand zum nächsten Ziel, wenn es außerhalb des Bildschirms liegt
+  let tg = null;
+  if (cur && !EV.mini) { if (C) tg = C.t.carry.to; else { let bd = 1e9; for (const t of vis) { if (evLocked(t)) continue; const d = evDist(m, t); if (d < bd) { bd = d; tg = t; } } if (!tg) tg = evStand(cur); } }
+  if (tg) {
+    const sp = toScreen(tg.x, tg.y - 100), mg = 34, top = 140, bot = 130, off = sp.x < mg || sp.x > VW - mg || sp.y < top || sp.y > VH - bot;
     if (off) {
-      const cx = VW / 2, cy = (top + VH - bot) / 2, dx = sp.x - cx, dy = sp.y - cy, f = Math.min((VW / 2 - m) / Math.abs(dx || 1e-6), ((VH - bot - top) / 2 - 10) / Math.abs(dy || 1e-6));
-      setPos(U.arr, cx + dx * f, cy + dy * f); const a = Math.atan2(dy, dx); U.arr.firstChild.style.transform = `rotate(${a}rad) translateX(26px)`;
-      evSet(U.arr.lastChild, 'text', k.icon); evSet(U.arr, 'hidden', false); evSet(U.pin, 'hidden', true);
-    } else { evSet(U.arr, 'hidden', true); evSet(U.pin, 'hidden', false); }
-  } else { evSet(U.pin, 'hidden', true); evSet(U.arr, 'hidden', true); }
-  // Fenster: gemeinsamer Fortschritt + Zeit
-  if (EV.open) {
-    const e = evById(EV.open);
-    if (e) { evSet($('evProg'), 'w', Math.round((1 - evK(e)) * 100) + '%'); if (!e.done && EV.game) evSet($('evSub'), 'text', `${evSpot(e).title} ${Math.round((1 - evK(e)) * 100)} % geschafft · noch ${mmss(evLeft(e))}${e.helpers > 1 ? ` · ${e.helpers} helfen mit` : ''}`); }
-  }
+      const cx = VW / 2, cy = (top + VH - bot) / 2, dx = sp.x - cx, dy = sp.y - cy, f = Math.min((VW / 2 - mg) / Math.abs(dx || 1e-6), ((VH - bot - top) / 2) / Math.abs(dy || 1e-6));
+      setPos(U.arr, cx + dx * f, cy + dy * f); U.arr.firstChild.style.transform = `rotate(${Math.atan2(dy, dx)}rad) translateX(26px)`;
+      evSet(U.arr.lastChild, 'text', C ? C.t.carry.icon : tg.icon || EV_KIND[cur.kind].icon); evSet(U.arr, 'cls', C ? 'evarrow dest' : 'evarrow'); evSet(U.arr, 'hidden', false);
+    } else evSet(U.arr, 'hidden', true);
+  } else evSet(U.arr, 'hidden', true);
 }
-function evHideUi() { const U = EV.ui; if (!U) return; evSet(U.ban, 'hidden', true); evSet(U.pin, 'hidden', true); evSet(U.arr, 'hidden', true); }
+function evHideUi() { const U = EV.ui; if (!U) return; evSet(U.ban, 'hidden', true); evSet(U.arr, 'hidden', true); evSet(U.dest, 'hidden', true); for (const id in EV.mk) { EV.mk[id].remove(); delete EV.mk[id]; } }
 function evErr(err) { if (EV.errs++ < 5) console.warn('[Schrauberstadt] Ereignis', err); }
 
 /* ---- Takt (aus 70_loop.js) ---- */
 function evTick(dt) {
-  if (!WALK.on || !ONLINE.sess) { if (EV.open) evClose(); evHideUi(); EV.goto = null; return; }
-  EV.t += dt; const cur = evCur(), near = !!(cur && evNear(cur));
-  const every = EV.back || (cur ? (EV.open || near ? 4 : 8) : 10);
+  if (!WALK.on || !ONLINE.sess) { evMiniClose(); evHideUi(); EV.goto = null; EV.carry = null; return; }
+  EV.t += dt; const cur = evCur(), vis = evVis(cur);
+  const every = EV.back || (cur ? (EV.mini || EV.carry || (cur && evNear(cur)) ? 4 : 8) : 10);
   if (EV.t > every || (cur && evLeft(cur) < -1 && EV.t > 2)) evPoll();
   for (const e of EV.list) e.sp = e.sp == null ? e.progress : e.sp + (e.progress - e.sp) * Math.min(1, dt * 3);
-  if (cur && EV.goto === cur.id && !WALK.path.length) { EV.goto = null; if (near) evOpen(cur); }
-  if (EV.goto && !cur) EV.goto = null;
-  EV.sendT += dt; if (EV.open && EV.pend > 0 && !EV.sending && EV.sendT >= 1.2) evSend();
-  if (EV.open && !evById(EV.open)) evClose();
-  evCowsTick(dt, cur);
-  evUi(cur, near);
+  // angekommen?
+  const G = EV.goto;
+  if (G && (!cur || cur.id !== G.eid)) EV.goto = null;
+  else if (G && !WALK.path.length) {
+    if (G.dest) { EV.goto = null; if (EV.carry && evDist(WALK.me, EV.carry.t.carry.to) < 130) evDeliver(); }
+    else { EV.goto = null; const all = evVis(cur, true); if (!all.includes(G.t)) toast('Schon erledigt – da war wer schneller! 😅'); else if (evDist(WALK.me, G.t) < 150) evAct(cur, G.t); }
+  }
+  // Tragen/Führen: folgt dicht hinter mir (damit Autos, die für mich halten, auch dafür halten); am Ziel automatisch abgeben
+  const C = EV.carry;
+  if (C) {
+    const m = WALK.me, back = m.flip ? -1 : 1, tx = m.x + back * 30, ty = m.y + 6, k = Math.min(1, dt * 8); C.x += (tx - C.x) * k; C.y += (ty - C.y) * k;
+    if (!WALK.path.length && evDist(m, C.t.carry.to) < 130) evDeliver();
+  }
+  EV.sendT += dt; if (EV.q.length && !EV.sending && EV.sendT >= 1.15) evSend();
+  if (EV.mini && !evById(EV.mini.eid) && !WK.busy) evMiniClose();
+  if (EV.mini && !$('work').classList.contains('evmode')) EV.mini = null; // jemand hat das Fenster für normale Arbeit übernommen
+  let sb = null, sd = 330; for (const t of vis) { if (!t.say && t.ty !== 'hurt') continue; const d = evDist(WALK.me, t); if (d < sd) { sd = d; sb = t; } } EV.sayT = sb;
+  evUi(cur, vis);
 }
 
-/* ---- Karte: Flammen, Busse, Dorfbulle mit Radar, Kühe (aus 60_draw.js, nach Y sortiert mit Autos und Leuten) ---- */
+/* ---- Karte: Flammen, RTW, Verletzte, Gaffer, Busse, Neue, Dorfbulle, Raser, Kühe (aus 60_draw.js, nach Y sortiert) ---- */
 function evEnts(ents) {
   try {
     const now = performance.now(), L = EV.ents; let n = 0;
     const add = (x, y, fn, a, b) => { const o = L[n] || (L[n] = { evd: evDrawEnt }); n++; o.x = x; o.y = y; o.fn = fn; o.a = a; o.b = b; ents.push(o); };
     for (const e of EV.list) {
       const fade = e.done ? 1 - (now - (e.doneAt || now)) / 12000 : 1; if (fade <= 0) continue;
-      const s = evSpot(e), k = e.done ? (e.outcome === 'ok' ? 0 : 1) : evK(e);
-      if (e.kind === 'brand' && s.fire) add(s.fire[0], s.fire[1] + 230, evDrawFire, e, { k, fade });
-      else if (e.kind === 'ansturm') {
-        const sg = iso(1330, -250); add(sg.x, sg.y, evDrawSign, e);
+      const s = evSpot(e), k = e.done ? (e.outcome === 'ok' ? 0 : 1) : evK(e), vis = evVis(e), S = evSub(e);
+      if (e.kind === 'brand' && s.fire) {
+        const sites = [0, 1, 2].filter((j) => vis.some((t) => t.site === j));
+        add(s.fire[0], s.fire[1] + 230, evDrawFire, e, { k, fade, sites });
+        if (S.rtw && !S.rtw.own && !e.done) add(S.rtw.x, S.rtw.y, evDrawRtw, e);
+      } else if (e.kind === 'ansturm') {
+        if (TOWN_EP < 6) { const sg = iso(1330, -250); add(sg.x, sg.y, evDrawSign, e); } // ab Folge 6 steht das echte Ortsschild
         [[1000, -720], [1230, -700]].forEach(([u, w], i) => { const p = iso(u, w); if (!e.done || i === 0) add(p.x, p.y, evDrawBus, e, { i, fade }); });
-        if (!e.done) { const m = Math.ceil(9 * k); for (let i = 0; i < m; i++) { const p = iso(1250 + (i % 3) * 55 + Math.floor(i / 3) * 30, -470 + Math.floor(i / 3) * 45 - (i % 2) * 15); add(p.x, p.y, evDrawGuest, e, i); } }
-      } else if (e.kind === 'blitzer' && !e.done) { const r = s.radar || [s.u, s.w + 75], p = iso(r[0], r[1]); add(p.x, p.y, evDrawRadar, e); const q = iso(r[0] + 60, r[1] + 25); add(q.x, q.y, evDrawCop, e); }
-      else if (e.kind === 'kuehe' && !e.done) EV.cows.forEach((c, i) => { if (i < Math.ceil(EV.cows.length * k)) add(c.x, c.y, evDrawCow, e, c); });
+      } else if (e.kind === 'blitzer' && !e.done) { const r = evRadarPt(e); add(r.x, r.y, evDrawRadar, e); const q = { x: r.x + 70, y: r.y + 10 }; add(q.x, q.y, evDrawCop, e); }
+      for (const t of vis) if (!(EV.carry && EV.carry.t === t)) { if (t.carry || t.look != null || t.img || t.ty === 'hyd' || t.ty === 'bag' || t.ty === 'fence') add(t.x, t.y, evDrawTask, e, t); }
     }
-    add(0, 1e9, evDrawFx, null); // Wasserstrahlen & Co. obenauf
+    if (EV.carry) add(EV.carry.x, EV.carry.y, evDrawTask, null, EV.carry.t);
+    add(0, 1e9, evDrawFx, null); // Wasserstrahlen, Punkte & Co. obenauf
   } catch (err) { evErr(err); }
 }
 function evDrawEnt(o, now) { try { o.fn(o, now); } catch (err) { evErr(err); } }
 function evDrawFire(o, now) {
-  const { k, fade } = o.b, f0 = evSpot(o.a).fire, s = toScreen(f0[0], f0[1]), z = view.s;
+  const { k, fade, sites } = o.b, f0 = evSpot(o.a).fire, s = toScreen(f0[0], f0[1]), z = view.s;
   ctx.save();
-  if (k > 0.02 && !o.a.done) {
-    const R = (120 + 160 * k) * z, g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, R);
-    g.addColorStop(0, `rgba(255,170,60,${0.55 * fade})`); g.addColorStop(1, 'rgba(255,90,20,0)'); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(s.x - R, s.y - R, R * 2, R * 2); ctx.globalCompositeOperation = 'source-over';
-    const n = 2 + Math.ceil(5 * k);
-    for (let i = 0; i < n; i++) {
-      const ph = now / 110 + i * 1.9, c = (i - (n - 1) / 2), off = c * 40 * z * (0.6 + k * 0.6), h = (60 + 90 * k) * (1.15 - Math.abs(c) / n * 0.8 + 0.25 * Math.sin(i * 7.3)) * z + 22 * Math.sin(ph) * z, wdt = (18 + 12 * k) * z, bx = s.x + off, by = s.y + 30 * z - Math.abs(off) * 0.25;
-      const fg = ctx.createLinearGradient(bx, by, bx, by - h); fg.addColorStop(0, 'rgba(255,240,140,.95)'); fg.addColorStop(0.45, 'rgba(255,140,30,.9)'); fg.addColorStop(1, 'rgba(220,40,20,0)');
-      ctx.fillStyle = fg; ctx.beginPath(); ctx.moveTo(bx - wdt, by); ctx.quadraticCurveTo(bx - wdt * 1.1, by - h * 0.5, bx + Math.sin(ph) * wdt * 0.6, by - h); ctx.quadraticCurveTo(bx + wdt * 1.1, by - h * 0.5, bx + wdt, by); ctx.closePath(); ctx.fill();
+  if (k > 0.02 && !o.a.done && sites.length) {
+    const R = (110 + 150 * k) * z, g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, R);
+    g.addColorStop(0, `rgba(255,170,60,${0.5 * fade})`); g.addColorStop(1, 'rgba(255,90,20,0)'); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(s.x - R, s.y - R, R * 2, R * 2); ctx.globalCompositeOperation = 'source-over';
+    for (const j of sites) {
+      const [ox, oy] = EV_FLAME_OFF[j], n = 2 + Math.ceil(3 * k), cx = s.x + ox * z, cy = s.y + oy * z;
+      for (let i = 0; i < n; i++) {
+        const ph = now / 110 + i * 1.9 + j * 3, c = (i - (n - 1) / 2), off = c * 26 * z, h = (45 + 75 * k) * (1.1 - Math.abs(c) / n * 0.7 + 0.25 * Math.sin(i * 7.3 + j)) * z + 16 * Math.sin(ph) * z, wdt = (14 + 9 * k) * z, bx = cx + off, by = cy + 22 * z - Math.abs(off) * 0.25;
+        const fg = ctx.createLinearGradient(bx, by, bx, by - h); fg.addColorStop(0, 'rgba(255,240,140,.95)'); fg.addColorStop(0.45, 'rgba(255,140,30,.9)'); fg.addColorStop(1, 'rgba(220,40,20,0)');
+        ctx.fillStyle = fg; ctx.beginPath(); ctx.moveTo(bx - wdt, by); ctx.quadraticCurveTo(bx - wdt * 1.1, by - h * 0.5, bx + Math.sin(ph) * wdt * 0.6, by - h); ctx.quadraticCurveTo(bx + wdt * 1.1, by - h * 0.5, bx + wdt, by); ctx.closePath(); ctx.fill();
+      }
     }
   }
   // Rauch (nach dem Löschen weißer Dampf, sonst dunkel) – steigt auf und verblasst
-  const steam = o.a.done && o.a.outcome === 'ok';
+  const steam = o.a.done ? o.a.outcome === 'ok' : !sites.length;
   for (let i = 0; i < 6; i++) {
     const t = (now / 1000 * 0.3 + i / 6) % 1, r = (24 + 70 * t) * z * (0.6 + 0.6 * Math.max(k, steam ? 0.6 : 0)), a = (1 - t) * 0.5 * fade * (steam ? 1 : 0.4 + 0.6 * k);
     ctx.fillStyle = steam ? `rgba(240,244,250,${a})` : `rgba(70,66,70,${a})`; ctx.beginPath(); ctx.arc(s.x + Math.sin(i * 2.3 + t * 3) * 30 * z + t * 40 * z, s.y - 70 * z - t * 260 * z, r, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
+}
+function evDrawRtw(o, now) {
+  const img = IMG.v_rtw; if (!img) return; shadow(o.x, o.y + 4, 80, 30); drawSprite(img, o.x, o.y, 190, false, 1, 0.7);
+  if (Math.floor(now / 350) % 2) { const s = toScreen(o.x - 10, o.y - 78); ctx.save(); ctx.fillStyle = 'rgba(80,150,255,.55)'; ctx.beginPath(); ctx.arc(s.x, s.y, 16 * view.s + 3, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
 }
 function evDrawSign(o) {
   const s = toScreen(o.x, o.y), z = view.s; ctx.save();
@@ -4649,19 +4928,38 @@ function evDrawBus(o, now) {
   const dx = (1 - eob(clamp(arrive))) * 260; shadow(o.x - dx, o.y + 6, 170, 60);
   drawSprite(img, o.x - dx, o.y - (e.done ? 0 : Math.abs(Math.sin(now / 400 + i)) * 2), 380, false, clamp(fade * 1.5) * clamp(arrive * 3));
 }
-const EV_GUEST = [[0, 1, 1], [40, 1.2, 1.1], [200, 1.1, 1], [300, 1.2, 1.05], [120, 1, 0.9]];
-function evDrawGuest(o, now) {
-  if (!IMG.kunde) return; const i = o.b, bob = Math.abs(Math.sin(now / 260 + i * 1.3)) * 4, t = EV_GUEST[i % EV_GUEST.length];
-  shadow(o.x, o.y, 18, 8); drawSprite(tinted('kunde', t[0], t[1], t[2]), o.x, o.y - bob, 44, i % 2 === 1, 1, 0.97);
-  if (i < 3) { const s = toScreen(o.x + 22, o.y - 6); ctx.save(); ctx.font = `${Math.max(9, 22 * view.s)}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('🧳', s.x, s.y); ctx.restore(); }
+const EV_LOOK = [[0, 1, 1], [40, 1.2, 1.1], [200, 1.1, 1], [300, 1.2, 1.05], [120, 1, 0.9]];
+const evEmoji = (x, y, txt, px) => { const s = toScreen(x, y); ctx.save(); ctx.font = `${Math.max(10, px * view.s)}px system-ui`; ctx.textAlign = 'center'; ctx.fillText(txt, s.x, s.y); ctx.restore(); };
+function evSay(x, y, txt) { // kleine Sprechblase (nur in der Nähe, sonst wird’s zu voll)
+  const s = toScreen(x, y); ctx.save(); ctx.font = '800 11px system-ui, sans-serif'; ctx.textAlign = 'center'; const t = txt.length > 34 ? txt.slice(0, 33) + '…' : txt, w = ctx.measureText(t).width + 14;
+  ctx.fillStyle = 'rgba(255,253,246,.96)'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(s.x - w / 2, s.y - 20, w, 20, 9) : ctx.rect(s.x - w / 2, s.y - 20, w, 20); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#1b1b1b'; ctx.fillText(t, s.x, s.y - 6); ctx.restore();
+}
+function evDrawTask(o, now) {
+  const t = o.b, z = view.s, carried = !!(EV.carry && EV.carry.t === t), bob = Math.abs(Math.sin(now / 260 + t.i * 1.3)) * (carried ? 6 : 3), near = EV.sayT === t;
+  if (t.img) { const img = EV.img[t.img] || IMG[t.img]; if (!img) return; shadow(o.x, o.y, 34, 13); const fl = carried ? !WALK.me.flip : Math.sin(now / 2400 + t.i) > 0; drawSprite(img, o.x + (carried ? 0 : Math.sin(now / 1700 + t.i) * 8), o.y - bob, t.img === 'an_goat' ? 66 : 112, fl, 1, 0.85); if (!carried && near) evEmoji(o.x, o.y - 95, t.ty === 'goat' ? '😈' : '❓', 22); return; }
+  if (t.ty === 'hyd') { const s = toScreen(o.x, o.y); ctx.save(); ctx.fillStyle = '#d9342b'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = Math.max(1, 2 * z); ctx.beginPath(); ctx.rect(s.x - 9 * z, s.y - 40 * z, 18 * z, 40 * z); ctx.fill(); ctx.stroke(); ctx.beginPath(); ctx.arc(s.x, s.y - 40 * z, 11 * z, Math.PI, 0); ctx.fill(); ctx.stroke(); ctx.fillRect(s.x - 15 * z, s.y - 30 * z, 30 * z, 8 * z); ctx.restore(); return; }
+  if (t.ty === 'fence') { evEmoji(o.x, o.y, '🪵🪵', 30); return; }
+  if (t.ty === 'bag') { evEmoji(o.x + (carried ? 18 : 0), o.y - (carried ? 40 : 0), carried ? '🧳' : '🧳🧳', carried ? 26 : 30); return; }
+  if (!IMG.kunde) return; const lk = EV_LOOK[(t.look || 0) % EV_LOOK.length];
+  if (t.ty === 'hurt' && !carried) { // liegt am Gehsteig
+    const s = toScreen(o.x, o.y), img = tinted('kunde', lk[0], lk[1], lk[2]), w = 46 * z, h = img.height * (w / img.width); shadow(o.x, o.y, 30, 10);
+    ctx.save(); ctx.translate(s.x, s.y - 6 * z); ctx.rotate(-1.45); ctx.drawImage(img, -w / 2, -h * 0.75, w, h); ctx.restore();
+    evEmoji(o.x + 10, o.y - 40, Math.floor(now / 900) % 2 ? '🤕' : '😵‍💫', 24); if (near) evSay(o.x, o.y - 70, ['Aua … mein Knie!', 'Hab nur Rauch geschluckt.', 'Ist mein Handy ok?'][t.i % 3]); return;
+  }
+  shadow(o.x, o.y, 18, 8); drawSprite(tinted('kunde', lk[0], lk[1], lk[2]), o.x, o.y - bob, 44, carried ? !WALK.me.flip : t.i % 2 === 1, 1, 0.97);
+  if (t.ty === 'hurt') evEmoji(o.x, o.y - 118, '🩹', 22);
+  else if (t.ty === 'gawk') { evEmoji(o.x + 18, o.y - 62, '📱', 20); if (near) evSay(o.x, o.y - 112, t.say); }
+  else if (t.ty === 'stop') { evEmoji(o.x - 26, o.y - 20, '🚗', 26); if (near) evSay(o.x, o.y - 112, t.say); }
+  else if (t.ty === 'guest') { evEmoji(o.x + 20, o.y - 6, '🧳', 22); if (near && !carried) evSay(o.x, o.y - 112, t.say); }
+  else if (t.ty === 'radar' || t.ty === 'ticket') { /* nur Markierung */ }
 }
 function evDrawRadar(o, now) {
   const s = toScreen(o.x, o.y), z = view.s; ctx.save(); ctx.strokeStyle = '#2b2d33'; ctx.lineWidth = Math.max(1.5, 4 * z);
   [[-18, 0], [18, 0], [0, 10]].forEach(([dx, dy]) => { ctx.beginPath(); ctx.moveTo(s.x, s.y - 60 * z); ctx.lineTo(s.x + dx * z, s.y + dy * z); ctx.stroke(); });
   ctx.fillStyle = '#e8e3d6'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = Math.max(1, 2.5 * z); ctx.beginPath(); ctx.rect(s.x - 22 * z, s.y - 92 * z, 44 * z, 34 * z); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#1b1b1b'; ctx.beginPath(); ctx.arc(s.x - 8 * z, s.y - 75 * z, 8 * z, 0, Math.PI * 2); ctx.fill();
-  // Blitz, wenn ein Auto vorbeifährt
-  let hot = false; for (const c of traffic) if (Math.hypot(c.x - o.x, c.y - o.y) < 230) { hot = true; break; }
+  let hot = false; for (const c of traffic) if (Math.hypot(c.x - o.x, c.y - o.y) < 230 && evCarV(c) > 50) { hot = true; break; }
   if (hot && now - EV.flashT > 900) EV.flashT = now;
   const f = 1 - (now - EV.flashT) / 220;
   if (f > 0) { const R = 120 * z, g = ctx.createRadialGradient(s.x - 8 * z, s.y - 75 * z, 0, s.x - 8 * z, s.y - 75 * z, R); g.addColorStop(0, `rgba(255,255,255,${f})`); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(s.x - R, s.y - 75 * z - R, R * 2, R * 2); }
@@ -4669,44 +4967,38 @@ function evDrawRadar(o, now) {
 }
 function evDrawCop(o, now) {
   if (!IMG.kunde) return; shadow(o.x, o.y, 20, 9); drawSprite(tinted('kunde', 190, 1.4, 0.85), o.x, o.y - Math.abs(Math.sin(now / 300)) * 2, 50, true, 1, 0.97);
-  const s = toScreen(o.x, o.y - 125); ctx.save(); ctx.font = `${Math.max(10, 24 * view.s)}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('👮', s.x, s.y); ctx.restore();
+  evEmoji(o.x, o.y - 125, '👮', 24);
+  if (evDist(WALK.me, o) < 500) evSay(o.x, o.y - 150, ['Tipp die Raser an!', 'Über 50 wird’s teuer!', 'Ich hab Hunger auf Leberkäs.'][Math.floor(now / 4000) % 3]);
 }
-function evCowsTick(dt, cur) {
-  if (!cur || cur.kind !== 'kuehe') { if (EV.cows.length) EV.cows = []; return; }
-  const box = (evSpot(cur).cows) || [450, 1000, -1450, -2050];
-  if (!EV.cows.length) for (let i = 0; i < 8; i++) { const u = rnd(box[0], box[1]), w = rnd(box[3], box[2]), p = iso(u, w); EV.cows.push({ u, w, tu: u, tw: w, x: p.x, y: p.y, img: i % 3 ? 'an_cow1' : 'an_cow2', flip: false, wait: Math.random() * 2 }); }
-  for (const c of EV.cows) {
-    if ((c.wait -= dt) > 0) continue;
-    const du = c.tu - c.u, dw = c.tw - c.w, d = Math.hypot(du, dw);
-    if (d < 5) { c.tu = rnd(box[0], box[1]); c.tw = rnd(box[3], box[2]); c.wait = 1 + Math.random() * 3; continue; }
-    const st = Math.min(d, 55 * dt); c.u += du / d * st; c.w += dw / d * st; const p = iso(c.u, c.w); c.flip = p.x > c.x; c.x = p.x; c.y = p.y;
-  }
-}
-function evDrawCow(o, now) {
-  const c = o.b, img = EV.img[c.img]; if (!img) return; shadow(c.x, c.y, 34, 13);
-  drawSprite(img, c.x, c.y - (c.wait > 0 ? 0 : Math.abs(Math.sin(now / 150 + c.u)) * 3), 120, c.flip, 1, 0.85);
-}
-// Helfer-Animation: Wasserstrahl / Winken / Blitz / Lasso von der Figur zum Ziel (eigene Figur und Mitspieler)
+// Helfer-Animation: Wasserstrahl / Winken / Blitz von der Figur zum Ziel (eigene Figur und Mitspieler), Punkte, Tempo-Schilder
 function evDrawFx(o, now) {
-  const e = evCur(); EV.fx = EV.fx.filter((f) => now - f.t < 700);
-  if (!e) return; const s = evSpot(e);
-  const tgt = e.kind === 'brand' && s.fire ? { x: s.fire[0], y: s.fire[1] } : e.kind === 'blitzer' ? (() => { const r = s.radar || [s.u, s.w]; return iso(r[0], r[1] - 40); })() : e.kind === 'ansturm' ? iso(1300, -420) : (EV.cows[0] || evStand(e));
-  const who = [];
-  if (EV.fx.length) who.push([WALK.me, (now - EV.fx[EV.fx.length - 1].t) / 700]);
-  for (const p of presPeople()) if (p.evh && now - p.evh < 1200) who.push([p, (now - p.evh) / 1200]);
-  for (const [p, t] of who) {
-    if (Math.hypot(p.x - tgt.x, p.y - tgt.y) > 900) continue; // nur wer wirklich dort ist
-    const a = toScreen(p.x, p.y - 70), b = toScreen(tgt.x, tgt.y), z = view.s; ctx.save();
-    if (e.kind === 'brand') {
-      ctx.strokeStyle = `rgba(80,170,255,${0.85 * (1 - t)})`; ctx.lineWidth = Math.max(2, 9 * z); ctx.lineCap = 'round';
-      const mx = (a.x + b.x) / 2, my = Math.min(a.y, b.y) - 120 * z; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo(mx, my, b.x, b.y); ctx.stroke();
-      ctx.fillStyle = `rgba(200,235,255,${1 - t})`; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(b.x + Math.sin(now / 60 + i * 2) * 30 * z, b.y + Math.cos(now / 70 + i) * 18 * z, 5 * z + 2, 0, Math.PI * 2); ctx.fill(); }
-    } else {
-      ctx.globalAlpha = 1 - t; ctx.font = `${Math.max(12, 30 * z)}px system-ui`; ctx.textAlign = 'center';
-      ctx.fillText({ ansturm: '👋', blitzer: '📸', kuehe: '🌾' }[e.kind] || '✨', a.x, a.y - 40 * z - t * 40 * z);
+  const e = evCur(); EV.fx = EV.fx.filter((f) => now - f.t < 700); EV.pops = EV.pops.filter((p) => now - p.t < 1400);
+  if (e) {
+    const s = evSpot(e), def = e.kind === 'brand' && s.fire ? { x: s.fire[0], y: s.fire[1] } : e.kind === 'blitzer' ? evRadarPt(e) : evStand(e);
+    const who = [];
+    if (EV.fx.length) { const f = EV.fx[EV.fx.length - 1]; who.push([WALK.me, (now - f.t) / 700, f.tg]); }
+    for (const p of presPeople()) if (p.evh && now - p.evh < 1200) who.push([p, (now - p.evh) / 1200, p.evt]);
+    for (const [p, t, tg0] of who) {
+      const tg = e.kind === 'brand' && tg0 && tg0.site != null ? { x: s.fire[0] + EV_FLAME_OFF[tg0.site][0], y: s.fire[1] + EV_FLAME_OFF[tg0.site][1] } : tg0 || def;
+      if (Math.hypot(p.x - tg.x, p.y - tg.y) > 900) continue; // nur wer wirklich dort ist
+      const a = toScreen(p.x, p.y - 70), b = toScreen(tg.x, tg.y), z = view.s; ctx.save();
+      if (e.kind === 'brand' && tg0 && tg0.site != null) {
+        ctx.strokeStyle = `rgba(80,170,255,${0.85 * (1 - t)})`; ctx.lineWidth = Math.max(2, 9 * z); ctx.lineCap = 'round';
+        const mx = (a.x + b.x) / 2, my = Math.min(a.y, b.y) - 120 * z; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.quadraticCurveTo(mx, my, b.x, b.y); ctx.stroke();
+        ctx.fillStyle = `rgba(200,235,255,${1 - t})`; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(b.x + Math.sin(now / 60 + i * 2) * 30 * z, b.y + Math.cos(now / 70 + i) * 18 * z, 5 * z + 2, 0, Math.PI * 2); ctx.fill(); }
+      } else { ctx.globalAlpha = 1 - t; ctx.font = `${Math.max(12, 30 * z)}px system-ui`; ctx.textAlign = 'center'; ctx.fillText({ brand: '💪', ansturm: '👋', blitzer: '📸', kuehe: '🌾' }[e.kind] || '✨', a.x, a.y - 40 * z - t * 40 * z); }
+      ctx.restore();
     }
-    ctx.restore();
+    // Blitzer: Tempo über den Autos in der Nähe des Radars
+    if (e.kind === 'blitzer') { const r = evRadarPt(e); ctx.save(); ctx.textAlign = 'center'; ctx.font = '800 12px system-ui, sans-serif';
+      for (const c of traffic) { if (c.hidden || evDist(c, r) > 750) continue; const v = evCarV(c), hit = c._evhit === e.id, q = toScreen(c.x, c.y - 95), txt = hit ? (v > 50 ? '📸 ✔' : '😇') : String(v), w = ctx.measureText(txt).width + 12;
+        ctx.fillStyle = hit ? '#fffdf6' : v > 50 ? '#e63b2e' : '#fffdf6'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(q.x - w / 2, q.y - 18, w, 18, 9) : ctx.rect(q.x - w / 2, q.y - 18, w, 18); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = !hit && v > 50 ? '#fff' : '#1b1b1b'; ctx.fillText(txt, q.x, q.y - 5); }
+      ctx.restore(); }
   }
+  for (const p of EV.pops) { const t = (now - p.t) / 1400, s = toScreen(p.x, p.y); ctx.save(); ctx.globalAlpha = 1 - t * t; ctx.font = `normal ${Math.round(26 + 6 * (1 - t))}px "Lilita One", "Arial Rounded MT Bold", sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 6; ctx.strokeStyle = '#fff'; ctx.strokeText(p.txt, s.x, s.y - t * 50); ctx.fillStyle = '#1f9a52'; ctx.fillText(p.txt, s.x, s.y - t * 50); ctx.restore(); }
+  // Weg-Hinweis beim Tragen: gestrichelte Linie zum Ziel
+  if (EV.carry) { const a = toScreen(WALK.me.x, WALK.me.y), b = toScreen(EV.carry.t.carry.to.x, EV.carry.t.carry.to.y); ctx.save(); ctx.setLineDash([10, 12]); ctx.lineDashOffset = -now / 40; ctx.strokeStyle = 'rgba(31,154,82,.8)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.restore(); }
 }
 
 /* ---- Probe-Modus ohne Server (für Tests und zum Ausprobieren in der Konsole: __events.mock('brand')) ---- */
@@ -4734,7 +5026,12 @@ function evMockRpc(fn, args) {
   return Promise.reject(new Error('unknown'));
 }
 window.__events = {
-  EV, EV_SPOTS, EV_KIND, poll: () => evPoll(), open: () => evOpen(evCur()), close: evClose, go: () => { const e = evCur(); if (e) evGo(e); },
+  EV, EV_SPOTS, EV_KIND, poll: () => evPoll(), open: () => { const e = evCur(); if (e) evGo(e); }, close: evMiniClose, go: () => { const e = evCur(); if (e) evGo(e); },
+  vis: (all) => evVis(evCur(), all).map((t) => ({ i: t.i, ty: t.ty, x: t.x, y: t.y, u: t.u, w: t.w, label: t.label, amt: t.amt, lock: evLocked(t), carry: !!t.carry, dest: t.carry ? { x: t.carry.to.x, y: t.carry.to.y } : null })),
+  task: (i) => { const e = evCur(); const t = e && evSub(e).tasks[i]; if (t) evTaskGo(e, t); return !!t; },
+  act: (i) => { const e = evCur(); const t = e && evSub(e).tasks[i]; if (t) evAct(e, t); return !!t; }, // ohne Hinlaufen (Test)
+  deliver: () => evDeliver(), tap: (x, y) => evTapAt(x, y), carV: evCarV, radar: () => { const e = evCur(); return e ? evRadarPt(e) : null; },
+  peer: (p) => evPeerHelp(p), rtw: () => { const e = evCur(); return e && evSub(e).rtw; },
   // Probe-Ereignis: __events.mock('brand', { spot: 'metzgerei', goal: 30, secs: 360, bots: 2, mult: 2 }); __events.mock(null) beendet den Probe-Modus
   mock(kind, o = {}) {
     if (!kind) { EV.mock = null; EV.list = []; EV.t = 99; return null; }
@@ -4743,8 +5040,658 @@ window.__events = {
       ev: { id, kind, spot, u: s.u, w: s.w, started_at: new Date(now).toISOString(), ends_at: new Date(now + (o.secs || 360) * 1000).toISOString(), goal: o.goal || 45, progress: 0, done: false, outcome: null, mine: 0, reward_cash: null, reward_xp: null, fund_delta: 0 } };
     EV.back = 0; EV.t = 99; return id;
   },
-  state: () => ({ list: EV.list.map((e) => ({ id: e.id, kind: e.kind, progress: e.progress, goal: e.goal, done: e.done, outcome: e.outcome, mine: e.mine, reward_cash: e.reward_cash, reward_xp: e.reward_xp })), open: EV.open, pend: EV.pend, back: EV.back, goto: EV.goto, banner: EV.ui && !EV.ui.ban.hidden ? EV.ui.ban.textContent : '', flash: EV.flash && EV.flash.mine }),
+  state: () => ({ list: EV.list.map((e) => ({ id: e.id, kind: e.kind, progress: e.progress, goal: e.goal, done: e.done, outcome: e.outcome, mine: e.mine, reward_cash: e.reward_cash, reward_xp: e.reward_xp })),
+    mini: EV.mini ? EV.mini.t.ty : null, carry: EV.carry ? EV.carry.t.ty : null, q: EV.q.length, back: EV.back, goto: !!EV.goto, banner: EV.ui && !EV.ui.ban.hidden ? EV.ui.ban.textContent : '', flash: EV.flash && EV.flash.mine,
+    markers: Object.keys(EV.mk).length, open: evCur() ? evVis(evCur(), true).length : 0 }),
 };
+/* ---------------- Welt-Incidents im Mehrspieler: Pannen, Reifenplatzer, Unfälle, Kühe, Winker, Starthilfe ---------------- */
+// Kleine Ereignisse am Straßenrand, die man im Walk-Modus findet: hinlaufen, antippen, Minispiel, Geld + Combo.
+// Server (server/world.sql, Agent A): incidents_active(p_u, p_w), incident_claim(p_id), incident_done(p_id, p_score).
+// Ohne Server/Login läuft ein lokaler Regisseur mit derselben Datenform (Belohnungen dann nur angezeigt).
+// Die Antwort liegt in window.INC_STATE (+ Event 'inc-state') – Ticker/Tagessieger (66_ticker.js) lesen nur von dort.
+
+// Standplätze: Mitte des Incident-Autos am Straßenrand (|w| bzw. |u| = 275: hinter dem Gehsteig bei 215, weit weg von der
+// Fahrbahn ±150 und den Spuren ±72/75), jeweils geprüft: kein Gebäude, kein Baum, keine Einfahrt, nicht im Hof/an der Kreuzung.
+// dir = Achse, zu der das Auto parallel steht. Dieselbe Liste liegt als VALUES in server/world.sql.
+const INC_SPOTS = [
+  { id: 'a_n1', u: 700, w: 275, dir: 'u', kinds: ['panne', 'reifen', 'winker', 'starthilfe'] },
+  { id: 'a_n2', u: 1100, w: 275, dir: 'u', kinds: ['panne', 'reifen', 'winker', 'starthilfe'] },
+  { id: 'a_n3', u: 1700, w: 275, dir: 'u', kinds: ['panne', 'reifen', 'unfall', 'winker'] },
+  { id: 'a_n4', u: -2300, w: 275, dir: 'u', kinds: ['panne', 'reifen', 'winker', 'starthilfe'] },
+  { id: 'a_n6', u: -2650, w: 275, dir: 'u', kinds: ['panne', 'reifen', 'unfall', 'winker', 'starthilfe'] },
+  { id: 'a_s1', u: 800, w: -275, dir: 'u', kinds: ['panne', 'reifen', 'winker', 'starthilfe'] },
+  { id: 'a_s4', u: -2300, w: -275, dir: 'u', kinds: ['panne', 'reifen', 'unfall', 'winker'] },
+  { id: 'a_s5', u: 2300, w: -275, dir: 'u', kinds: ['panne', 'reifen', 'unfall', 'winker', 'kuh'] },
+  { id: 'a_s6', u: -1950, w: -275, dir: 'u', kinds: ['panne', 'reifen', 'winker', 'starthilfe'] },
+  { id: 'b_e2', u: 275, w: 1700, dir: 'w', kinds: ['panne', 'reifen', 'winker', 'starthilfe'] },
+  { id: 'b_e3', u: 275, w: -800, dir: 'w', kinds: ['panne', 'reifen', 'unfall', 'winker', 'kuh'] },
+  { id: 'b_e4', u: 275, w: -1550, dir: 'w', kinds: ['panne', 'reifen', 'winker', 'kuh'] },
+  { id: 'b_w1', u: -275, w: -1600, dir: 'w', kinds: ['panne', 'reifen', 'unfall', 'winker', 'kuh'] },
+  { id: 'b_w2', u: -275, w: 1000, dir: 'w', kinds: ['panne', 'reifen', 'winker', 'starthilfe'] },
+  { id: 'b_w3', u: -275, w: -2400, dir: 'w', kinds: ['panne', 'reifen', 'unfall', 'winker', 'kuh'] },
+  { id: 'b_w4', u: -275, w: 2300, dir: 'w', kinds: ['panne', 'reifen', 'winker', 'starthilfe'] },
+  { id: 'b_w5', u: -275, w: -650, dir: 'w', kinds: ['panne', 'reifen', 'winker', 'kuh'] },
+];
+const INC_WERK = { id: 'werkstatt', u: -900, w: 330 }; // Stage-Ziel (Eingang der Stadt-Werkstatt)
+const INC_WERK_CAR = { u: -1080, w: 380, dir: 'u', f: -1 }; // dort steht das Auto: im Hof links neben Säule C (u -887), nicht auf den Fahrwegen
+const INC_TOW = 'tow'; // Stage-Typ Abschleppen (danach fährt der Abschleppwagen weg)
+
+// Minispiele aus 63_work.js (TIMING, STEPS, PICK, SEQ, CATCH, GAUGE …) – pro Stage eines zufällig
+const INC_MINI = {
+  tow: [
+    TIMING('Seilwinde kurbeln', '🪝', 4, '🪝 Kurbeln!', 'Im grünen Bereich kurbeln – sonst hängt das Auto schief am Haken', { pot: '🚗', hit: '⛓️',
+      miss: ['Seil verheddert! 🪢', 'Das Auto rollt einen halben Meter zurück. 😬', 'Der Abschleppwagen hupt beleidigt.'], clean: 'Hängt bombenfest am Haken!' }),
+    GAUGE('Auto hochziehen', '🪝', 'm', 10, 'Seilwinde genau so weit ziehen, bis das Auto oben ist'),
+  ],
+  repair: [
+    STEPS('Reparatur', ['🔌 Batterie abklemmen', '🔧 Altteil ausbauen', '📦 Neuteil einbauen', '🔩 Festziehen', '🔑 Probefahrt'], 12, 'Schritt für Schritt – der Kunde schaut durchs Fenster', {
+      wrong: ['Probefahrt ohne Motor? Mutig.', 'Zuerst abklemmen – sonst funkt’s! ⚡', 'Der Meister räuspert sich laut.'], done: 'Schnurrt wie ein Kätzchen!' }),
+    PICK('Was hat er denn?', [
+      ['Motor ging einfach aus, Tank ist voll', '⛽ Benzinpumpe', ['⛽ Benzinpumpe', '🎵 Radio', '🧽 Fußmatten']],
+      ['Qualmt weiß aus dem Motorraum', '💧 Kühlwasserschlauch', ['💧 Kühlwasserschlauch', '🌲 Wunderbaum', '🪟 Scheibenwischer']],
+      ['Es klackert, aber er startet nicht', '⚡ Anlasser', ['⚡ Anlasser', '🛞 Reifendruck', '🪑 Sitzheizung']],
+      ['Ruckelt und die Motorleuchte blinkt', '🔥 Zündspule', ['🔥 Zündspule', '🚿 Waschwasser', '🧸 Wackeldackel']],
+      ['Keilriemen quietscht wie ein Meerschweinchen', '🔧 Keilriemen tauschen', ['🔧 Keilriemen tauschen', '🐹 Meerschweinchen füttern', '🔊 Radio lauter']]]),
+  ],
+  reifen: [
+    SEQ('Radmuttern über Kreuz', '🔩', 5, 9, 'Radmuttern über Kreuz lösen: 1, 2, 3 … – sonst eiert das Rad'),
+    TAP('Reifen wechseln', '🔩', 5, 7, 'Alle Radmuttern lösen – das Reserverad wartet schon!'),
+  ],
+  sani: [
+    STEPS('Erste Hilfe am Unfallort', ['🦺 Warnweste an', '⚠️ Unfallstelle sichern', '🗣️ „Alles okay bei Ihnen?“', '🩹 Pflaster auf die Stirn', '☕ Beruhigungs-Kaffee'], 12, 'Ruhig bleiben, der Reihe nach!', {
+      wrong: ['Kaffee VOR der Warnweste? Gewagt.', 'Der Fahrer will zuerst gefragt werden, ob’s ihm gut geht.', 'Ein Lkw hupt – zuerst sichern!'], done: 'Beide Fahrer streiten schon wieder – also alles okay!' }),
+    TIMING('Puls messen', '💓', 4, '🩺 Jetzt zählen!', 'Im Takt vom Herzschlag tippen', { pot: '🩺', hit: '💓',
+      miss: ['Das war dein eigener Puls. 🫀', '„Bin i scho tot?“ – Nein, nur daneben.', 'Der Fahrer schaut skeptisch. 🤨'], clean: 'Puls passt – Schreck lass nach!' }),
+  ],
+  kuh: [
+    TIMING('Kuh heimlocken', '🐄', 4, '🌾 Mit Heu wedeln!', 'Genau im richtigen Moment wedeln – die Resi ist wählerisch', { pot: '🐄', hit: '👣',
+      miss: ['Muh! Die Resi bleibt stur stehen.', 'Sie frisst lieber den Blumentrog.', 'Ein Traktor hupt – die Kuh muht zurück.'], clean: 'Brav heimgetrottet!' }),
+  ],
+  ziege: [CATCH('Ziege einfangen', '🐐', 5, 12, 'Die Gretl ist schon wieder ausgebüxt – erwisch sie!')],
+  winker: [
+    PICK('Was macht das Geräusch?', [
+      ['„Es macht klonk-klonk beim Bremsen!“', '🛑 Bremsbeläge', ['🛑 Bremsbeläge', '🎺 Hupe', '🧴 Scheibenwaschwasser']],
+      ['„Es pfeift beim Gasgeben wie ein Teekessel!“', '🌀 Turbolader', ['🌀 Turbolader', '🫖 Teekessel im Kofferraum', '🪟 Fensterheber']],
+      ['„Es quietscht beim Lenken wie ein Meerschweinchen!“', '🛢️ Servoöl nachfüllen', ['🛢️ Servoöl nachfüllen', '🐹 Meerschweinchen suchen', '🔊 Radio lauter']],
+      ['„Es riecht nach Pommes!“', '🍟 Fährt mit Bio-Diesel – alles gut', ['🍟 Fährt mit Bio-Diesel – alles gut', '🔥 Sofort Feuerwehr!', '🧂 Salz drüber']],
+      ['„Ein orangenes Kännchen leuchtet!“', '🛢️ Öl nachfüllen', ['🛢️ Öl nachfüllen', '☕ Kaffee kochen', '🫖 Teekanne entkalken']],
+      ['„Es macht gar nix mehr. Gar nix.“', '⛽ Tank leer', ['⛽ Tank leer', '🔮 Hellseher rufen', '🙏 Beten']]]),
+    DIAG,
+  ],
+  starthilfe: [
+    STEPS('Starthilfe', ['🔴 Rot an Plus (leeres Auto)', '🔴 Rot an Plus (Spender)', '⚫ Schwarz an Minus (Spender)', '⚫ Schwarz an Masse (Motor)', '🔑 Starten!'], 12, 'Kabel richtig anklemmen: Rot zuerst, Masse zuletzt!', {
+      wrong: ['Bzzzt! ⚡ Deine Haare stehen zu Berge.', 'Funkenregen! Der Nachbar filmt schon.', 'Falsch rum – das Radio spielt jetzt nur noch Schlager.'], done: 'Brumm! Er läuft wieder.' }),
+  ],
+};
+// Arten (Stages wie im Vertrag). at: 'werkstatt' = Ziel der Stage ist die Werkstatt; rw = Belohnung im Probe-Modus
+const INC_KIND = {
+  panne: { icon: '🛻', name: 'Liegengeblieben', say: ['Na super … 🙄', 'Er hat nur kurz „pfff“ gemacht!', 'Gestern ging er noch!'],
+    stages: [{ act: 'Abschleppen', mini: 'tow', tow: true, done: (c) => `den liegengebliebenen ${c} abgeschleppt` },
+      { act: 'In der Werkstatt reparieren', mini: 'repair', at: 'werkstatt', done: (c) => `den ${c} wieder flottgemacht` }], rw: [120, 160] },
+  reifen: { icon: '🛞', name: 'Reifen geplatzt', say: ['Pffffft! 💨', 'Wer hat da Nägel verloren?!', 'Ich hab nicht mal einen Wagenheber …'],
+    stages: [{ act: 'Reifen wechseln', mini: 'reifen', done: (c) => `beim ${c} den Reifen gewechselt` }], rw: [100] },
+  unfall: { icon: '💥', name: 'Blechschaden', say: ['Der stand plötzlich da!', 'Mein schöner Golf! 😭', 'Ich hab doch geblinkt!'],
+    stages: [{ act: 'Erste Hilfe', mini: 'sani', done: () => 'nach dem Blechschaden Erste Hilfe geleistet' },
+      { act: 'Abschleppen', mini: 'tow', tow: true, done: (c) => `den verbeulten ${c} abgeschleppt` },
+      { act: 'In der Werkstatt ausbeulen', mini: 'repair', at: 'werkstatt', done: (c) => `den ${c} wieder ausgebeult` }], rw: [80, 120, 180] },
+  kuh: { icon: '🐄', name: 'Kuh am Straßenrand', say: ['Muuuh!', 'Muh? 🌼', 'Muuuuuh!'],
+    stages: [{ act: 'Zurück zur Weide treiben', mini: 'kuh', done: (c, a) => `${a ? 'die Ziege Gretl' : 'die Resi'} heimgetrieben` }], rw: [90] },
+  winker: { icon: '🙋', name: 'Kunde winkt', say: ['Huhu! Mein Auto macht klonk-klonk!', 'Hallo! Können Sie mal hinhören?', 'Es pfeift so komisch!'],
+    stages: [{ act: 'Geräusch diagnostizieren', mini: 'winker', done: (c) => `das Klonk-Klonk im ${c} gefunden` }], rw: [70] },
+  starthilfe: { icon: '🪫', name: 'Batterie leer', say: ['Batterie leer! 🪫', 'Hat wer Starthilfekabel?', 'Licht angelassen … 🤦'],
+    stages: [{ act: 'Starthilfe geben', mini: 'starthilfe', done: (c) => `dem ${c} Starthilfe gegeben` }], rw: [90] },
+};
+const INC = { list: [], t: 99, busy: false, mode: 'server', retry: 0, skew: 0, seen: {}, prev: {}, vis: {}, tows: [], gone: [], fx: [], pins: {}, ui: null,
+  goto: null, focus: null, going: false, fails: 0, wasOn: false, mockTold: false, errs: 0, fallback: false, M: null, last: null };
+const INC_STATE0 = { feed: [], combo: 0, combo_until: null, day_top: [], my_pts: 0, incidents: [], mock: false };
+window.INC_STATE = INC_STATE0;
+function incErr(e) { if (INC.errs++ < 5) console.warn('[Schrauberstadt] Incident', e); }
+const incStage = (i) => { const K = INC_KIND[i.kind]; return K.stages[Math.min(i.stage, K.stages.length - 1)]; };
+const incCarName = (i) => CARS[Math.abs(i.id) % CARS.length][0];
+const incIsGoat = (i) => i.kind === 'kuh' && Math.abs(i.id) % 3 === 0;
+const incAtWerk = (i) => Math.hypot(i.u - INC_WERK.u, i.w - INC_WERK.w) < 150;
+// Lage eines Incidents: Achse, Seite, Blickrichtung (Rechtsverkehr: das Auto steht in Fahrtrichtung seiner Straßenseite)
+function incGeo(i) {
+  if (incAtWerk(i)) { const g = { u: INC_WERK_CAR.u, w: INC_WERK_CAR.w, ax: 'u', side: 1, f: -1, werk: true }; g.stand = iso(INC_WERK.u, INC_WERK.w); return g; }
+  const sp = INC_SPOTS.find((s) => Math.abs(s.u - i.u) < 8 && Math.abs(s.w - i.w) < 8), ax = sp ? sp.dir : Math.abs(i.w) < Math.abs(i.u) ? 'u' : 'w';
+  const side = Math.sign(ax === 'u' ? i.w : i.u) || 1, f = ax === 'u' ? -side : side;
+  const g = { u: i.u, w: i.w, ax, side, f };
+  g.stand = incP(g, -f * 70, side * 215 - (ax === 'u' ? i.w : i.u)); // auf dem Gehsteig neben dem Heck
+  return g;
+}
+// Punkt relativ zum Incident: a entlang der Achse, l quer dazu
+function incP(g, a, l, v) { return g.ax === 'u' ? iso(g.u + a, g.w + l, v) : iso(g.u + l, g.w + a, v); }
+function incCarImg(ci, f, ax) { // Sprite + Spiegelung für die Blickrichtung (wie setSprite in 40_cars.js)
+  const [, , sp, h, sa, l] = CARS[((ci % CARS.length) + CARS.length) % CARS.length], back = ax === 'u' ? f < 0 : f > 0;
+  return { img: tinted(back ? sp + '_r' : sp, h, sa, l), flip: ax === 'u' };
+}
+function incNear(i) { const g = incGeo(i), m = WALK.me; return Math.hypot(m.x - g.stand.x, m.y - g.stand.y) < 190; }
+
+/* ---- Server / Probe-Regisseur ---- */
+function incNorm(r) {
+  if (!r || typeof r !== 'object' || !INC_KIND[r.kind]) return null;
+  const n = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0), K = INC_KIND[r.kind], stages = Math.max(1, Math.floor(n(r.stages)) || K.stages.length);
+  return { id: n(r.id), kind: r.kind, stage: clamp(Math.floor(n(r.stage)), 0, stages - 1), stages, title: str(r.title, 60) || K.name, u: n(r.u), w: n(r.w),
+    status: r.status === 'claimed' ? 'claimed' : 'open', claimed_by: r.claimed_by ? str(String(r.claimed_by), 24) : null, mine: !!r.mine,
+    expires_at: String(r.expires_at || ''), claim_until: r.claim_until ? String(r.claim_until) : null, reward: Math.max(0, n(r.reward)) };
+}
+async function incRpc(fn, args) {
+  if (INC.mode === 'mock') return incMock(fn, args || {});
+  return sbRpc(fn, args);
+}
+const incNoServer = (m) => /could not find|PGRST202|does not exist|404|kein Incident-Server|join first/i.test(m || '');
+async function incPoll() { if (window.__incOff) return;
+  if (INC.busy) return; INC.t = 0;
+  if (!ONLINE.sess) { if (INC.list.length) { INC.list = []; incApply({ incidents: [], feed: [] }); } return; } // ohne Login keine Einsätze (kein Probe-Modus)
+  if (INC.retry > 0) return; INC.busy = true;
+  const m = uwOf(WALK.me), args = { p_u: Math.round(m.u), p_w: Math.round(m.w) };
+  try {
+    const r = await sbRpc('incidents_active', args); if (!r || !Array.isArray(r.incidents)) throw new Error('kein Incident-Server');
+    INC.fails = 0; INC.mockTold = false; incApply(r);
+  } catch (e) { // Server nicht erreichbar: nichts vortäuschen, still warten und später neu versuchen
+    if (++INC.fails >= 3) { INC.retry = Math.min(120, 15 * INC.fails); if (INC.list.length) { INC.list = []; incApply({ incidents: [], feed: [] }); }
+      if (!INC.mockTold) { INC.mockTold = true; toast('📡 Stadt-Server gerade nicht erreichbar – Einsätze kommen gleich wieder.'); } }
+    if (!incNoServer(String(e && e.message)) && INC.fails === 3) incErr(e); // fehlende Funktion / Netz: still, nur einmal melden
+  }
+  INC.busy = false;
+}
+function incToMock() {
+  INC.mode = 'mock'; INC.retry = 120; INC.list = [];
+  if (!INC.M) INC.M = { list: [], idc: 7000000 + Math.floor(Math.random() * 99999), next: Date.now() + rnd(30, 90) * 1000, near: 0, combo: 0, comboAt: 0, pts: 0, feed: [], fid: 1 };
+}
+// Antwort übernehmen: Liste, Zustand für den Ticker, Neuigkeiten melden, Animationen (Abschleppen, Verschwinden)
+function incApply(r) {
+  if (r.now && Number.isFinite(Date.parse(r.now))) INC.skew = Date.parse(r.now) - Date.now();
+  const list = r.incidents.map(incNorm).filter(Boolean).slice(0, 8), ids = {};
+  list.forEach((i) => { ids[i.id] = 1; incSeen(i); });
+  for (const id in INC.prev) if (!ids[id]) { const p = INC.prev[id]; if (performance.now() - (p.tAt || 0) > 500) INC.gone.push({ i: p, t0: performance.now() }); delete INC.prev[id]; }
+  INC.list = list;
+  if (INC.focus && !ids[INC.focus]) INC.focus = null;
+  if (INC.goto && !ids[INC.goto]) INC.goto = null;
+  const feed = Array.isArray(r.feed) ? r.feed.slice(0, 15).map((x) => ({ id: Number(x && x.id) || 0, at: String((x && x.at) || ''), icon: str(String((x && x.icon) || ''), 8), text: str(String((x && x.text) || ''), 160) })) : [];
+  const top = Array.isArray(r.day_top) ? r.day_top.slice(0, 5).map((x) => ({ name: str(String((x && x.name) || '?'), 24), pts: Number(x && x.pts) || 0 })) : [];
+  window.INC_STATE = { feed, combo: Number(r.combo) || 0, combo_until: r.combo_until || null, day_top: top, my_pts: Number(r.my_pts) || 0, incidents: list, mock: INC.mode === 'mock' };
+  try { window.dispatchEvent(new Event('inc-state')); } catch (e) { incErr(e); }
+}
+function incSeen(i) {
+  const p = INC.prev[i.id], g = incGeo(i), now = performance.now(), v = INC.vis[i.id] || (INC.vis[i.id] = { born: now });
+  if (p && (Math.abs(p.u - i.u) > 5 || Math.abs(p.w - i.w) > 5)) { // Kette: Ort hat gewechselt → Abschleppwagen holt das Auto, dann taucht es am Ziel auf
+    if (INC_KIND[p.kind].stages[Math.min(p.stage, INC_KIND[p.kind].stages.length - 1)].tow) { INC.tows.push({ g: incGeo(p), ci: Math.abs(p.id), t0: now, kind: p.kind }); v.born = now + 3400; }
+    else v.born = now;
+  }
+  if (!INC.seen[i.id]) {
+    INC.seen[i.id] = 1; const m = WALK.me, d = Math.hypot(g.stand.x - m.x, g.stand.y - m.y);
+    if (i.status === 'open' && !incMiniOn() && (d < 1600 || !INC.told)) { INC.told = true; const K = INC_KIND[i.kind]; sfx.event(); toast(`${K.icon} ${i.title}! ${d < 900 ? 'Gleich hier in der Nähe – tipp' : 'Tipp'} drauf und hilf!`); }
+  }
+  INC.prev[i.id] = { ...i, tAt: now };
+}
+// Lokaler Regisseur (gleiche Datenform wie der Server)
+function incMockInc(sp, kind) {
+  const M = INC.M, K = INC_KIND[kind], id = ++M.idc, now = Date.now();
+  return { id, kind, stage: 0, stages: K.stages.length, title: incMockTitle(kind, id), u: sp.u, w: sp.w, status: 'open', claimed_by: null, mine: false,
+    exp: now + 300e3, claimAt: 0, claimEnd: 0, reward: K.rw[0] };
+}
+function incMockTitle(kind, id) {
+  const c = CARS[id % CARS.length][0];
+  return { panne: `${c} liegengeblieben`, reifen: `Reifenplatzer beim ${c}`, unfall: `Blechschaden: ${c} gegen Zaun … äh, Auto`, kuh: id % 3 === 0 ? 'Ziege Gretl büxt aus' : 'Kuh Resi am Straßenrand',
+    winker: 'Kunde winkt aufgeregt', starthilfe: `${c} springt nicht an` }[kind];
+}
+function incMockJson(i) {
+  const left = (t) => new Date(t).toISOString();
+  return { id: i.id, kind: i.kind, stage: i.stage, stages: i.stages, title: i.title, u: i.u, w: i.w, status: i.status, claimed_by: i.claimed_by, mine: i.mine,
+    expires_at: left(i.exp), claim_until: i.claimEnd ? left(i.claimEnd) : null, reward: i.reward };
+}
+function incMockFeed(icon, text) { const M = INC.M; M.feed.unshift({ id: M.fid++, at: new Date().toISOString(), icon, text }); M.feed.length = Math.min(M.feed.length, 15); }
+function incMockSpawn(pu, pw, maxD) {
+  const M = INC.M, used = (s) => M.list.some((i) => Math.abs(i.u - s.u) < 8 && Math.abs(i.w - s.w) < 8);
+  let cand = INC_SPOTS.filter((s) => !used(s));
+  if (maxD) cand = cand.map((s) => [s, Math.hypot(s.u - pu, s.w - pw)]).filter(([, d]) => d <= maxD).sort((a, b) => a[1] - b[1]).map(([s]) => s).slice(0, 2);
+  if (!cand.length) return null;
+  const sp = pick(cand), kinds = sp.kinds.filter((k) => !M.list.some((i) => i.kind === k) || Math.random() < 0.3), inc = incMockInc(sp, pick(kinds.length ? kinds : sp.kinds));
+  M.list.push(inc); return inc;
+}
+function incMock(fn, a) {
+  const M = INC.M, now = Date.now(), me = (CITY.me && CITY.me.name) || myName();
+  const find = () => M.list.find((i) => i.id === Number(a.p_id));
+  if (fn === 'incidents_active') {
+    M.list = M.list.filter((i) => {
+      if (i.status === 'claimed' && now > i.claimEnd) { i.status = 'open'; i.claimed_by = null; i.mine = false; i.claimEnd = 0; }
+      if (now > i.exp && i.status === 'open') { if (i.stage > 0) incMockFeed('😬', `${incMockTitle(i.kind, i.id)}: Kette abgebrochen – keiner kam.`); return false; }
+      return true;
+    });
+    const pu = Number(a.p_u) || 0, pw = Number(a.p_w) || 0, nearOne = M.list.some((i) => Math.hypot(i.u - pu, i.w - pw) <= 900);
+    if (!nearOne && now - M.near > 300e3 && incMockSpawn(pu, pw, 900)) M.near = now; // Einstieg: gleich was vor der Nase
+    else if (now >= M.next && M.list.length < 8 && M.list.filter((i) => i.status === 'open').length < 3) { incMockSpawn(pu, pw, 0); M.next = now + rnd(30, 90) * 1000; }
+    return Promise.resolve({ now: new Date(now).toISOString(), incidents: M.list.map(incMockJson), feed: M.feed.slice(), combo: M.combo,
+      combo_until: M.combo && now - M.comboAt < 180e3 ? new Date(M.comboAt + 180e3).toISOString() : null, day_top: M.pts ? [{ name: me, pts: M.pts }] : [], my_pts: M.pts });
+  }
+  if (fn === 'incident_claim') {
+    const i = find(); if (!i || i.status !== 'open') return Promise.reject(new Error('not open'));
+    Object.assign(i, { status: 'claimed', claimed_by: me, mine: true, claimAt: now, claimEnd: now + 120e3 });
+    return Promise.resolve({ ok: true, incident: incMockJson(i) });
+  }
+  if (fn === 'incident_done') {
+    const i = find(); if (!i || !i.mine || i.status !== 'claimed') return Promise.reject(new Error('not claimed'));
+    if (now - i.claimAt < 4000) return Promise.reject(new Error('too fast'));
+    const score = clamp(Math.round(Number(a.p_score) || 0), 0, 100), K = INC_KIND[i.kind], st = K.stages[i.stage];
+    M.combo = now - M.comboAt < 180e3 ? M.combo + 1 : 1; M.comboAt = now; M.pts += 1 + i.stage;
+    const cash = Math.round(i.reward * (0.5 + score / 200) * (1 + 0.1 * Math.min(M.combo, 5))), text = `${me} hat ${st.done(incCarName(i), incIsGoat(i))}`;
+    incMockFeed(K.icon, text);
+    let next = null;
+    if (i.stage + 1 < i.stages) {
+      const ns = K.stages[i.stage + 1]; i.stage++; i.reward = K.rw[i.stage] || i.reward; i.status = 'open'; i.claimed_by = null; i.mine = false; i.claimEnd = 0; i.exp = now + 300e3;
+      if (ns.at === 'werkstatt') { i.u = INC_WERK.u; i.w = INC_WERK.w; }
+      next = incMockJson(i);
+    } else M.list.splice(M.list.indexOf(i), 1);
+    return Promise.resolve({ ok: true, cash, xp: 1, combo: M.combo, next, text });
+  }
+  return Promise.reject(new Error('unknown'));
+}
+
+/* ---- Ablauf: hingehen → beanspruchen → Minispiel → fertig (→ nächste Stage) ---- */
+function incGo(i) {
+  if (!i || INC.going) return;
+  if (i.status === 'claimed' && !i.mine) { sfx.nope(); toast(`${i.claimed_by || 'Jemand'} kümmert sich schon darum.`); return; }
+  $('place').hidden = true;
+  if (incNear(i)) { WALK.path = []; incStart(i); return; }
+  const g = incGeo(i); walkTo(g.stand.x, g.stand.y, null); INC.goto = i.id; INC.focus = i.id;
+  toast(`${INC_KIND[i.kind].icon} Auf geht’s: ${incStage(i).act}!`);
+}
+async function incStart(i) {
+  if (INC.going || incMiniOn()) return; INC.going = true; INC.goto = null;
+  try {
+    if (!(i.status === 'claimed' && i.mine)) {
+      const r = await incRpc('incident_claim', { p_id: i.id });
+      if (!r || r.ok === false) throw new Error('not open'); const n = incNorm(r.incident);
+      if (n) { const k = INC.list.findIndex((x) => x.id === n.id); if (k >= 0) INC.list[k] = n; i = n; } else { i.status = 'claimed'; i.mine = true; }
+      INC.prev[i.id] = { ...i, tAt: performance.now() };
+    }
+    INC.focus = i.id; sfx.pop();
+    const st = incStage(i), defs = INC_MINI[i.kind === 'kuh' && incIsGoat(i) ? 'ziege' : st.mini] || INC_MINI.repair;
+    playMini(pick(defs), (score) => { incFinish(i, score); });
+  } catch (e) {
+    const m = String((e && e.message) || ''); sfx.nope();
+    toast(/not open|claimed|taken/i.test(m) ? 'Zu spät – da war schon wer schneller!' : incNoServer(m) ? 'Kurz kein Kontakt zum Stadt-Server …' : 'Das hat nicht geklappt – gleich nochmal!');
+    INC.t = 99; INC.going = false;
+  }
+}
+async function incFinish(i, score, tries = 0) {
+  if (score <= 0) { INC.going = false; toast('Nix geschafft 😬 – tipp nochmal drauf und probier’s nochmal!'); return; }
+  try {
+    const r = await incRpc('incident_done', { p_id: i.id, p_score: clamp(Math.round(score), 1, 100) });
+    if (!r || r.ok === false) throw new Error((r && r.text) || 'nicht geklappt');
+    const cash = Number(r.cash) || 0, combo = Number(r.combo) || 0, st = incStage(i), m = WALK.me;
+    sfx.cash(); INC.fx.push({ x: m.x, y: m.y - 150, t0: performance.now(), txt: `+${fmt(cash)}`, sub: INC.mode === 'mock' ? 'Probe' : '' });
+    if (combo >= 2) { comboPop(`🔥 Combo x${combo}!`, `+${Math.min(combo, 5) * 10} % Bonus`); if (combo >= 3) confetti(24); }
+    const txt = str(String(r.text || ''), 140);
+    const nx = incNorm(r.next);
+    if (nx) {
+      const k = INC.list.findIndex((x) => x.id === nx.id); if (k >= 0) INC.list[k] = nx; else INC.list.push(nx);
+      incSeen(nx); INC.focus = nx.id; INC.goto = null;
+      const ns = incStage(nx); setTimeout(() => { sfx.event(); toast(`➡️ Weiter: ${ns.at === 'werkstatt' ? 'Auto in die Werkstatt bringen' : ns.act}! Folge dem Pfeil.`); }, st.tow ? 1800 : 1200);
+    } else {
+      INC.list = INC.list.filter((x) => x.id !== i.id); if (INC.focus === i.id) INC.focus = null;
+      if (INC.prev[i.id]) { INC.gone.push({ i: INC.prev[i.id], t0: performance.now(), fixed: true }); delete INC.prev[i.id]; }
+    }
+    toast(`${INC_KIND[i.kind].icon} ${txt || 'Erledigt!'} +${fmt(cash)}${INC.mode === 'mock' ? ' (Probe-Runde, ohne Server nicht gutgeschrieben)' : ''}`);
+    if (INC.mode !== 'mock') setTimeout(() => { if (typeof cityLoad === 'function') cityLoad(); }, 500);
+    INC.t = Math.max(INC.t, 4.5);
+  } catch (e) {
+    const m = String((e && e.message) || '');
+    if (/too fast|wait|rate/i.test(m) && tries < 3) { setTimeout(() => incFinish(i, score, tries + 1), 2500); return; }
+    sfx.nope(); toast(/not claimed|expired|not yours/i.test(m) ? 'Zu lange gebraucht – der Einsatz ist wieder frei.' : 'Abrechnung hat nicht geklappt.'); INC.t = 99;
+  }
+  INC.going = false;
+}
+
+/* ---- Minispiel-Wrapper: nutzt das Arbeits-Fenster und die Minispiele aus 63_work.js ---- */
+// finishTask (63_work.js) rechnet normale Aufträge mit dem Server ab; während eines Incident-Minispiels leiten wir das Ergebnis
+// hierher um (63_work.js bleibt unverändert). Nur solange WK.task genau unser Minispiel ist.
+const IM = { on: false, def: null, cb: null };
+const incMiniOn = () => IM.on && WK.on && WK.task === IM.def;
+const INC_RUN = { tap: taskTap, gauge: taskGauge, order: taskOrder, pick: taskPick, timing: taskMilk, stack: taskStack, blaze: taskBlaze, seq: taskChain, steps: taskSteps, gassi: taskGassi, catch: taskCatch, mash: taskMash };
+try { const fin0 = finishTask; finishTask = function (q, note) { return incMiniOn() ? incMiniFinish(q, note) : fin0(q, note); }; } catch (e) { incErr(e); }
+function playMini(def, onDone) {
+  if (WK.on) closeWork(); $('place').hidden = true;
+  IM.on = true; IM.def = def; IM.cb = onDone;
+  WK.on = true; WK.done = 0; WK.seq = (WK.seq || 0) + 1; WK.busy = false; clearInterval(WK.timer); clearInterval(WK.anim);
+  WK.task = def; const A = $('workArea'); A.innerHTML = ''; $('workTitle').textContent = def.title; $('workRes').textContent = ''; $('workStop').textContent = 'Abbrechen';
+  $('work').hidden = false;
+  try { INC_RUN[def.t](def, A); } catch (e) { incErr(e); incMiniClose(); onDone(0); }
+}
+function incMiniFinish(q, note) {
+  if (WK.busy || !WK.on) return; WK.busy = true; clearInterval(WK.timer); clearInterval(WK.anim);
+  $('workArea').querySelectorAll('button').forEach((b) => { b.disabled = true; });
+  q = clamp(Number(q) || 0); const stars = q >= 0.9 ? '⭐⭐⭐' : q >= 0.65 ? '⭐⭐' : q >= 0.4 ? '⭐' : '😬';
+  $('workRes').textContent = `${stars} ${note || ''}`; const cb = IM.cb, def = IM.def;
+  setTimeout(() => { if (IM.def !== def) return; incMiniClose(); if (cb) cb(Math.round(q * 100)); }, 1300);
+}
+function incMiniClose() { const was = IM.on && WK.task === IM.def; IM.on = false; IM.cb = null; IM.def = null; $('workStop').textContent = 'Feierabend'; if (was) { WK.on = false; clearInterval(WK.timer); clearInterval(WK.anim); $('work').hidden = true; } }
+$('workStop').addEventListener('click', () => { if (!IM.on) return; IM.on = false; IM.cb = null; IM.def = null; $('workStop').textContent = 'Feierabend'; INC.going = false; toast('Abgebrochen – der Einsatz bleibt kurz deiner. Tipp nochmal drauf!'); });
+
+/* ---- Takt (aus 70_loop.js) ---- */
+function incTick(dt) {
+  if (!WALK.on) { if (INC.wasOn) { INC.wasOn = false; incHideUi(); if (IM.on) { IM.on = false; IM.cb = null; IM.def = null; INC.going = false; } } return; }
+  if (!INC.wasOn) { INC.wasOn = true; INC.t = 99; }
+  INC.t += dt; INC.retry -= dt;
+  if (INC.t > (INC.focus || INC.goto ? 4 : 6)) incPoll();
+  if (IM.on && !WK.on) { IM.on = false; IM.cb = null; IM.def = null; INC.going = false; } // Fenster von außen geschlossen
+  const gi = INC.goto && INC.list.find((x) => x.id === INC.goto);
+  if (gi && !WALK.path.length) { INC.goto = null; if (incNear(gi)) incStart(gi); }
+  incUi();
+}
+
+/* ---- Pins, Pfeil am Rand (DOM) ---- */
+function incUiBuild() {
+  if (INC.ui) return INC.ui;
+  const st = document.createElement('style');
+  st.textContent = `.pin.walkpin.incpin{background:#ffb02e;color:#1b1b1b;z-index:1}.pin.walkpin.incpin b{color:#1b1b1b}.pin.walkpin.incpin span{color:#5a3800}
+.pin.walkpin.incpin.taken{background:#d9d4c7;opacity:.85}.pin.walkpin.incpin.mine{background:#3bb36b;color:#fff}.pin.walkpin.incpin.mine b{color:#ffd23f}.pin.walkpin.incpin.mine span{color:#fff}
+.pin.walkpin.incpin{white-space:nowrap}.pin.walkpin.incpin.far{transform:translate(-50%,-100%) scale(.82)}
+.incarrow{position:absolute;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;background:#ffb02e;border:3px solid #1b1b1b;box-shadow:0 3px 0 #1b1b1b;display:grid;place-items:center;font-size:19px;pointer-events:auto;cursor:pointer;padding:0;z-index:2}
+.incarrow.mine{background:#3bb36b}.incarrow i{position:absolute;left:50%;top:50%;width:0;height:0;margin:-7px 0 0 -7px;border:7px solid transparent;border-left:12px solid #1b1b1b}`;
+  document.head.appendChild(st);
+  const arr = document.createElement('button'); arr.type = 'button'; arr.className = 'incarrow'; arr.hidden = true; arr.innerHTML = '<i></i><span></span>'; layer.appendChild(arr);
+  arr.addEventListener('click', () => { const i = INC.list.find((x) => x.id === arr._id); if (i) incGo(i); });
+  INC.ui = { arr }; return INC.ui;
+}
+function incHideUi() { for (const id in INC.pins) { INC.pins[id].remove(); delete INC.pins[id]; } if (INC.ui) INC.ui.arr.hidden = true; }
+function incUi() {
+  const U = incUiBuild(), seen = {}, m = WALK.me, mini = incMiniOn();
+  let best = null, bestD = 1e9;
+  for (const i of INC.list) {
+    const g = incGeo(i), v = INC.vis[i.id], d = Math.hypot(g.stand.x - m.x, g.stand.y - m.y);
+    if (v && v.born > performance.now()) continue; // wird gerade abgeschleppt
+    const prio = i.id === INC.focus ? -1e6 : i.status === 'open' ? 0 : 1e6; if (d + prio < bestD) { bestD = d + prio; best = i; }
+    const top = incP(g, 0, 0), s = toScreen(top.x, top.y - 175);
+    if (mini || s.x < -80 || s.x > VW + 80 || s.y < -40 || s.y > VH + 120) continue;
+    seen[i.id] = 1; let el = INC.pins[i.id];
+    if (!el) { el = document.createElement('button'); el.type = 'button'; el.className = 'pin walkpin incpin'; layer.appendChild(el); INC.pins[i.id] = el; el.addEventListener('click', () => { const x = INC.list.find((y) => y.id === el._id); if (x) incGo(x); }); }
+    el._id = i.id; const K = INC_KIND[i.kind], st = incStage(i), taken = i.status === 'claimed' && !i.mine, mine = i.status === 'claimed' && i.mine;
+    const sub = taken ? `von ${esc(i.claimed_by || 'jemandem')} übernommen` : mine ? 'Du bist dran – antippen!' : `${i.stages > 1 ? `${i.stage + 1}/${i.stages} · ` : ''}${esc(st.act)} · +${fmt(i.reward)}`;
+    const h = `<b>${K.icon} ${esc(i.title)}</b><span>${sub}</span>`;
+    if (el._h !== h) { el._h = h; el.innerHTML = h; }
+    const cls = 'pin walkpin incpin' + (taken ? ' taken' : '') + (mine ? ' mine' : '') + (d > 1400 && i.id !== INC.focus ? ' far' : '');
+    if (el._c !== cls) { el._c = cls; el.className = cls; }
+    setPos(el, clamp(s.x, 90, VW - 90), s.y);
+  }
+  for (const id in INC.pins) if (!seen[id]) { INC.pins[id].remove(); delete INC.pins[id]; }
+  // Pfeil am Bildschirmrand zum wichtigsten Incident (eigene Kette zuerst, sonst das nächste offene)
+  const a = U.arr;
+  if (best && !mini && (best.status === 'open' || best.mine)) {
+    const g = incGeo(best), s = toScreen(g.stand.x, g.stand.y - 60), mg = 34, top = 110, bot = 130;
+    const off = s.x < -20 || s.x > VW + 20 || s.y < 60 || s.y > VH - 90; // nur wenn wirklich außerhalb des Bildes
+    if (off) {
+      const cx = VW / 2, cy = (top + VH - bot) / 2, dx = s.x - cx, dy = s.y - cy, f = Math.min((VW / 2 - mg) / Math.abs(dx || 1e-6), ((VH - bot - top) / 2 - 10) / Math.abs(dy || 1e-6));
+      setPos(a, cx + dx * f, cy + dy * f); const r = `rotate(${Math.atan2(dy, dx).toFixed(2)}rad) translateX(24px)`; if (a.firstChild._r !== r) { a.firstChild._r = r; a.firstChild.style.transform = r; }
+      a._id = best.id; const ic = INC_KIND[best.kind].icon; if (a.lastChild.textContent !== ic) a.lastChild.textContent = ic; a.classList.toggle('mine', best.id === INC.focus); if (a.hidden) a.hidden = false;
+    } else if (!a.hidden) a.hidden = true;
+  } else if (!a.hidden) a.hidden = true;
+}
+// Tippen auf ein Incident in der Welt (Auto, Kuh, Kunde) = hingehen bzw. loslegen (nach dem normalen Hingehen aus 61_walk.js)
+{ let down = null;
+  canvas.addEventListener('pointerdown', (e) => { down = ptrs.size > 1 ? null : { x: e.clientX, y: e.clientY, t: performance.now() }; });
+  canvas.addEventListener('pointerup', (e) => {
+    if (!WALK.on || !down) return; const ok = Math.hypot(e.clientX - down.x, e.clientY - down.y) <= 10 && performance.now() - down.t < 450; down = null; if (!ok) return;
+    const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left - VW / 2) / view.s + view.cx, y = (e.clientY - r.top - VH / 2) / view.s + view.cy;
+    let hit = null, hd = 1e9;
+    for (const i of INC.list) { const p = incP(incGeo(i), 0, 0), d = Math.hypot(x - p.x, (y - (p.y - 40)) * 1.4); if (d < 150 && d < hd) { hd = d; hit = i; } }
+    if (hit) incGo(hit);
+  });
+}
+
+/* ---- Karte: Autos mit Warnblinker, Warndreieck, Kühe, Winker … (nach Y sortiert mit Autos und Leuten) ---- */
+function incEnts(ents) {
+  try {
+    const now = performance.now();
+    const add = (x, y, fn, a, b) => { ents.push({ x, y, evd: incDrawEnt, fn, a, b }); };
+    for (const i of INC.list) {
+      const g = incGeo(i), v = INC.vis[i.id] || (INC.vis[i.id] = { born: now }), al = clamp((now - v.born) / 600); if (al <= 0) continue;
+      incPieces(i, g, al, now, add, false);
+    }
+    INC.gone = INC.gone.filter((o) => now - o.t0 < 1200);
+    for (const o of INC.gone) { const g = incGeo(o.i), al = 1 - (now - o.t0) / 1200; incPieces(o.i, g, al, now, add, true); }
+    INC.tows = INC.tows.filter((t) => now - t.t0 < 4200);
+    for (const t of INC.tows) { const p = incP(t.g, 0, 0); add(p.x, p.y + 1, incDrawTow, t); }
+  } catch (e) { incErr(e); }
+}
+function incDrawEnt(o, now) { try { o.fn(o, now); } catch (e) { incErr(e); } }
+// Bestandteile eines Incidents in die Zeichenliste
+function incPieces(i, g, al, now, add, gone) {
+  const K = INC_KIND[i.kind], ci = Math.abs(i.id), st = incStage(i), bub = !gone && i.status === 'open' && Math.hypot(WALK.me.x - g.stand.x, WALK.me.y - g.stand.y) < 1100;
+  const say = bub ? K.say[ci % K.say.length] : '';
+  const car = (a, l, cix, o) => { const p = incP(g, a, l); add(p.x, p.y, incDrawCar, { g, p, ci: cix, al, ...o }); };
+  if (g.werk) { car(0, 0, ci, { haz: false, hood: true }); incHelper(i, g, al, add); if (bub) { const p = incP(g, 0, 0); add(p.x, p.y + 2, incDrawBubble, { p, txt: i.kind === 'unfall' ? 'Ausbeulen, bitte! 🔨' : 'Ab auf die Bühne! 🔧', al }); } return; }
+  const side = g.side, lat = (k) => k * side; // quer: positiv = weg von der Straße
+  if (i.kind === 'kuh') {
+    const goat = incIsGoat(i), t = now / 1000 + ci, a = Math.sin(t * 0.35) * 120, l = lat(Math.sin(t * 0.23) * 25 - 5), p = incP(g, a, l);
+    add(p.x, p.y, incDrawAnimal, { p, img: goat ? 'an_goat' : ci % 2 ? 'an_cow1' : 'an_cow2', flip: Math.cos(t * 0.35) * g.f > 0, al, goat, t, say: bub ? (goat ? 'Määäh! 🐐' : say) : '' });
+    incHelper(i, g, al, add); return;
+  }
+  if (i.kind === 'unfall') {
+    car(108, lat(-6), ci, { haz: i.stage < 2, rot: 0.05 * g.f, dent: true, smoke: true }); car(-104, lat(8), ci * 7 + 3, { haz: i.stage < 2, rot: -0.08 * g.f }); // hinten aufgefahren
+    if (i.stage === 0) { const p = incP(g, 30, lat(-58)); add(p.x, p.y, incDrawPerson, { p, tint: 1, al, hurt: true, say }); }
+    const tri = incP(g, -g.f * 400, lat(-30)); add(tri.x, tri.y, incDrawTri, { p: tri, al });
+    return;
+  }
+  // ein Auto am Straßenrand (Panne, Reifen, Winker, Starthilfe)
+  car(0, 0, ci, { haz: i.kind === 'panne' || i.kind === 'reifen', smoke: i.kind === 'panne', tyre: i.kind === 'reifen', hood: i.kind === 'starthilfe', rot: i.kind === 'reifen' ? 0.06 * g.f : 0 });
+  if (i.kind === 'panne' || i.kind === 'reifen') { const tri = incP(g, -g.f * 300, lat(-25)); add(tri.x, tri.y, incDrawTri, { p: tri, al }); }
+  const pp = incP(g, g.f * 40, lat(-62)); // Fahrer/Kunde steht am Gehsteig
+  if (i.kind === 'winker') add(pp.x, pp.y, incDrawPerson, { p: pp, tint: ci, al, wave: true, say });
+  else if (bub || i.kind === 'starthilfe') add(pp.x, pp.y, incDrawPerson, { p: pp, tint: ci + 2, al, say, scratch: i.kind === 'starthilfe' });
+  if (i.kind === 'reifen') { const w0 = incP(g, g.f * 30, lat(-75)); add(w0.x, w0.y, incDrawWheel, { p: w0, al }); }
+  incHelper(i, g, al, add);
+}
+// wer den Einsatz übernommen hat (fremder Claim), schraubt sichtbar daneben – mit Namensschild
+function incHelper(i, g, al, add) {
+  if (i.status !== 'claimed' || i.mine || !i.claimed_by) return;
+  const p = g.werk ? incP(g, 60, -95) : incP(g, -g.f * 150, (g.ax === 'u' ? g.side * 215 - g.w : g.side * 215 - g.u)); add(p.x, p.y, incDrawPerson, { p, img: 'geselle', tint: 3, al, work: true, tag: i.claimed_by });
+}
+function incSprite(img, x, y, w, flip, alpha, rot, anchorY = 0.62) {
+  if (!img || !img.width || !img.height) return; const h = img.height * (w / img.width), s = toScreen(x, y), sw = w * view.s, sh = h * view.s;
+  ctx.save(); ctx.globalAlpha = alpha; ctx.translate(s.x, s.y); if (rot) ctx.rotate(rot); if (flip) ctx.scale(-1, 1); ctx.drawImage(img, -sw / 2, -sh * anchorY, sw, sh); ctx.restore();
+}
+function incDrawCar(o, now) {
+  const b = o.a, g = b.g, p = b.p, z = view.s, { img, flip } = incCarImg(b.ci, g.f, g.ax), c0 = incP(g, 0, 0), dx = p.x - c0.x, dy = p.y - c0.y;
+  const rel = (a, l, up) => { const q = incP(g, a, l); return toScreen(q.x + dx, q.y + dy - up); };
+  ctx.save(); ctx.globalAlpha = b.al; shadow(p.x, p.y + 6, CAR_W * 0.47, CAR_W * 0.2); ctx.restore();
+  incSprite(img, p.x, p.y, CAR_W, flip, b.al, b.rot || 0);
+  ctx.save(); ctx.globalAlpha = b.al;
+  if (b.haz && Math.sin(now / 230) > 0) { // Warnblinker: alle vier Ecken orange
+    ctx.globalCompositeOperation = 'lighter';
+    for (const [a, l] of [[100, 40], [100, -40], [-100, 40], [-100, -40]]) {
+      const s = rel(a, l, 38), R = 26 * z + 3, gr = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, R);
+      gr.addColorStop(0, 'rgba(255,190,40,1)'); gr.addColorStop(0.35, 'rgba(255,150,20,.8)'); gr.addColorStop(1, 'rgba(255,120,0,0)'); ctx.fillStyle = gr; ctx.fillRect(s.x - R, s.y - R, R * 2, R * 2);
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  if (b.hood) { // offene Motorhaube steht schräg hoch, leere Batterie blinkt darüber
+    const s = rel(g.f * 62, 0, 62), hw = 40 * z, hh = 36 * z, k = (g.ax === 'u' ? 1 : -1) * 8 * z;
+    ctx.fillStyle = '#2a2d33'; ctx.beginPath(); ctx.ellipse(s.x, s.y + 8 * z, hw * 0.85, 12 * z, 0, 0, Math.PI * 2); ctx.fill(); // offener Motorraum
+    const hg = ctx.createLinearGradient(0, s.y - hh, 0, s.y + 6 * z); hg.addColorStop(0, '#d9dde3'); hg.addColorStop(1, '#8d939c');
+    ctx.fillStyle = hg; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = Math.max(1, 2 * z);
+    ctx.beginPath(); ctx.moveTo(s.x - hw, s.y + 4 * z); ctx.lineTo(s.x + hw, s.y + 4 * z); ctx.lineTo(s.x + hw * 0.75 + k, s.y - hh); ctx.lineTo(s.x - hw * 0.75 + k, s.y - hh); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#555'; ctx.beginPath(); ctx.moveTo(s.x + hw * 0.6, s.y + 4 * z); ctx.lineTo(s.x + hw * 0.5 + k, s.y - hh * 0.6); ctx.stroke(); // Haubenstange
+    if (Math.sin(now / 300) > -0.2) { ctx.font = `${Math.max(12, 30 * z)}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('🪫', s.x, s.y - hh - 10 * z); }
+  }
+  if (b.dent) { const s = rel(g.f * 110, 0, 60), k = 1 + 0.12 * Math.sin(now / 140); ctx.font = `${Math.max(14, 40 * z * k)}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('💥', s.x, s.y); }
+  if (b.smoke) { // Rauch aus dem Motorraum
+    const s0 = rel(g.f * 80, 0, 60);
+    for (let k = 0; k < 5; k++) { const t = (now / 1000 * 0.45 + k / 5) % 1, r = (12 + 40 * t) * z, al = (1 - t) * 0.55 * b.al;
+      ctx.fillStyle = `rgba(85,82,88,${al * 1.3})`; ctx.beginPath(); ctx.arc(s0.x + Math.sin(k * 2.1 + t * 4) * 16 * z + t * 22 * z, s0.y - t * 170 * z, r, 0, Math.PI * 2); ctx.fill(); }
+  }
+  ctx.restore();
+}
+function incDrawTri(o) { // Warndreieck auf dem Gehsteig
+  const s = toScreen(o.a.p.x, o.a.p.y), z = view.s, h = 34 * z + 4, w = h * 0.58; ctx.save(); ctx.globalAlpha = o.a.al;
+  ctx.strokeStyle = '#555'; ctx.lineWidth = Math.max(1, 2 * z); ctx.beginPath(); ctx.moveTo(s.x - w * 0.6, s.y); ctx.lineTo(s.x, s.y - h * 0.25); ctx.lineTo(s.x + w * 0.6, s.y); ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#e22b20'; ctx.lineWidth = Math.max(2, 6 * z); ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(s.x, s.y - h); ctx.lineTo(s.x + w, s.y - 4 * z); ctx.lineTo(s.x - w, s.y - 4 * z); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+}
+function incDrawWheel(o, now) { // Reserverad lehnt am Auto
+  const s = toScreen(o.a.p.x, o.a.p.y), z = view.s, r = 20 * z + 2; ctx.save(); ctx.globalAlpha = o.a.al;
+  ctx.fillStyle = '#222'; ctx.beginPath(); ctx.ellipse(s.x, s.y - r, r * 0.75, r, 0.15, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#b9bcc2'; ctx.beginPath(); ctx.ellipse(s.x, s.y - r, r * 0.35, r * 0.48, 0.15, 0, Math.PI * 2); ctx.fill();
+  ctx.font = `${Math.max(9, 20 * z)}px system-ui`; ctx.textAlign = 'center'; ctx.globalAlpha = o.a.al * (0.5 + 0.5 * Math.sin(now / 200)); ctx.fillText('💨', s.x + 24 * z, s.y - r * 2.2);
+  ctx.restore();
+}
+const INC_TINT = [[0, 1, 1], [0, 0.45, 1.1], [15, 1.3, 0.85], [0, 1, 0.75], [345, 1.1, 1.05], [25, 0.8, 1]];
+function incDrawPerson(o, now) {
+  const b = o.a, sp = b.img || 'kunde'; if (!IMG[sp]) return; const bob = b.wave || b.work ? Math.abs(Math.sin(now / (b.work ? 170 : 160))) * 7 : b.hurt ? 0 : Math.abs(Math.sin(now / 420)) * 2;
+  ctx.save(); ctx.globalAlpha = b.al; shadow(b.p.x, b.p.y, 18, 8); ctx.restore();
+  const tt = INC_TINT[(b.tint || 0) % INC_TINT.length]; // nur kleine Farbton-Drehungen: Gesichter bleiben hautfarben
+  incSprite(tinted(sp, tt[0], tt[1], tt[2]), b.p.x, b.p.y - bob, b.img ? 54 : 46, false, b.al, b.hurt ? -0.12 : 0, 0.97);
+  const s = toScreen(b.p.x, b.p.y - 100), z = view.s; ctx.save(); ctx.globalAlpha = b.al; ctx.textAlign = 'center'; ctx.font = `${Math.max(11, 26 * z)}px system-ui`;
+  if (b.wave) { ctx.translate(s.x + 22 * z, s.y + 8 * z); ctx.rotate(Math.sin(now / 120) * 0.5); ctx.fillText('👋', 0, 0); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+  else if (b.hurt) ctx.fillText('🤕', s.x, s.y + 10 * z);
+  else if (b.scratch) ctx.fillText(Math.sin(now / 500) > 0 ? '🤷' : '❓', s.x + 18 * z, s.y);
+  else if (b.work) { ctx.translate(s.x + 24 * z, s.y + 30 * z); ctx.rotate(Math.sin(now / 110) * 0.6); ctx.fillText('🔧', 0, 0); }
+  ctx.restore();
+  if (b.tag) { const t = toScreen(b.p.x, b.p.y - 118); ctx.save(); ctx.font = '800 11px system-ui, sans-serif'; ctx.textAlign = 'center'; const w = ctx.measureText(b.tag).width + 12;
+    ctx.globalAlpha = b.al; ctx.fillStyle = '#d9d4c7'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(t.x - w / 2, t.y - 16, w, 17, 8) : ctx.rect(t.x - w / 2, t.y - 16, w, 17); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#1b1b1b'; ctx.fillText(b.tag, t.x, t.y - 4); ctx.restore(); }
+  if (b.say) incBubble(b.p.x, b.p.y - 135, b.say, b.al);
+}
+function incDrawAnimal(o, now) {
+  const b = o.a, img = IMG[b.img] || (EV && EV.img && EV.img[b.img]); if (!img) return;
+  ctx.save(); ctx.globalAlpha = b.al; shadow(b.p.x, b.p.y, b.goat ? 22 : 34, b.goat ? 9 : 13); ctx.restore();
+  incSprite(img, b.p.x, b.p.y - Math.abs(Math.sin(now / 150)) * 3, b.goat ? 88 : 135, b.flip, b.al, 0, 0.85);
+  if (b.say && Math.sin(b.t * 0.9) > -0.3) incBubble(b.p.x, b.p.y - (b.goat ? 80 : 110), b.say, b.al);
+}
+function incDrawBubble(o) { incBubble(o.a.p.x, o.a.p.y - 150, o.a.txt, o.a.al); }
+function incBubble(x, y, txt, al = 1) {
+  const s = toScreen(x, y), z = clamp(view.s, 0.55, 1.2); ctx.save(); ctx.globalAlpha = al; ctx.font = `800 ${Math.round(12 * z + 1)}px system-ui, sans-serif`; ctx.textAlign = 'center';
+  const w = ctx.measureText(txt).width + 14, h = 14 * z + 9, bx = s.x - w / 2, by = s.y - h;
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, w, h, 9) : ctx.rect(bx, by, w, h); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s.x - 5, by + h - 1); ctx.lineTo(s.x, by + h + 7); ctx.lineTo(s.x + 5, by + h - 1); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.fillRect(s.x - 4, by + h - 3, 8, 3); ctx.fillStyle = '#1b1b1b'; ctx.fillText(txt, s.x, by + h - 6 * z - 2); ctx.restore();
+}
+// Abschleppwagen: fährt am Straßenrand (nicht auf der Fahrbahn) heran, zieht das Auto hoch und fährt mit ihm davon
+// Abschleppwagen: der Kombi, einmal knallorange eingefärbt (silberne Sprites lassen sich nicht über den Farbton drehen)
+const INC_TOWIMG = {};
+function incTowImg(back) {
+  const k = back ? 'car_kombi_r' : 'car_kombi', src = IMG[k]; if (!src) return null; if (INC_TOWIMG[k]) return INC_TOWIMG[k];
+  const c = document.createElement('canvas'); c.width = src.width; c.height = src.height; const g = c.getContext('2d');
+  g.drawImage(src, 0, 0); g.globalCompositeOperation = 'multiply'; g.fillStyle = '#ffa020'; g.fillRect(0, 0, c.width, c.height);
+  g.globalCompositeOperation = 'destination-in'; g.drawImage(src, 0, 0); return (INC_TOWIMG[k] = c);
+}
+function incDrawTow(o, now) {
+  const t = o.a, g = t.g, k = (now - t.t0) / 1000, z = view.s, f = g.f;
+  const inK = eob(clamp(k / 1.1)), lift = clamp((k - 1.2) / 1.0), away = clamp((k - 2.4) / 1.8), al = clamp(k / 0.4) * (1 - clamp((k - 3.4) / 0.8));
+  const ta = f * (700 - 450 * inK) + f * 900 * away * away, truck = incP(g, ta, 0), back = g.ax === 'u' ? f < 0 : f > 0;
+  ctx.save(); ctx.globalAlpha = al; shadow(truck.x, truck.y + 6, 120, 50); ctx.restore();
+  incSprite(incTowImg(back), truck.x, truck.y, 250, g.ax === 'u', al, 0);
+  // Gelblicht + Schild „ABSCHLEPPDIENST“
+  const s = toScreen(truck.x, truck.y - 150); ctx.save(); ctx.globalAlpha = al;
+  if (Math.sin(now / 90) > 0) { ctx.globalCompositeOperation = 'lighter'; const R = 60 * z + 6, gr = ctx.createRadialGradient(s.x, s.y + 10 * z, 0, s.x, s.y + 10 * z, R); gr.addColorStop(0, 'rgba(255,200,40,.95)'); gr.addColorStop(1, 'rgba(255,140,0,0)'); ctx.fillStyle = gr; ctx.fillRect(s.x - R, s.y + 10 * z - R, R * 2, R * 2); ctx.globalCompositeOperation = 'source-over'; }
+  ctx.font = `800 ${Math.max(8, 15 * z)}px system-ui, sans-serif`; ctx.textAlign = 'center'; const tw = ctx.measureText('🪝 ABSCHLEPPDIENST').width + 10;
+  ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2; ctx.fillRect(s.x - tw / 2, s.y - 20 * z, tw, 20 * z + 4); ctx.strokeRect(s.x - tw / 2, s.y - 20 * z, tw, 20 * z + 4);
+  ctx.fillStyle = '#1b1b1b'; ctx.fillText('🪝 ABSCHLEPPDIENST', s.x, s.y - 2 * z); ctx.restore();
+  // das Auto: wird an den Haken gezogen, Schnauze hoch, und fährt hinten mit
+  const cp = incP(g, (ta - f * 230) * lift, 0), { img, flip } = incCarImg(t.ci, f, g.ax), fade = 1 - clamp((k - 3.4) / 0.8);
+  incSprite(img, cp.x, cp.y - 40 * lift, CAR_W, flip, fade, -0.12 * lift * (g.ax === 'u' ? -f : f));
+  if (k > 1.1 && k < 2.4) { const c = toScreen(cp.x, cp.y - 120); ctx.save(); ctx.font = `${Math.max(10, 22 * z)}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('⛓️', c.x, c.y); ctx.restore(); }
+}
+// Über allem: Geld-Popups (+ Notbetrieb, falls der Zeichen-Haken in 64_events.js fehlt)
+function incDrawTop(now) {
+  if (!WALK.on) return;
+  INC.fx = INC.fx.filter((f) => now - f.t0 < 1800);
+  for (const f of INC.fx) {
+    const k = (now - f.t0) / 1800, s = toScreen(f.x, f.y); ctx.save(); ctx.globalAlpha = 1 - clamp((k - 0.6) / 0.4); ctx.textAlign = 'center';
+    ctx.font = `${Math.round(30 + 8 * eob(clamp(k * 4)))}px "Lilita One", system-ui, sans-serif`; ctx.lineWidth = 6; ctx.strokeStyle = '#1b1b1b'; ctx.fillStyle = '#ffd23f';
+    ctx.strokeText(f.txt, s.x, s.y - k * 70); ctx.fillText(f.txt, s.x, s.y - k * 70);
+    if (f.sub) { ctx.font = '800 12px system-ui, sans-serif'; ctx.lineWidth = 3; ctx.strokeText(f.sub, s.x, s.y - k * 70 + 18); ctx.fillStyle = '#fff'; ctx.fillText(f.sub, s.x, s.y - k * 70 + 18); }
+    ctx.restore();
+  }
+  if (INC.fallback) { const L = []; incEnts(L); L.sort(byY); for (const e of L) e.evd(e, now); }
+}
+// Zeichen-Haken: Stadt-Ereignisse (64_events.js) fügen ihre Figuren über evEnts in die nach Y sortierte Liste ein – wir hängen uns dahinter
+try { const ev0 = evEnts; evEnts = function (ents) { ev0(ents); incEnts(ents); }; } catch (e) { INC.fallback = true; }
+
+/* ---- Test-Haken (tools/incidents_test.js) ---- */
+window.__inc = {
+  INC, INC_SPOTS, INC_KIND, INC_WERK, IM, poll: () => incPoll(), go: (id) => incGo(INC.list.find((x) => x.id === id)), geo: (id) => { const i = INC.list.find((x) => x.id === id); if (!i) return null; const g = incGeo(i); return { ...g, car: incP(g, 0, 0) }; },
+  near: (id) => { const i = INC.list.find((x) => x.id === id); return !!i && incNear(i); }, mock: () => { incToMock(); INC.t = 99; }, mini: (def, cb) => playMini(def, cb), MINI: INC_MINI, finishForTest: (q) => finishTask(q, 'Test'),
+  state: () => ({ mode: INC.mode, list: INC.list.map((i) => ({ id: i.id, kind: i.kind, stage: i.stage, status: i.status, mine: i.mine, by: i.claimed_by, u: i.u, w: i.w })), focus: INC.focus, goto: INC.goto, going: INC.going, mini: IM.on, tows: INC.tows.length, fallback: INC.fallback,
+    pins: Object.values(INC.pins).map((p) => p.textContent), arrow: INC.ui && !INC.ui.arr.hidden }),
+};
+/* ---------------- Live-Ticker, Einsatz-Serie (Combo) und Tagessieger im Mehrspieler ---------------- */
+// Liest nur window.INC_STATE (befüllt von 65_incidents.js, Event 'inc-state'): feed, combo, combo_until, day_top, my_pts.
+// Eine schmale Zeile oben: 🏆-Punkte (aufklappbar: Top 5 heute) · durchlaufende Ticker-Meldung · Combo-Ring mit Countdown.
+// Ohne INC_STATE bleibt alles weg (Mehrspieler wie bisher).
+const TK = { el: null, cur: null, shown: 0, seen: {}, first: true, combo: 0, open: false, openT: 0, sig: '' };
+const TK_COMBO_SECS = 180; // Serie hält 180 s nach dem letzten Einsatz (server/world.sql)
+const TK_FILL = ['📻 Radio Schrauberstadt: Alles ruhig. Die Resi kaut.', '🔧 Mario sucht seinen 10er-Schlüssel. Schon wieder.', '☕ Im Café gibt’s heute Kipferl zum halben Preis.',
+  '👮 Der Dorfbulle hat Langeweile. Fahrt lieber 50.', '🚒 Die Feuerwehr putzt das Löschfahrzeug – zum dritten Mal heute.', '🐐 Die Ziege Gretl wurde vor dem Tierheim gesichtet. Draußen.'];
+function tkBuild() {
+  if (TK.el) return TK.el;
+  const el = document.createElement('div'); el.id = 'tkBar'; el.hidden = true;
+  el.innerHTML = '<button type="button" class="tkpts" aria-expanded="false" title="Tagessieger heute">🏆<b>0</b></button><div class="tkline" aria-live="polite"><span class="tktxt"></span></div>'
+    + '<div class="tkcombo" hidden title="Einsatz-Serie: schnell den nächsten Einsatz erledigen!"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="bg" cx="20" cy="20" r="16"/><circle class="fg" cx="20" cy="20" r="16"/></svg><b></b></div>'
+    + '<div class="tktop" hidden><p>🏆 Tagessieger heute</p><ol></ol><small></small></div>';
+  document.body.appendChild(el); TK.el = el;
+  el.querySelector('.tkpts').addEventListener('click', () => { TK.open = !TK.open; TK.openT = 0; tkRender(true); sfx.pop(); });
+  el.querySelector('.tktop').addEventListener('click', () => { TK.open = false; tkRender(true); });
+  return el;
+}
+const tkAgo = (at) => { const s = (Date.now() - Date.parse(at)) / 1000; return !Number.isFinite(s) ? '' : s < 50 ? 'gerade eben' : s < 3600 ? `vor ${Math.max(1, Math.round(s / 60))} min` : `vor ${Math.round(s / 3600)} h`; };
+function tkItems() {
+  const S = window.INC_STATE, f = S && Array.isArray(S.feed) ? S.feed : [];
+  return f.filter((x) => x && typeof x === 'object' && x.text).slice(0, 15).map((x) => ({ id: String(x.id != null ? x.id : x.text), icon: str(x.icon, 8), text: str(x.text, 140), at: x.at }));
+}
+// nächste Zeile: neue Meldungen sofort, sonst die letzten 6 der Reihe nach, ohne Meldungen ein Lückenfüller
+function tkNext() {
+  const it = tkItems(), fresh = it.find((x) => !TK.seen[x.id]);
+  if (TK.first) { it.forEach((x) => { TK.seen[x.id] = 1; }); TK.first = false; } // beim Betreten: nicht alles als „neu“ blinken lassen
+  if (fresh && !TK.first && !TK.seen[fresh.id]) { TK.seen[fresh.id] = 1; return { ...fresh, isNew: true }; }
+  if (it.length) { const pool = it.slice(0, 6), i = TK.cur ? pool.findIndex((x) => x.id === TK.cur.id) : -1; return pool[(i + 1) % pool.length]; }
+  const n = TK.cur && TK.cur.fill != null ? (TK.cur.fill + 1) % TK_FILL.length : Math.floor(Math.random() * TK_FILL.length);
+  return { id: 'f' + n, icon: '', text: TK_FILL[n], fill: n };
+}
+function tkShow(x) {
+  const line = TK.el.querySelector('.tkline'), sp = line.firstChild; TK.cur = x; TK.shown = performance.now();
+  sp.textContent = `${x.icon ? x.icon + ' ' : ''}${x.text}${x.at ? ' · ' + tkAgo(x.at) : ''}`;
+  line.classList.remove('in', 'new', 'run'); sp.style.removeProperty('--tkrun'); void line.offsetWidth; line.classList.add('in'); if (x.isNew) { line.classList.add('new'); sfx.pop(); }
+  const over = sp.scrollWidth - line.clientWidth + 8; // zu lang: langsam durchlaufen lassen
+  if (over > 8) { sp.style.setProperty('--tkrun', `-${over}px`); sp.style.setProperty('--tkdur', `${Math.max(3, over / 32)}s`); line.classList.add('run'); }
+  TK.dur = 4200 + Math.max(0, over) / 32 * 1000;
+}
+function tkRender(force) {
+  const el = tkBuild(), S = window.INC_STATE, on = !!(WALK.on && S && typeof S === 'object' && !document.body.classList.contains('menu'));
+  if (el.hidden === on) { el.hidden = !on; document.body.classList.toggle('tkon', on); if (on) TK.cur = null; }
+  if (!on) return;
+  const now = performance.now();
+  if (!TK.cur || now - TK.shown > TK.dur || (tkItems().some((x) => !TK.seen[x.id]) && now - TK.shown > 1500 && !TK.first)) tkShow(tkNext());
+  // Punkte + Combo
+  const pts = Math.max(0, Number(S.my_pts) || 0), pb = el.querySelector('.tkpts b'); if (pb.textContent !== String(pts)) { pb.textContent = String(pts); if (!force) { el.querySelector('.tkpts').classList.remove('pop'); void el.offsetWidth; el.querySelector('.tkpts').classList.add('pop'); } }
+  const combo = Math.max(0, Math.floor(Number(S.combo) || 0)), until = Date.parse(S.combo_until), left = Number.isFinite(until) ? (until - Date.now()) / 1000 : 0, cb = el.querySelector('.tkcombo');
+  const showC = combo >= 2 && left > 0; if (cb.hidden === showC) cb.hidden = !showC;
+  if (showC) {
+    const k = clamp(left / TK_COMBO_SECS), fg = cb.querySelector('.fg'), C = 2 * Math.PI * 16; fg.style.strokeDasharray = `${C}`; fg.style.strokeDashoffset = `${C * (1 - k)}`;
+    cb.classList.toggle('low', left < 30); const t = `×${combo}`; const b = cb.querySelector('b'); if (b.textContent !== t) { b.textContent = t; cb.classList.remove('pop'); void cb.offsetWidth; cb.classList.add('pop'); }
+    cb.title = `Einsatz-Serie ×${combo}: noch ${Math.ceil(left)} s für den nächsten Einsatz – sonst ist die Serie weg!`;
+  }
+  if (combo > TK.combo && combo >= 2 && TK.combo > 0) toast(`⚡ Serie ×${combo}! Jeder Einsatz bringt jetzt +${Math.min(combo, 5) * 10} % – schnell weiter!`);
+  TK.combo = combo;
+  // Tagessieger (aufgeklappt): Top 5 + eigener Stand; klappt nach 8 s von selbst zu
+  const top = el.querySelector('.tktop'); if (TK.open) { TK.openT += 0.25; if (TK.openT > 8) TK.open = false; }
+  el.querySelector('.tkpts').setAttribute('aria-expanded', String(TK.open));
+  if (top.hidden === TK.open) top.hidden = !TK.open;
+  if (TK.open) {
+    const me = (CITY.me && CITY.me.name) || myName(), list = (Array.isArray(S.day_top) ? S.day_top : []).slice(0, 5);
+    const sig = JSON.stringify([list, pts, me]);
+    if (sig !== TK.sig || force) {
+      TK.sig = sig; const medal = ['🥇', '🥈', '🥉', '4.', '5.'];
+      top.querySelector('ol').innerHTML = list.length ? list.map((r, i) => `<li class="${str(r && r.name, 20) === me ? 'me' : ''}"><i>${medal[i]}</i><span>${esc(str(r && r.name, 20) || '?')}</span><b>${Math.max(0, Number(r && r.pts) || 0)}</b></li>`).join('') : '<li class="none">Noch niemand – sei die/der Erste!</li>';
+      const inTop = list.some((r) => str(r && r.name, 20) === me), lead = list[0] ? Math.max(0, Number(list[0].pts) || 0) : 0;
+      top.querySelector('small').textContent = inTop ? (list[0] && str(list[0].name, 20) === me ? 'Du führst! Der Mario ist schon nervös.' : `Du: ${pts} · noch ${Math.max(1, lead - pts + 1)} bis Platz 1`) : `Du: ${pts} Punkte · jeder Einsatz zählt!`;
+    }
+  }
+}
+window.addEventListener('inc-state', () => { try { if (WALK.on) tkRender(); } catch (e) { /* nie das Spiel stören */ } });
+setInterval(() => { try { if (TK.el || window.INC_STATE) tkRender(); } catch (e) { if (!TK.err) { TK.err = 1; console.warn('[Schrauberstadt] Ticker', e); } } }, 250);
+window.__ticker = { TK, render: () => tkRender(true) };
 /* ---------------- Schleife ---------------- */
 let last = performance.now(), loopOn = false;
 // Sicherheitsnetz: eine Exception in Update oder Zeichnen darf die Schleife nie anhalten. Jede Meldung nur einmal loggen.
@@ -4777,6 +5724,7 @@ function frame(dt, now) {
   safe('walk', walkTick, dt);
   safe('presence', presTick, dt);
   safe('events', evTick, dt); // Stadt-Ereignisse (64_events.js)
+  safe('incidents', incTick, dt); // Welt-Incidents (65_incidents.js)
   if (running && !guest) safe('goal', checkGoal);
 }
 function loop(now) {
@@ -4785,6 +5733,7 @@ function loop(now) {
   if (!(dt > 0)) dt = 0; else if (dt > 0.1) dt = 0.1; // Tab war versteckt / Ruckler: höchstens 0,1 s Spielzeit pro Frame
   safe('frame', frame, dt);
   if (!safe('draw', draw, now) && ctx.reset) ctx.reset(); // abgebrochenes save()/clip() nicht über Frames hinweg stapeln
+  else safe('incTop', incDrawTop, now); // Geld-Popups der Welt-Incidents obenauf
 }
 function startLoop() { if (loopOn) return; loopOn = true; last = performance.now(); requestAnimationFrame(loop); }
 setInterval(() => { safe('auto', autoTick); if (running) safe('hud', hud); }, 600);
