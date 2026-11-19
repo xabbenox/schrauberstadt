@@ -1027,7 +1027,7 @@ const TOWN = [
   { ep: 6, news: 'Folge 6: Großeinsatz! Tierheim, Landmaschinen-Halle und 125 neue Einwohner – Polizei oder Spedition, was kommt als Nächstes?', items: [
     // gleiche Stellen wie im Video (director/ep06.js; Regie zeichnet bei y − 0.62·h, das Spiel bei y − 0.85·h → +0.23·h)
     ['b_tierheim', -436, 3657, 760], // Gewinner der Abstimmung, Wunsch von @ossi_kahn (u 620, w -2130)
-    ['b_lmhalle', -250, 2270, 680], // für den Riesentraktor von @luca_ballern (u -650, w -580)
+    ['b_lmhalle', -215, 2185, 590], // für den Riesentraktor von @luca_ballern (u -650, w -580)
     ['o_ortsschild', 1838, 2885, 210, 0.97], // gelbes Ortsschild an der Hauptstraße (Video u 1330, hier u 1365, damit es die Abschlepp-Halle nicht berührt), hier kam der Ansturm an
     ['v_rtw', -505, 1244, 200], // Rettungswache beim Feuerwehrhaus: der RTW steht bereit (u -1800, w 330)
   ], animals: [
@@ -3972,7 +3972,7 @@ function drawMe() {
   if (!IMG.geselle) return;
   shadow(m.x, m.y, 26, 11); drawSprite(tinted('geselle', 0, 1.15, 1.2), m.x, m.y - bob, m.w, m.flip, 1, 0.97);
   const s = toScreen(m.x, m.y - 110); ctx.save(); ctx.font = '800 13px system-ui, sans-serif'; ctx.textAlign = 'center';
-  const name = (CITY.me && CITY.me.name) || myName(); const w = ctx.measureText(name).width + 16;
+  let name = (CITY.me && CITY.me.name) || ''; if (!name || DEFAULT_NAME.test(name.trim())) name = 'Du'; const w = ctx.measureText(name).width + 16;
   ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(s.x - w / 2, s.y - 22, w, 22, 11) : ctx.rect(s.x - w / 2, s.y - 22, w, 22); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#1b1b1b'; ctx.fillText(name, s.x, s.y - 6);
   const I = WALK.intro; if (I && I.tg && I.phase === 'pan' && !WALK.pan) { // Pfeil am Boden Richtung Geschehen
@@ -4107,7 +4107,36 @@ async function startWalk() {
   const sp = iso(-200, -260); WALK.me.x = sp.x; WALK.me.y = sp.y; WALK.path = []; WALK.shift = null; view.cx = sp.x; view.cy = sp.y; setZoom(1.1); clampView();
   WALK.intro = { t: 0, phase: 'wait', told: false }; WALK.pan = null; walkHintHide(); EV.polled = false; if (!EV.back) EV.t = 99; // Groß-Ereignisse gleich abfragen
   await cityLoad();
+  askPlayerName();
   if (WALK.intro && WALK.intro.phase === 'wait') { WALK.intro.t = Math.max(WALK.intro.t, 0); walkIntroTry(); }
+}
+/* ---- Spielername: im Mehrspieler bist du eine Person, keine „Meine Werkstatt“ ---- */
+const DEFAULT_NAME = /^(meine werkstatt|werkstatt\b.*|neuling)( \d+)?$/i;
+function askPlayerName(force) {
+  const cur = (CITY.me && CITY.me.name) || '';
+  if (window.__noNameAsk || (!force && (!cur || !DEFAULT_NAME.test(cur.trim())))) return;
+  if ($('nameAsk')) return;
+  const d = document.createElement('div'); d.id = 'nameAsk';
+  d.style.cssText = 'position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(0,0,0,.45);padding:16px';
+  d.innerHTML = `<div style="background:#fffdf6;border:3px solid #1b1b1b;border-radius:18px;padding:18px;max-width:360px;width:100%;box-shadow:0 6px 0 #1b1b1b;font-family:inherit">
+    <h3 style="margin:0 0 6px">👋 Wie heißt du in der Stadt?</h3>
+    <p style="margin:0 0 12px;font-size:14px;opacity:.8">Dein Name steht über deiner Figur und im Stadt-Ticker. Gern dein Insta- oder TikTok-Name!</p>
+    <input id="nameAskIn" maxlength="20" placeholder="z. B. Richard" style="width:100%;box-sizing:border-box;font-size:18px;padding:10px;border:2px solid #1b1b1b;border-radius:10px">
+    <p id="nameAskErr" style="color:#c0392b;font-size:13px;min-height:16px;margin:6px 0"></p>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" id="nameAskLater" class="big sm">Später</button><button type="button" id="nameAskOk" class="big go">Los geht's</button></div></div>`;
+  document.body.appendChild(d);
+  const inp = $('nameAskIn'); if (!DEFAULT_NAME.test(cur.trim())) inp.value = cur; setTimeout(() => inp.focus(), 50);
+  $('nameAskLater').onclick = () => d.remove();
+  const save = async () => {
+    const v = inp.value.trim(); if (v.length < 2) { $('nameAskErr').textContent = 'Mindestens 2 Zeichen, bitte.'; return; }
+    $('nameAskOk').disabled = true;
+    try { const r = await sbRpc('set_player_name', { p_name: v });
+      if (r && r.ok) { if (CITY.me) CITY.me.name = r.name; if (CITY.state && CITY.state.me) CITY.state.me.name = r.name; d.remove(); sfx.goal(); toast(`Hallo ${r.name}! 👋`); }
+      else $('nameAskErr').textContent = (r && r.msg) || 'Hat nicht geklappt – probier einen anderen Namen.';
+    } catch (e) { $('nameAskErr').textContent = 'Keine Verbindung – probier es gleich nochmal.'; }
+    $('nameAskOk').disabled = false;
+  };
+  $('nameAskOk').onclick = save; inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
 }
 const walkWelcome = () => toast((CITY.state && CITY.state.me && (CITY.state.me.townJob || CITY.state.me.employer)) ? 'Zurück in Schrauberstadt! Geh zu deiner Arbeit und starte eine Schicht.' : 'Willkommen in Schrauberstadt! Tippe auf ein Schild und frag nach Arbeit.');
 /* ---- Einstieg: statt Menü erst mal zeigen, wo gerade was los ist (Incidents aus 65_incidents.js oder Groß-Ereignis) ---- */
@@ -6375,7 +6404,9 @@ function boot(data) {
     try { S = sanitize(migrate(saved)); }
     catch (e) { console.error('[Schrauberstadt] Spielstand unlesbar, neues Spiel', e); S = fresh(); }
   }
-  resize(); safe('hud', hud); safe('menu', () => { setMenu(true); menuInfo(); }); netInit().catch((e) => console.error('[Schrauberstadt] Mehrspieler', e)); onlineInit().catch((e) => console.error('[Schrauberstadt] Online', e));
+  resize(); safe('hud', hud); safe('menu', () => { setMenu(true); menuInfo(); });
+  try { if (capNative()) requestAnimationFrame(() => requestAnimationFrame(() => { capPlugin('SplashScreen').hide({ fadeOutDuration: 300 }).catch(() => {}); })); } catch (e) { /* kein Splash-Plugin */ } // App: Startbild erst weg, wenn das Menü steht
+  netInit().catch((e) => console.error('[Schrauberstadt] Mehrspieler', e)); onlineInit().catch((e) => console.error('[Schrauberstadt] Online', e));
   loadAll().then(() => {
     safe('blur', makeBlurBg); dirty = true; bgDirty = true;
     safe('van', () => { van.front = tinted('car_kombi', 0, 0, 1.2); van.rear = tinted('car_kombi_r', 0, 0, 1.2); });
