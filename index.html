@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Schrauberstadt</title><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1f2a44"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="favicon.png"><link rel="preload" as="image" href="assets/title.jpg?v=90017ab2"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Schrauberstadt"><script>if("serviceWorker" in navigator&&location.protocol==="https:")addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script><meta name="description" content="Schrauberstadt – das Mitmach-Spiel zur Serie auf Instagram und TikTok"></head><body><title>Schrauberstadt</title>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Schrauberstadt</title><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1f2a44"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" href="favicon.png"><link rel="preload" as="image" href="assets/title.jpg?v=dceb6e1c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Schrauberstadt"><script>if("serviceWorker" in navigator&&location.protocol==="https:")addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});</script><meta name="description" content="Schrauberstadt – das Mitmach-Spiel zur Serie auf Instagram und TikTok"></head><body><title>Schrauberstadt</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800&display=swap">
@@ -115,7 +115,7 @@ body:has(#decide:not([hidden])) #toast { bottom: auto; top: calc(env(safe-area-i
 .big:disabled { background: #d9d6cc; color: #8a8c90; box-shadow: none; cursor: default; }
 
 /* Titel */
-#title { position: fixed; inset: 0; display: grid; place-items: center; padding: 20px max(16px, env(safe-area-inset-right, 0px)) 20px max(16px, env(safe-area-inset-left, 0px)); background: #2a3a1c url("assets/title.jpg?v=90017ab2") center 30% / cover no-repeat; }
+#title { position: fixed; inset: 0; display: grid; place-items: center; padding: 20px max(16px, env(safe-area-inset-right, 0px)) 20px max(16px, env(safe-area-inset-left, 0px)); background: #2a3a1c url("assets/title.jpg?v=dceb6e1c") center 30% / cover no-repeat; }
 #title::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20,24,32,.15) 0%, rgba(20,24,32,.05) 40%, rgba(20,24,32,.75) 100%); }
 .title-card { position: relative; box-sizing: border-box; display: grid; justify-items: center; gap: 14px; text-align: center; max-width: 440px; width: 100%; align-self: end; margin-bottom: 4vh; }
 .logo { background: var(--sun); border: 6px solid var(--ink); border-radius: 24px; box-shadow: 0 9px 0 var(--ink); font-family: var(--display); font-size: clamp(28px, 8.6vw, 60px); padding: 8px 20px 2px; max-width: 100%; box-sizing: border-box; line-height: 1.05; }
@@ -788,7 +788,7 @@ function loadAll() {
   // Fehlschlag (Funkloch, gerade veröffentlicht …): bis zu 3× nachladen; kommt ein Bild später, wird neu gezeichnet
   const one = (n, res, tries) => { const i = new Image(); i.onload = () => { IMG[n] = i; if (res) res(); else { if (n.startsWith('base_')) safe('blur', makeBlurBg); dirty = true; bgDirty = true; } };
     i.onerror = () => { if (res) res(); if (tries < 3) setTimeout(() => one(n, null, tries + 1), 1500 * (tries + 1)); };
-    i.src = 'assets/' + n + '.webp?v=90017ab2' + (tries ? (('assets/' + n + '.webp?v=90017ab2').includes('?') ? '&' : '?') + 'r=' + tries + Date.now() : ''); };
+    i.src = 'assets/' + n + '.webp?v=dceb6e1c' + (tries ? (('assets/' + n + '.webp?v=dceb6e1c').includes('?') ? '&' : '?') + 'r=' + tries + Date.now() : ''); };
   return Promise.all(ASSETS.map((n) => new Promise((res) => one(n, res, 0))));
 }
 const tintCache = {};
@@ -2298,7 +2298,7 @@ window.__tk = { spawn: () => { spawnTask(); return tasks.length; }, dec: (id) =>
 
 /* ---------------- Spaß: Spezialkunden, Combos, Bewertungen, Erfolge ---------------- */
 // Nur Einzelspieler (Spezialkunden) bzw. nie beim Koop-Gast. Alles läuft über Sprechblasen/Toasts, nichts blockiert das Spiel.
-['v_lf', 'v_lf_r', 'v_tractor', 'v_tractor_r'].forEach((n) => { if (IMG[n]) return; const i = new Image(); i.onload = () => { IMG[n] = i; }; i.src = 'assets/' + n + '.webp?v=90017ab2'; });
+['v_lf', 'v_lf_r', 'v_tractor', 'v_tractor_r'].forEach((n) => { if (IMG[n]) return; const i = new Image(); i.onload = () => { IMG[n] = i; }; i.src = 'assets/' + n + '.webp?v=dceb6e1c'; });
 const MARDER_JOB = { id: 'marder', name: 'Marderschaden', pay: 210, dur: 10, st: 'lift', skill: 'basic', parts: 'Zündkabel + Marderschreck', stock: true };
 const funBuff = (sp, t) => { if (buff.t > 0) return false; buff.spd = sp; buff.t = t; return true; };
 const SPECIALS = [
@@ -3843,7 +3843,7 @@ function renderCity() {
 // Runde 5: 10 Ausbaustufen → 5 Bild-Stufen (1–2, 3–4, 5–6, 7–8, 9–10), Bilder werden erst bei Bedarf geladen
 const bizTier = (lv) => (lv >= 9 ? 5 : lv >= 7 ? 4 : lv >= 5 ? 3 : lv >= 3 ? 2 : 1);
 const LAZY = {};
-function lazyImg(n) { if (IMG[n] || LAZY[n]) return; LAZY[n] = 1; const i = new Image(); i.onload = () => { IMG[n] = i; dirty = true; bgDirty = true; }; i.onerror = () => { LAZY[n] = 0; }; i.src = 'assets/' + n + '.webp?v=90017ab2'; }
+function lazyImg(n) { if (IMG[n] || LAZY[n]) return; LAZY[n] = 1; const i = new Image(); i.onload = () => { IMG[n] = i; dirty = true; bgDirty = true; }; i.onerror = () => { LAZY[n] = 0; }; i.src = 'assets/' + n + '.webp?v=dceb6e1c'; }
 function bizImg(kind, lv) { const base = KIND_IMG[kind]; if (!base) return 'h_shop'; lv = clamp(lv | 0, 1, 10); if (lv === 1) return base; const n = base + '_l' + lv; if (!IMG[n]) lazyImg(n); if (IMG[n]) return n; for (let k = lv - 1; k >= 2; k--) if (IMG[base + '_l' + k]) return base + '_l' + k; return base; } // jede Stufe ein eigenes Bild; solange es lädt: die nächstniedrigere
 function bizDeco(lv) { // Fahnen links/rechts + Lichterkette dazwischen (mehr Fahnen bei höheren Stufen)
   const cols = ['#e63b2e', '#ffd23f', '#2f7de1', '#3bb36b'];
@@ -5062,7 +5062,7 @@ const EV_RTW_HOME = { u: -1800, w: 262 }; // RTW der Rettungswache (Folge 6) –
 const EV = { list: [], t: 8, back: 0, busy: false, skew: 0, goto: null, q: [], sendT: 9, sending: false, seen: {}, told: {}, flash: null,
   mock: null, ui: null, fx: [], pops: [], ents: [], img: {}, errs: 0, flashT: 0, sub: {}, mk: {}, carry: null, mini: null, near: null, tapT: 0 };
 // eigene Bilder (Bus, Kühe), ohne die gemeinsame Bilderliste anzufassen
-['v_bus', 'an_cow1', 'an_cow2'].forEach((n) => { const i = new Image(); i.onload = () => { EV.img[n] = i; }; i.src = 'assets/' + n + '.webp?v=90017ab2'; });
+['v_bus', 'an_cow1', 'an_cow2'].forEach((n) => { const i = new Image(); i.onload = () => { EV.img[n] = i; }; i.src = 'assets/' + n + '.webp?v=dceb6e1c'; });
 const evSpot = (e) => EV_SPOTS[e.spot] || { ...EV_SPOTS[EV_DEF_SPOT[e.kind]], u: e.u, w: e.w };
 const evStandUW = (e) => { const s = evSpot(e); return { u: Number.isFinite(e.u) ? e.u : s.u, w: Number.isFinite(e.w) ? e.w : s.w }; };
 const evStand = (e) => { const p = evStandUW(e); return iso(p.u, p.w); };
@@ -6533,7 +6533,7 @@ const DRV = { on: false, info: null, cb: null, phase: '', t: 0, limit: 120, u: 0
   red: 0, hits: 0, bonks: 0, hitT: 0, bonkT: 0, sayT: 0, stopT: 0, hookT: 0, trail: [], fx: [], rects: [], from: null, to: null, maxPen: 0, penInfo: null, offRoad: 0, shake: 0, zoom0: 1, ui: null,
   truck: { kind: 'drive', x: 0, y: 0, v: 0, len: DRV_LEN, flip: true, back: false, mdx: 1, mdy: 0, path: [] },
   tow: { kind: 'drive', x: 0, y: 0, v: 0, len: 220, flip: true, back: false, mdx: 1, mdy: 0, path: [], hu: 1, hw: 0, img: null, on: false } };
-['v_tow', 'v_tow_r'].forEach((n) => { if (IMG[n]) return; const i = new Image(); i.onload = () => { IMG[n] = i; }; i.src = 'assets/' + n + '.webp?v=90017ab2'; });
+['v_tow', 'v_tow_r'].forEach((n) => { if (IMG[n]) return; const i = new Image(); i.onload = () => { IMG[n] = i; }; i.src = 'assets/' + n + '.webp?v=dceb6e1c'; });
 // Fahrbahnen: Hauptstraßen (|w| < 150 bzw. |u| < 150) + Nebenstraßen aus 32_town (an beiden Enden um die halbe Breite verlängert)
 function drvRects() {
   const R = [{ ax: 'u', a0: U_FAR_N, a1: U_FAR_P, c: 0, hw: 150 }, { ax: 'w', a0: W_FAR_N, a1: W_FAR_P, c: 0, hw: 150 }];
