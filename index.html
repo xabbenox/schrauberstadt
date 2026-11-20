@@ -4163,7 +4163,7 @@ function walkHud() {
 function openPlace(p) {
   const st = CITY.state || {}, me = st.me || {}, uid = ONLINE.sess && ONLINE.sess.uid, rk = rankOf(me.xp || 0);
   const list = $('placeList'); list.innerHTML = ''; shopBtns = []; $('placeH').textContent = `${p.icon} ${p.name}`;
-  const workHere = () => { $('place').hidden = true; WALK.shift = { t: 0, busy: false }; WALK.follow = true; openWork(); };
+  const workHere = () => { $('place').hidden = true; WALK.shift = { t: 0, busy: false, place: p }; WALK.follow = true; openWork(); }; // Ort merken: Aufgaben + Abrechnung passen zum Betrieb, in dem man gerade steht
   const take = (args, okMsg) => async () => { try { await sbRpc('take_job', args); sfx.goal(); toast(okMsg); await cityLoad(); openPlace(p); } catch (e) { sfx.nope(); const m = e.message || ''; toast(e instanceof TypeError || /Abort|Timeout/.test(e.name) ? 'Keine Verbindung zum Stadt-Server – bitte später nochmal probieren.' : p.soon && !/cooldown|join first|choose profession|no vacancy/.test(m) ? p.soon : cityErr(m)); } };
   if (p.kind === 'town') {
     const mine = me.townJob === p.id;
@@ -4561,7 +4561,14 @@ const WORK = {
     TIMING('Rahmen schweißen', '🔥', 5, '⚡ Schweißen!', 'Genau im grünen Bereich schweißen', { pot: '🚜', hit: '🔸', miss: ['Loch gebrannt! 🕳️', 'Funken im Heu – vorsichtig!', 'Das hält keinen Pflug.'], clean: 'Hält für die Ewigkeit!' })],
 };
 const WK = { on: false, task: null, t: 0, timer: null, anim: null, done: 0, busy: false };
+// Betriebsart → Aufgaben (wer im eigenen oder fremden Betrieb arbeitet, bekommt dessen Aufgaben – nicht die vom Stadt-Job)
+const KIND_WORK = { werkstatt: 'mechaniker', restauration: 'restaurator', autohandel: 'autohaendler', abschlepp: 'abschlepper', hotel: 'hotelier', autokino: 'kinobetreiber', bauernhof: 'landwirt',
+  metzgerei: 'metzger', parkplatz: 'parkwaechter', reifenhotel: 'reifenprofi', tankstelle: 'tankwart', taxi: 'taxifahrer', waschanlage: 'waescher', tierheim: 'tierpfleger', rettung: 'sanitaeter', feuerwehr: 'feuerwehr', lmhalle: 'landmaschinen' };
+function workPlace() { return (WALK.shift && WALK.shift.place) || null; }
+function workOwnBiz() { const p = workPlace(), uid = ONLINE.sess && ONLINE.sess.uid; return p && p.plot && p.plot.biz && p.plot.owner === uid ? p.plot.biz : null; }
 function workTasksFor() {
+  const at = workPlace();
+  if (at) { if (at.kind === 'town' && at.work && WORK[at.work]) return WORK[at.work]; const bz = at.plot && at.plot.biz; if (bz && WORK[KIND_WORK[bz.kind]]) return WORK[KIND_WORK[bz.kind]]; }
   const me = (CITY.state && CITY.state.me) || {}; let pid = me.profession;
   const tp = me.townJob && TOWN_PLACES.find((x) => x.id === me.townJob); if (tp && tp.work && WORK[tp.work]) return WORK[tp.work]; // Stadt-Job: Aufträge passend zum Ort, auch wenn der Server den Beruf noch nicht kennt
   if (!me.employer && !me.townJob) { // eigener Betrieb: Beruf passend zum Betrieb
@@ -4600,7 +4607,7 @@ async function finishTask(q, note) {
   $('workRes').textContent = `${stars} ${note || ''}`;
   if (q <= 0) { $('workRes').textContent += ' · kein Lohn'; WK.busy = false; setTimeout(() => { if (WK.on && WK.seq === seq) nextTask(); }, 1600); return; } // nichts geschafft = keine Abrechnung (kein Geld fürs Herumstehen)
   try {
-    const r = await sbRpc('work_task', { p_quality: Math.max(0.2, q) });
+    const own = workOwnBiz(), r = own ? await sbRpc('work_task_at', { p_quality: Math.max(0.2, q), p_biz: own.id }) : await sbRpc('work_task', { p_quality: Math.max(0.2, q) });
     const rk = rankOf(r.xp), next = RANKS[rk + 1]; WK.done++; const cur = WK.on && WK.seq === seq;
     sfx.cash(); if (cur) $('workRes').textContent = `${stars} +${fmt(r.pay)}${r.gain ? '' : ' (keine Erfahrung – sorgfältiger arbeiten!)'} · ${RANKS[rk][0]}${next ? ` ${r.xp}/${next[1]}` : ''}`;
     if (rk > rankOf(r.xp - (r.gain ? 1 : 0))) { sfx.goal(); toast(`🎉 Aufgestiegen: Du bist jetzt ${RANKS[rk][0]}!`); }
