@@ -769,7 +769,11 @@ const ASSETS = ['base_old', 'base_reno', 'p_lift1', 'p_lift2', 'p_tyre', 'p_pain
 const PATCH_POS = { lift1: [440, 800], lift2: [80, 1060], tyre: [840, 1340], paint: [55, 650], wash: [730, 260], parking: [750, 1540] };
 const IMG = {};
 function loadAll() {
-  return Promise.all(ASSETS.map((n) => new Promise((res) => { const i = new Image(); i.onload = () => { IMG[n] = i; res(); }; i.onerror = () => res(); i.src = 'assets/' + n + '.webp?v=bf19bc62'; })));
+  // Fehlschlag (Funkloch, gerade veröffentlicht …): bis zu 3× nachladen; kommt ein Bild später, wird neu gezeichnet
+  const one = (n, res, tries) => { const i = new Image(); i.onload = () => { IMG[n] = i; if (res) res(); else { if (n.startsWith('base_')) safe('blur', makeBlurBg); dirty = true; bgDirty = true; } };
+    i.onerror = () => { if (res) res(); if (tries < 3) setTimeout(() => one(n, null, tries + 1), 1500 * (tries + 1)); };
+    i.src = 'assets/' + n + '.webp?v=bf19bc62' + (tries ? (('assets/' + n + '.webp?v=bf19bc62').includes('?') ? '&' : '?') + 'r=' + tries + Date.now() : ''); };
+  return Promise.all(ASSETS.map((n) => new Promise((res) => one(n, res, 0))));
 }
 const tintCache = {};
 function tinted(name, hue, sat, lum) {
