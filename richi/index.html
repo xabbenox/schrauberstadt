@@ -29,6 +29,7 @@ header .sp{flex:1}
 nav.tabs{display:flex;gap:6px;padding:10px 16px 0;max-width:1200px;margin:0 auto}
 nav.tabs button{flex:0 0 auto;border:0;background:transparent;color:var(--mut);padding:9px 14px;border-radius:12px;cursor:pointer;font-weight:700}
 nav.tabs button.on{background:var(--y);color:var(--ytx)}
+nav.tabs button{position:relative}.badge{position:absolute;top:2px;right:6px;background:var(--red);color:#fff;border-radius:999px;font-size:10px;padding:1px 6px;line-height:1.4}
 main{max-width:1200px;margin:0 auto;padding:14px 16px 96px}
 .grid{display:grid;gap:12px}
 .tiles{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
@@ -138,6 +139,7 @@ dialog::backdrop{background:rgba(5,8,15,.7);backdrop-filter:blur(2px)}
 <div id="app" class="hidden">
   <nav class="tabs" id="tabs">
     <button data-t="dash" class="on"><span>📊</span>Übersicht</button>
+    <button data-t="fb"><span>💬</span>Feedback<b class="badge hidden" id="fbBadge"></b></button>
     <button data-t="players"><span>👥</span>Spieler</button>
     <button data-t="feed"><span>📡</span>Live</button>
     <button data-t="actions"><span>🛠️</span>Aktionen</button>
@@ -158,6 +160,14 @@ dialog::backdrop{background:rgba(5,8,15,.7);backdrop-filter:blur(2px)}
         <div class="card"><h3>🏪 Betriebe</h3><div id="biz"></div></div>
       </div>
       <div class="card" style="margin-top:12px"><h3>📡 Gerade los <span class="sp"></span><button class="btn sm ghost" data-goto="feed">Alles</button></h3><div class="list" id="miniFeed"></div></div>
+    </section>
+
+    <!-- Feedback -->
+    <section id="t_fb" class="hidden">
+      <div class="card"><h3>💬 Feedback der Tester <span class="sp"></span><button class="btn sm ghost" id="fbRe">↻</button></h3>
+        <div class="seg" id="fbStat"><button class="btn sm on" data-s="neu">🆕 Neu</button><button class="btn sm" data-s="gesehen">👀 Gesehen</button><button class="btn sm" data-s="erledigt">✅ Erledigt</button><button class="btn sm" data-s="abgelehnt">🚫 Abgelehnt</button><button class="btn sm" data-s="">Alle</button></div>
+        <div class="seg" id="fbKind" style="margin-top:6px"><button class="btn sm on" data-k="">Alles</button><button class="btn sm" data-k="bug">🐞 Fehler</button><button class="btn sm" data-k="idea">💡 Vorschläge</button></div>
+        <div class="list" id="fbList" style="margin-top:8px"></div></div>
     </section>
 
     <!-- Spieler -->
@@ -318,7 +328,7 @@ $('otpGo').onclick = async () => {
 let tab = 'dash';
 function go(t) {
   tab = t; document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.t === t));
-  ['dash', 'players', 'feed', 'actions', 'log'].forEach((x) => $('t_' + x).classList.toggle('hidden', x !== t));
+  ['dash', 'fb', 'players', 'feed', 'actions', 'log'].forEach((x) => $('t_' + x).classList.toggle('hidden', x !== t));
   lsSet('ss_admin_tab', t); refresh();
 }
 $('tabs').onclick = (e) => { const b = e.target.closest('button'); if (b) go(b.dataset.t); };
@@ -482,12 +492,40 @@ async function endEvent(id) {
 $('evEnd').onclick = () => endEvent(null);
 
 /* ---------- Log ---------- */
-const ACT = { ban: '⛔ Sperre', unban: '✅ Entsperrt', cash: '💶 Geld', rename: '✏️ Name', end_event: '🛑 Ereignis beendet', spawn_event: '🔥 Ereignis gestartet', feed_post: '📢 Ticker' };
+const ACT = { ban: '⛔ Sperre', unban: '✅ Entsperrt', cash: '💶 Geld', rename: '✏️ Name', end_event: '🛑 Ereignis beendet', spawn_event: '🔥 Ereignis gestartet', feed_post: '📢 Ticker', feedback_gesehen: '👀 Feedback gesehen', feedback_erledigt: '✅ Feedback erledigt', feedback_abgelehnt: '🚫 Feedback abgelehnt', feedback_neu: '🆕 Feedback' };
 async function loadLog() {
   const l = await rpc('admin_log_list', { p_limit: 200 });
   $('alog').innerHTML = l.length ? l.map((x) => `<div class="row"><div class="body"><b>${esc(ACT[x.action] || x.action)}</b> ${x.targetName ? `<b class="name" data-pid="${esc(x.target)}" style="cursor:pointer">${esc(x.targetName)}</b>` : ''} <span class="muted">${esc(x.detail || '')}</span><div class="small muted">${esc(x.admin || '')}</div></div><span class="t">${esc(dt(x.at))}</span></div>`).join('') : '<div class="empty">Noch keine Admin-Aktionen.</div>';
 }
 $('logRe').onclick = () => loadLog().catch((e) => toast(errTxt(e), 1));
+
+/* ---------- Feedback ---------- */
+let fbS = 'neu', fbK = '', fbItems = [];
+const FBST = { neu: '🆕 neu', gesehen: '👀 gesehen', erledigt: '✅ erledigt', abgelehnt: '🚫 abgelehnt' };
+async function fbBadge() { const r = await rpc('admin_feedback', { p_status: 'neu', p_kind: null, p_limit: 1 }); const n = (r.counts && r.counts.neu) || 0, b = $('fbBadge'); b.textContent = n; b.classList.toggle('hidden', !n); }
+async function loadFb() {
+  const r = await rpc('admin_feedback', { p_status: fbS || null, p_kind: fbK || null, p_limit: 200 }); fbItems = r.items || [];
+  const c = r.counts || {}; document.querySelectorAll('#fbStat button').forEach((b) => { const n = b.dataset.s ? c[b.dataset.s] || 0 : Object.values(c).reduce((a, x) => a + x, 0); b.textContent = b.textContent.replace(/ \(\d+\)$/, '') + ` (${n})`; });
+  const n = c.neu || 0, bd = $('fbBadge'); bd.textContent = n; bd.classList.toggle('hidden', !n);
+  $('fbList').innerHTML = fbItems.length ? fbItems.map((f) => { const m = f.meta || {};
+    return `<div class="row"><span class="ic">${f.kind === 'bug' ? '🐞' : '💡'}</span><div class="body"><div>${esc(f.body)}</div>
+      <div class="small muted" style="margin-top:4px">${f.player ? `<b class="name" data-pid="${esc(f.player)}" style="cursor:pointer">${esc(f.name || 'Spieler')}</b>` : 'Gast'} · ${esc(m.where || '')}${m.job ? ' · ' + esc(m.job) : ''} · ${esc(m.app || '')} ${esc(m.screen || '')} · ${esc(m.v || '')}</div>
+      ${m.errs && m.errs.length ? `<div class="small" style="color:#ff9a9a;margin-top:2px">⚠️ ${esc(m.errs.join(' | '))}</div>` : ''}
+      ${f.note ? `<div class="small" style="margin-top:2px">📝 ${esc(f.note)}</div>` : ''}
+      <div class="actions" style="margin-top:6px">${f.has_shot ? `<button class="btn sm" data-shot="${f.id}">🖼️ Bild</button>` : ''}${['gesehen', 'erledigt', 'abgelehnt'].filter((s) => s !== f.status).map((s) => `<button class="btn sm ghost" data-set="${s}" data-id="${f.id}">${FBST[s]}</button>`).join('')}<button class="btn sm ghost" data-note="${f.id}">📝</button></div></div>
+      <span class="t">${esc(dt(f.created_at))}<br><span class="chip">${esc(FBST[f.status] || f.status)}</span></span></div>`; }).join('') : '<div class="empty">Nichts in dieser Liste. 🎉</div>';
+}
+$('fbRe').onclick = () => loadFb().catch((e) => toast(errTxt(e), 1));
+$('fbStat').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; fbS = b.dataset.s; document.querySelectorAll('#fbStat button').forEach((x) => x.classList.toggle('on', x === b)); loadFb().catch((er) => toast(errTxt(er), 1)); };
+$('fbKind').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; fbK = b.dataset.k; document.querySelectorAll('#fbKind button').forEach((x) => x.classList.toggle('on', x === b)); loadFb().catch((er) => toast(errTxt(er), 1)); };
+$('fbList').onclick = async (e) => {
+  const sh = e.target.closest('[data-shot]'), st = e.target.closest('[data-set]'), no = e.target.closest('[data-note]');
+  try {
+    if (sh) { openDlg('<div class="empty">Lade Bild …</div>'); const img = await rpc('admin_feedback_shot', { p_id: +sh.dataset.shot }); openDlg(`<h2>Bildschirmfoto<span class="sp"></span><button class="x" aria-label="Schließen">✕</button></h2>${img ? `<img src="${esc(img)}" alt="Bildschirmfoto" style="width:100%;border-radius:12px">` : '<div class="empty">Kein Bild.</div>'}`); }
+    else if (st) { await rpc('admin_feedback_set', { p_id: +st.dataset.id, p_status: st.dataset.set, p_note: null }); toast('Gespeichert: ' + FBST[st.dataset.set]); await loadFb(); }
+    else if (no) { const f = fbItems.find((x) => x.id === +no.dataset.note); const t = prompt('Notiz zu diesem Feedback:', (f && f.note) || ''); if (t == null) return; await rpc('admin_feedback_set', { p_id: f.id, p_status: f.status, p_note: t }); await loadFb(); }
+  } catch (er) { toast(errTxt(er), 1); }
+};
 
 /* ---------- Laden / Live ---------- */
 async function loadDash() { renderDash(await rpc('admin_overview')); }
@@ -498,6 +536,8 @@ async function refresh() {
     else if (tab === 'feed') await loadFeed();
     else if (tab === 'actions') await loadDash();
     else if (tab === 'log') await loadLog();
+    else if (tab === 'fb') await loadFb();
+    if (tab !== 'fb') fbBadge().catch(() => {});
     $('liveDot').classList.add('on');
   } catch (e) { $('liveDot').classList.remove('on'); if (e.message !== 'forbidden' && e.message !== 'nicht angemeldet') toast(errTxt(e), 1); }
 }
