@@ -193,6 +193,9 @@ body:has(#decide:not([hidden])) #toast { bottom: auto; top: calc(env(safe-area-i
 #menuKoop { background: #ece8dc; font-size: 18px; }
 .mp-box { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 10px; overflow-y: auto; }
 .mp-box .item { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.lg-col { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; min-width: 0; } .lg-col .mp-row .buy { flex: none; } input.lg-in { box-sizing: border-box; width: 100%; } .lg-link { background: none; border: 0; padding: 4px 2px; font: inherit; font-weight: 800; font-size: 14px; color: var(--navy); text-decoration: underline; cursor: pointer; text-align: left; } .lg-hint { margin: 0; font-weight: 700; font-size: 14px; }
+#loginOut { display: flex; flex-wrap: wrap; gap: 8px; } #loginOut[hidden] { display: none; }
+#loginMail, .mp-row input.lg-in, input.lg-in { text-transform: none !important; letter-spacing: 0 !important; font-size: 17px !important; text-align: left !important; font-family: inherit !important; border: 3px solid var(--ink); border-radius: 14px; padding: 8px 10px; min-width: 0; }
 #loginMail { text-transform: none !important; letter-spacing: 0 !important; font-size: 17px !important; text-align: left !important; font-family: inherit !important; }
 .mp-row { display: flex; gap: 8px; } .mp-row input { flex: 1; min-width: 0; font-family: var(--display); font-size: 24px; letter-spacing: .2em; text-transform: uppercase; border: 3px solid var(--ink); border-radius: 14px; padding: 6px 10px 3px; text-align: center; }
 .mp-box .buy { font-size: 18px; } .mp-box .big { font-size: 20px; }
@@ -435,10 +438,14 @@ body.tkon #evBanner { top: calc(env(safe-area-inset-top, 0px) + 34px); }
     <div class="mp-box">
       <p id="loginState"></p>
       <div id="loginOAuth" class="mp-row"><button class="buy oauth" id="login_apple" type="button"> Mit Apple anmelden</button><button class="buy oauth" id="login_google" type="button">G Mit Google anmelden</button></div>
-      <div id="loginForm" class="mp-row"><input id="loginMail" type="email" autocomplete="email" placeholder="deine@email.at" aria-label="E-Mail"><button class="buy" id="loginSend" type="button">Link schicken</button></div>
+      <div id="loginForm" class="lg-col"><input id="loginMail" class="lg-in" type="email" autocomplete="username email" placeholder="deine@email.at" aria-label="E-Mail">
+        <div class="mp-row"><input id="loginPw" class="lg-in" type="password" autocomplete="current-password" placeholder="Passwort" aria-label="Passwort"><button class="buy" id="loginPwGo" type="button">Anmelden</button></div>
+        <button class="lg-link" id="loginSend" type="button">Neu hier oder Passwort vergessen? Code per Mail schicken</button></div>
       <div id="loginCode" class="mp-row" hidden><input id="loginOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Code aus der Mail" aria-label="Code"><button class="buy" id="loginVerify" type="button">Anmelden</button></div>
-      <div id="loginOut" hidden><button class="fire" id="loginLogout" type="button">Abmelden</button> <button class="fire" id="loginDelete" type="button">Konto löschen</button></div>
-      <p class="hint">Kein Passwort nötig: Du bekommst eine Mail mit Code und Link. Google-Login folgt.</p>
+      <div id="loginSetPw" class="lg-col" hidden><p id="loginSetPwTxt" class="lg-hint">Leg dir ein Passwort fest, dann brauchst du nächstes Mal keinen Code mehr.</p>
+        <div class="mp-row"><input id="loginNewPw" class="lg-in" type="password" autocomplete="new-password" placeholder="Neues Passwort (8+ Zeichen)" aria-label="Neues Passwort"><button class="buy" id="loginNewPwGo" type="button">Speichern</button></div></div>
+      <div id="loginOut" hidden><button class="fire" id="loginLogout" type="button">Abmelden</button> <button class="fire" id="loginPwChange" type="button">Passwort ändern</button> <button class="fire" id="loginDelete" type="button">Konto löschen</button></div>
+      <p class="hint" id="loginHint">Einmal anmelden reicht – die App merkt sich dein Konto.</p>
     </div>
   </div>
 </div>
@@ -3072,8 +3079,8 @@ function loginUi() {
   const s = ONLINE.sess, b = $('menuLogin'); if (!b) return;
   b.textContent = s ? '☁️ ' + (s.email || 'Angemeldet') : '☁️ Anmelden & online speichern';
   const st = $('loginState'); if (!st) return;
-  $('loginForm').hidden = !!s; $('loginOut').hidden = !s;
-  st.textContent = s ? `Angemeldet als ${s.email}. ${ONLINE.status}` : 'Mit deiner E-Mail anmelden: Dein Spielstand liegt dann online und du spielst auf jedem Gerät weiter. Bald auch: die gemeinsame Stadt.';
+  $('loginForm').hidden = !!s; $('loginOut').hidden = !s; const oa = $('loginOAuth'); if (oa) oa.hidden = !!s; if (!s) { $('loginSetPw').hidden = true; } else { $('loginCode').hidden = true; }
+  st.textContent = s ? `Angemeldet als ${s.email}. ${ONLINE.status}` : 'Mit E-Mail und Passwort anmelden: Dein Spielstand liegt dann online und du spielst auf jedem Gerät weiter. Bald auch: die gemeinsame Stadt.';
 }
 async function onlineInit() {
   try { const raw = lsGet(SB_SESS); if (raw) ONLINE.sess = JSON.parse(raw); } catch (e) { ONLINE.sess = null; }
@@ -3087,9 +3094,42 @@ $('loginSend').addEventListener('click', async () => {
   const email = $('loginMail').value.trim(), btn = $('loginSend');
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Bitte eine gültige E-Mail eingeben.'); return; }
   btn.disabled = true; btn.textContent = 'Sende …';
-  try { await sbLink(email); ONLINE.mail = email; $('loginCode').hidden = false; $('loginOtp').value = ''; $('loginState').textContent = `Mail an ${email} geschickt. Gib den 6-stelligen Code aus der Mail hier ein (oder tippe in der Mail auf den Link).`; }
+  try { await sbLink(email); ONLINE.mail = email; $('loginCode').hidden = false; $('loginOtp').value = ''; $('loginState').textContent = `Mail an ${email} geschickt. Gib den Code aus der Mail hier ein – danach legst du dein Passwort fest.`; }
   catch (e) { $('loginState').textContent = 'Das hat nicht geklappt: ' + e.message + '. Probier es in ein paar Minuten nochmal.'; }
-  btn.disabled = false; btn.textContent = 'Link schicken';
+  btn.disabled = false; btn.textContent = 'Neu hier oder Passwort vergessen? Code per Mail schicken';
+});
+// Anmelden mit E-Mail + Passwort
+function sbSessFrom(j, email) { sbStore({ at: j.access_token, rt: j.refresh_token, exp: Date.now() + (j.expires_in || 3600) * 1000, email: (j.user && j.user.email) || email, uid: j.user && j.user.id }); }
+async function loginPw() {
+  const email = $('loginMail').value.trim(), password = $('loginPw').value, btn = $('loginPwGo');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { toast('Bitte eine gültige E-Mail eingeben.'); return; }
+  if (!password) { toast('Bitte dein Passwort eingeben.'); return; }
+  btn.disabled = true;
+  try {
+    const r = await fetch(SB_URL + '/auth/v1/token?grant_type=password', { method: 'POST', headers: sbHead(), body: JSON.stringify({ email, password }) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.access_token) {
+      $('loginState').textContent = r.status === 400 ? 'E-Mail oder Passwort stimmt nicht. Noch kein Passwort? Tipp unten auf „Code per Mail schicken“ – danach kannst du eins festlegen.' : 'Anmelden hat nicht geklappt (' + r.status + '). Probier es gleich nochmal.';
+    } else { $('loginPw').value = ''; sbSessFrom(j, email); toast('Angemeldet als ' + email); loginUi(); onlineSync(); }
+  } catch (e) { $('loginState').textContent = 'Server nicht erreichbar – probier es gleich nochmal.'; }
+  btn.disabled = false;
+}
+$('loginPwGo').addEventListener('click', loginPw);
+$('loginPw').addEventListener('keydown', (e) => { if (e.key === 'Enter') loginPw(); });
+// Passwort festlegen / ändern (nach Code- oder Google-Login)
+function showSetPw(txt) { $('loginSetPw').hidden = false; $('loginSetPwTxt').textContent = txt; $('loginNewPw').value = ''; setTimeout(() => { try { $('loginNewPw').focus(); } catch (e) { /* egal */ } }, 50); }
+$('loginPwChange').addEventListener('click', () => showSetPw('Neues Passwort festlegen:'));
+$('loginNewPwGo').addEventListener('click', async () => {
+  const pw = $('loginNewPw').value, btn = $('loginNewPwGo');
+  if (pw.length < 8) { toast('Das Passwort braucht mindestens 8 Zeichen.'); return; }
+  btn.disabled = true;
+  try {
+    const tok = await sbToken(); if (!tok) throw new Error('nicht angemeldet');
+    const r = await fetch(SB_URL + '/auth/v1/user', { method: 'PUT', headers: sbHead(tok), body: JSON.stringify({ password: pw }) });
+    if (!r.ok) { let m = ''; try { const j = await r.json(); m = j.msg || j.error_description || ''; } catch (e) { /* egal */ } throw new Error(/weak|short|characters/i.test(m) ? 'Passwort zu schwach – nimm ein längeres.' : /same|different/i.test(m) ? 'Das ist schon dein Passwort.' : 'Speichern hat nicht geklappt.'); }
+    $('loginSetPw').hidden = true; $('loginNewPw').value = ''; toast('Passwort gespeichert ✔ Nächstes Mal einfach mit E-Mail + Passwort anmelden.');
+  } catch (e) { toast(e.message === 'nicht angemeldet' ? 'Bitte zuerst anmelden.' : e.message); }
+  btn.disabled = false;
 });
 $('loginLogout').addEventListener('click', async () => { await onlinePush(true); sbStore(null); ONLINE.status = ''; loginUi(); toast('Abgemeldet. Dein Spielstand bleibt online gespeichert.'); });
 
@@ -3111,8 +3151,9 @@ $('loginVerify').addEventListener('click', async () => {
   try {
     const r = await fetch(SB_URL + '/auth/v1/verify', { method: 'POST', headers: sbHead(), body: JSON.stringify({ type: 'email', email, token }) });
     const j = await r.json(); if (!r.ok || !j.access_token) throw new Error(j.msg || j.error_description || 'Code falsch');
-    sbStore({ at: j.access_token, rt: j.refresh_token, exp: Date.now() + (j.expires_in || 3600) * 1000, email: (j.user && j.user.email) || email, uid: j.user && j.user.id });
+    sbSessFrom(j, email);
     $('loginCode').hidden = true; toast('Angemeldet als ' + email); loginUi(); onlineSync();
+    showSetPw('Angemeldet ✔ Leg dir jetzt ein Passwort fest, dann brauchst du nächstes Mal keinen Code mehr.');
   } catch (e) { toast('Der Code passt nicht oder ist abgelaufen.'); }
   btn.disabled = false;
 });
