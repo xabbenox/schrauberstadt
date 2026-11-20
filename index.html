@@ -291,6 +291,7 @@ body.tkon #evBanner { top: calc(env(safe-area-inset-top, 0px) + 46px); }
 .pin.walkpin.evtask { background: #e63b2e; color: #fff; padding: 2px 8px 3px; border-radius: 11px; z-index: 2; box-shadow: 0 3px 0 var(--ink); }
 .pin.walkpin.evtask b { color: #fff; font-size: 13px; white-space: nowrap; } .pin.walkpin.evtask span { font-size: 9px; }
 .pin.walkpin.evtask.x2 { background: #f08a1c; } .pin.walkpin.evtask.lock { background: #8a8f99; } .pin.walkpin.evtask.evdest { background: #1f9a52; } .pin.walkpin.evtask.evdest b { color: #ffd23f; font-size: 15px; }
+.pin.walkpin.evtask.ico { background: #e63b2e; padding: 0; width: 34px; height: 34px; } .pin.walkpin.evtask.ico.x2 { background: #f08a1c; } .pin.walkpin.evtask.ico i { font-size: 17px; }
 .pin.walkpin.evtask.near, .pin.walkpin.evtask.evdest { animation: evbob .7s ease-in-out infinite alternate; }
 @keyframes evbob { to { margin-top: -6px; } }
 /* Runde 4: weniger Text auf der Karte – runde Symbole, Popup beim Antippen, gesperrter Kauf, Hinweis ohne Job, schmaler Ticker */
@@ -3931,7 +3932,9 @@ function draw(now) {
   if (van.trip && van.front) ents.push(van);
   for (const w of crew) ents.push(w);
   if (ampelOn()) for (const a of AMPELN) ents.push(a);
-  if (WALK.on) { ents.push(WALK.me); for (const o of presPeople()) ents.push(o); evEnts(ents); } // evEnts: Stadt-Ereignisse (64_events.js)
+  if (WALK.on) { ents.push(WALK.me); // viele Spieler online: nur die 15 nächsten zeichnen, Namen nur bei den 3 nächsten (sonst Text-Chaos)
+    const m = WALK.me, ps = presPeople().map((o) => [o, Math.hypot(o.x - m.x, (o.y - m.y) * 2)]).sort((a, b) => a[1] - b[1]).slice(0, 15);
+    ps.forEach(([o, d], k) => { o._lbl = k < 3 && d < 900; ents.push(o); }); evEnts(ents); } // evEnts: Stadt-Ereignisse (64_events.js)
   occluders();
   ents.sort(byY);
   for (const e of ents) { if (e.occ) drawOcc(e.occ); else if (e.evd) e.evd(e, now); else if (e.peer) drawPeer(e); else if (e.me) drawMe(); else if (e.amp) drawAmpel(e); else if (e.role) drawCrew(e, now); else drawCar(e); }
@@ -4353,7 +4356,7 @@ function drawPeer(o) {
   if (!IMG.geselle) return;
   const t = performance.now(), bob = o.moving ? Math.abs(Math.sin(t / 90)) * 8 : o.w ? Math.abs(Math.sin(t / 170)) * 6 : 0;
   shadow(o.x, o.y, 24, 10); drawSprite(tinted('geselle', 140, 0.9, 1.1), o.x, o.y - bob, 52, o.flip, 1, 0.97);
-  if (typeof FOCUS !== 'undefined' && FOCUS.on) return; // Fokus: keine Namen, nur der Weg
+  if ((typeof FOCUS !== 'undefined' && FOCUS.on) || o._lbl === false) return; // Fokus oder weit weg: keine Namen
   const s = toScreen(o.x, o.y - 105); ctx.save(); ctx.font = '800 12px system-ui, sans-serif'; ctx.textAlign = 'center';
   const label = `${o.n} · ${RANKS[o.r][0]}`; const w = ctx.measureText(label).width + 14;
   ctx.fillStyle = 'rgba(255,253,246,0.95)'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(s.x - w / 2, s.y - 20, w, 20, 10) : ctx.rect(s.x - w / 2, s.y - 20, w, 20); ctx.fill(); ctx.stroke();
@@ -5286,13 +5289,17 @@ function evSet(el, prop, v) { if (el['_' + prop] !== v) { el['_' + prop] = v; if
 function evMarkers(cur, vis) {
   const seen = {}, m = WALK.me;
   const list = cur && !EV.mini ? vis.filter((t) => !(EV.carry && EV.carry.t === t) && (!evLocked(t) || evDist(m, t) < 500)).sort((a, b) => evDist(a, m) - evDist(b, m)).slice(0, 4) : [];
+  const placed = []; // Beta-Feedback „zu viel Text“: nur das nächste Ziel mit Namen, die anderen als kleines Symbol; nichts übereinander
   for (const t of list) {
     const id = cur.id + ':' + t.i; seen[id] = 1; let el = EV.mk[id];
     if (!el) { el = document.createElement('button'); el.type = 'button'; el.className = 'pin walkpin evtask'; layer.appendChild(el); EV.mk[id] = el; el.addEventListener('click', () => { const e = evById(el._e), tt = e && evSub(e).tasks[el._i]; if (tt) evTaskGo(e, tt); }); }
     el._e = cur.id; el._i = t.i; const lock = evLocked(t), x2 = !lock && t.dbl && evHas(t.dbl) && !evMyJob(cur), near = evDist(m, t) < 140;
-    evSet(el, 'html', `<b>${lock ? '🔒' : t.icon} ${esc(t.label)}${x2 ? ' ⭐×2' : ''}</b>`);
-    evSet(el, 'cls', `pin walkpin evtask${lock ? ' lock' : ''}${x2 ? ' x2' : ''}${near ? ' near' : ''}`); evSet(el, 'hidden', false);
-    const s = t.mx != null ? toScreen(t.mx, t.my) : toScreen(t.x, t.y - (t.look != null ? 150 : t.img ? 120 : 95)); setPos(el, s.x, s.y);
+    const big = t === list[0] && EV.sayT !== t; // die Sprechblase sagt beim nächsten schon alles
+    evSet(el, 'html', big ? `<b>${lock ? '🔒' : t.icon} ${esc(t.label)}${x2 ? ' ⭐×2' : ''}</b>` : `<i>${lock ? '🔒' : t.icon}</i>`);
+    evSet(el, 'cls', `pin walkpin evtask${big ? '' : ' ico'}${lock ? ' lock' : ''}${x2 ? ' x2' : ''}${near ? ' near' : ''}`); evSet(el, 'hidden', false);
+    let s = t.mx != null ? toScreen(t.mx, t.my) : toScreen(t.x, t.y - (t.look != null ? 150 : t.img ? 120 : 95)); s = { x: s.x, y: s.y };
+    for (let k = 0; k < 6; k++) { const q = placed.find((o) => Math.abs(o.x - s.x) < (big || o.big ? 90 : 38) && Math.abs(o.y - s.y) < 36); if (!q) break; s.x += s.x >= q.x ? 40 : -40; } // auseinanderschieben
+    placed.push({ x: s.x, y: s.y, big }); setPos(el, s.x, s.y);
   }
   for (const id in EV.mk) if (!seen[id]) { EV.mk[id].remove(); delete EV.mk[id]; }
 }
