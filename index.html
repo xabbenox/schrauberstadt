@@ -3054,7 +3054,7 @@ async function onlinePush(force) {
 // Nach dem Login: anmelden im Spiel + neueren Spielstand holen
 async function onlineSync() {
   if (!ONLINE.sess) return;
-  try { await sbRest('rpc/join_game', { method: 'POST', body: JSON.stringify({ p_name: myName() }) }); } catch (e) { /* Name evtl. vergeben: egal für den Spielstand */ }
+  try { await sbRpc('join_game', { p_name: myName() }); } catch (e) { /* Name evtl. vergeben: egal für den Spielstand; 'banned' meldet sbRpc */ }
   try {
     const rows = await sbRest('saves?select=data,updated_at&player=eq.' + ONLINE.sess.uid);
     const remote = rows && rows[0];
@@ -3613,10 +3613,17 @@ function plotLockCard(desc, lk) {
   const c = card('Grundstück kaufen', desc, '🔒 ' + lk.txt, `🔒 Ab ${RANKS[PLOT_RANK][0]}`, () => true, 'locked', () => { sfx.nope(); toast('🔒 ' + lk.txt); });
   const b = c.querySelector('.buy'); b.classList.add('locked'); b.setAttribute('aria-disabled', 'true'); return c;
 }
+// Gesperrtes Konto (Server: _assert_not_banned → message 'banned', details = Grund, hint = Dauer): freundlich melden, höchstens alle 20 s
+let sbBanAt = 0;
+function sbBanned(j) {
+  ONLINE.banned = true; if (Date.now() - sbBanAt < 20000) return; sbBanAt = Date.now();
+  const why = (j && j.details) || 'kein Grund angegeben', until = (j && j.hint) || '';
+  toast(`Dein Konto ist gesperrt (Grund: ${why}${until ? ', ' + until : ''}).`);
+}
 async function sbRpc(fn, args) {
   const tok = await sbToken(); if (!tok) throw new Error('join first');
   const r = await fetch(SB_URL + '/rest/v1/rpc/' + fn, { method: 'POST', headers: sbHead(tok), body: JSON.stringify(args || {}), signal: sbSig() });
-  const t = await r.text(); if (!r.ok) { let m = t; try { m = JSON.parse(t).message || t; } catch (e) { /* egal */ } throw new Error(m); }
+  const t = await r.text(); if (!r.ok) { let m = t, j = null; try { j = JSON.parse(t); m = j.message || t; } catch (e) { /* egal */ } if (m === 'banned') sbBanned(j); throw new Error(m); }
   return t ? JSON.parse(t) : null;
 }
 async function cityLoad() {
