@@ -3728,8 +3728,9 @@ async function cityLoad() {
   if (!ONLINE.sess || CITY.busy) return; CITY.busy = true;
   try {
     CITY.state = await sbRpc('city_state');
+    sbRpc('online_count').then((n) => { CITY.online = Number(n) || 0; }).catch(() => {}); // echte Zahl vom Server (alle Spieler, die in den letzten 3 min aktiv waren)
     const uid = ONLINE.sess.uid;
-    const me = await sbRest('players?select=name,cash,last_tick_net,outfit&id=eq.' + uid); CITY.me = me && me[0]; if (CITY.me && Array.isArray(CITY.me.outfit) && !lsGet('ss_outfit')) { OUTFIT.cur = outfitNorm(CITY.me.outfit); lsSet('ss_outfit', JSON.stringify(OUTFIT.cur)); }
+    const me = await sbRest('players?select=name,cash,last_tick_net,outfit,buff_pct,buff_until,buff_label&id=eq.' + uid); CITY.me = me && me[0]; if (CITY.me && CITY.me.buff_until) CITY.buff = { label: CITY.me.buff_label || '⚡', pct: CITY.me.buff_pct, until: Date.parse(CITY.me.buff_until) }; if (CITY.me && Array.isArray(CITY.me.outfit) && !lsGet('ss_outfit')) { OUTFIT.cur = outfitNorm(CITY.me.outfit); lsSet('ss_outfit', JSON.stringify(OUTFIT.cur)); }
     if (!CITY.me) { await sbRpc('join_game', { p_name: myName() }); const m2 = await sbRest('players?select=name,cash,last_tick_net&id=eq.' + uid); CITY.me = m2 && m2[0]; }
     CITY.ledger = await sbRest('ledger?select=amount,reason,created_at&order=created_at.desc&limit=8&player=eq.' + uid) || [];
     CITY.err = '';
@@ -4175,8 +4176,8 @@ function walkHud() {
   const me = (CITY.state && CITY.state.me) || {}, cash = CITY.me ? CITY.me.cash : me.cash, xp = me.xp || 0, rk = rankOf(xp), next = RANKS[rk + 1];
   const prof = ((CITY.state && CITY.state.professions) || []).find((x) => x.id === me.profession);
   WALK.job = me.townJob || (me.employer ? 'plot_' + (((CITY.state && CITY.state.plots) || []).find((p) => p.biz && p.biz.id === me.employer) || {}).id : null);
-  const online = Object.keys(PRES.peers).length;
-  const h = `<b>💰 ${fmt(cash || 0)}</b><span>${online ? `👥 ${online} online · ` : ''}${RANKS[rk][0]}${prof ? ' · ' + prof.icon + ' ' + esc(prof.label) : ' · arbeitslos'}${next ? ` · ${xp}/${next[1]} bis ${next[0]}` : ''}</span>`;
+  const online = Math.max(CITY.online || 0, Object.keys(PRES.peers).length + 1); // inkl. mir
+  const h = `<b>💰 ${fmt(cash || 0)}</b><span>${CITY.buff && CITY.buff.until > Date.now() ? `${CITY.buff.label.split(' ')[0]} +${CITY.buff.pct} % · ` : ''}${online ? `👥 ${online} online · ` : ''}${RANKS[rk][0]}${prof ? ' · ' + prof.icon + ' ' + esc(prof.label) : ' · arbeitslos'}${next ? ` · ${xp}/${next[1]} bis ${next[0]}` : ''}</span>`;
   if ($('walkInfo')._h !== h) { $('walkInfo')._h = h; $('walkInfo').innerHTML = h; }
 }
 // Ort antippen → kleines Fenster: Arbeit anfragen, Schicht arbeiten, Grundstück kaufen …
@@ -4208,6 +4209,7 @@ function openPlace(p) {
     else if (mineBiz) list.appendChild(li('hint', !plotLock() ? 'Dein Grundstück. Gründe in der Stadt-Übersicht (🏙️) einen Betrieb.' : `Dein Grundstück. Einen Betrieb gründen kannst du ab Geselle (noch ${RANKS[2][1] - (me.xp || 0)} XP).`));
     else list.appendChild(li('hint', `Gehört ${pl.ownerName || '?'}.`));
   }
+  shopCards(p, list);
   list.appendChild(li('hint', `Karriere: ${RANKS.map(([n, x], i) => (i === rk ? `»${n}«` : n) + ` (${x})`).join(' → ')} XP – XP gibt’s für Schichten und Einsätze`));
   $('place').hidden = false;
 }
@@ -6876,6 +6878,34 @@ function bizBack(p) { const e = document.createElement('li'); e.className = 'hin
 .bm-day small{font-weight:800;font-size:11px}.bm-p{color:#1f7a4a}.bm-m{color:#c0392b}.bm-small{font-size:12px;opacity:.8}.bm-row{display:grid;grid-template-columns:1fr auto;gap:0 8px}.bm-row small{grid-column:1/-1;opacity:.6;font-size:11px}
 .bm-name{width:100%;min-width:0;text-transform:none!important;letter-spacing:0!important}`;
   document.head.appendChild(st); }
+
+/* ---- Einkaufen (Beta-Wunsch): in Orten und fremden Betrieben etwas kaufen → kurzer Lohn-Bonus; Geld geht an den Besitzer bzw. die Stadtkasse ---- */
+const CITY_SHOP = {
+  cafe: [['melange', '☕ Melange', 4, 15, 15], ['kipferl', '🥐 Kipferl', 3, 10, 10], ['sacher', '🍰 Sachertorte', 6, 20, 20]],
+  metzgerei: [['leberkas', '🥖 Leberkässemmel', 4, 15, 20], ['krainer', '🌭 Käsekrainer', 5, 20, 20]],
+  tankstelle: [['kaffee', '☕ Kaffee to go', 3, 10, 10], ['hotdog', '🌭 Hotdog', 4, 15, 15]],
+  waschanlage: [['wasch', '🫧 Dein Auto waschen lassen', 8, 10, 30]],
+  hotel: [['nap', '🛏️ Nickerchen im Hotel', 15, 25, 30], ['fruehstueck', '🍳 Hotelfrühstück', 9, 20, 20]],
+  autokino: [['karte', '🎬 Kinokarte', 10, 20, 30], ['popcorn', '🍿 Popcorn', 4, 10, 15]],
+  taxi: [['fahrt', '🚕 Taxi zu deiner Arbeit', 6, 0, 0]],
+  bauernhof: [['milch', '🥛 Frische Milch vom Hof', 2, 10, 15]],
+};
+function shopCards(p, list) {
+  const uid = ONLINE.sess && ONLINE.sess.uid, b = p.plot && p.plot.biz, kind = p.kind === 'town' ? p.id : b && b.kind, items = CITY_SHOP[kind];
+  if (!items || !ONLINE.sess || (b && p.plot.owner === uid)) return;
+  const cash = () => Number((CITY.me && CITY.me.cash) != null ? CITY.me.cash : ((CITY.state && CITY.state.me) || {}).cash) || 0;
+  list.appendChild(li('sec', '🛒 Kaufen'));
+  items.forEach(([id, label, price, pct, mins]) => list.appendChild(card(label, pct ? `${pct} % mehr Lohn für ${mins} Minuten` : 'Bringt dich sofort zu deinem Arbeitsplatz', b ? `Geht an ${esc(p.plot.ownerName || 'den Besitzer')}` : 'Geht in die Stadtkasse', fmt(price), () => cash() >= price, '', async () => {
+    try { const r = await sbRpc('shop_buy', { p_kind: kind, p_item: id, p_biz: b ? b.id : null }); if (r && r.ok === false) { toast(r.msg); return; }
+      sfx.cash(); if (CITY.me) CITY.me.cash = cash() - price;
+      if (r.pct) { CITY.buff = { label: r.label, pct: r.pct, until: Date.parse(r.until) }; toast(`${r.label}: ${r.pct} % mehr Lohn bis ${new Date(r.until).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })} Uhr!`); }
+      if (id === 'fahrt') { const me = (CITY.state && CITY.state.me) || {}, job = walkPlaces().find((q) => q.id === me.townJob || (q.plot && q.plot.biz && (q.plot.biz.id === me.employer || q.plot.owner === uid)));
+        if (job) { const q = offRoad(uwOf(job)), i = iso(q.u, q.w); WALK.me.x = i.x; WALK.me.y = i.y; WALK.path = []; view.cx = i.x; view.cy = i.y; clampView(); $('place').hidden = true; toast('🚕 Da wärst du! Der Taxler winkt.'); }
+        else toast('Du hast noch keinen Arbeitsplatz – such dir zuerst einen Job.'); }
+      cityLoad(); if (!$('place').hidden) openPlace(p);
+    } catch (e) { sfx.nope(); toast(cityErr(String(e.message || ''))); }
+  })));
+}
 /* ---------------- Schleife ---------------- */
 let last = performance.now(), loopOn = false;
 // Sicherheitsnetz: eine Exception in Update oder Zeichnen darf die Schleife nie anhalten. Jede Meldung nur einmal loggen.
