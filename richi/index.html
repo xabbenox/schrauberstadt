@@ -396,13 +396,15 @@ document.addEventListener('click', (e) => { const n = e.target.closest('[data-pi
 
 /* ---------- Spieler ---------- */
 let qT;
+let PT = {}; // Spielzeit (Sekunden) je Spieler: { id: { today, total } } – zählt seit 20.11.2026
+const hm = (sec) => { sec = Number(sec) || 0; if (sec < 60) return sec ? '<1 min' : '0 min'; const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60); return h ? `${h} h ${String(m).padStart(2, '0')} min` : `${m} min`; };
 async function loadPlayers() {
-  const list = await rpc('admin_players', { p_search: $('q').value.trim() || null, p_limit: 200 });
+  const [list, pt] = await Promise.all([rpc('admin_players', { p_search: $('q').value.trim() || null, p_limit: 200 }), rpc('admin_playtime').catch(() => ({}))]); PT = pt || {};
   $('plist').innerHTML = list.length ? list.map((p) => {
     const on = p.lastSeen && Date.now() - Date.parse(p.lastSeen) < 600000;
     return `<div class="pl" data-pid="${esc(p.id)}"><div style="min-width:0"><div class="n"><span class="dot${on ? ' on' : ''}"></span> ${esc(p.name)} ${p.isAdmin ? '<span class="chip y">Admin</span>' : ''}${p.banned ? '<span class="chip red">gesperrt</span>' : ''}</div><div class="e">${esc(p.email || '—')}</div></div>
       <div style="text-align:right"><div class="amt">${eur(p.cash)}</div><div class="muted small">${ago(p.lastSeen)}</div></div>
-      <div class="m"><span class="chip y">Rang ${num(p.rank)} · ${num(p.xp)} XP</span>${p.profession ? `<span class="chip">🧰 ${esc(p.profession)}</span>` : ''}${p.townJob ? `<span class="chip">🏛️ ${esc(p.townJob)}</span>` : ''}${p.employer ? `<span class="chip">💼 ${esc(p.employer)}</span>` : ''}${p.businesses ? `<span class="chip">🏪 ${num(p.businesses)}</span>` : ''}${p.plots ? `<span class="chip">📍 ${num(p.plots)}</span>` : ''}<span class="chip">🚨 heute ${num(p.runsToday)}</span><span class="chip">seit ${new Date(p.createdAt).toLocaleDateString('de-AT')}</span></div></div>`;
+      <div class="m"><span class="chip grn" title="Spielzeit heute / gesamt">⏱️ ${hm((PT[p.id] || {}).today)} heute · ${hm((PT[p.id] || {}).total)} gesamt</span><span class="chip y">Rang ${num(p.rank)} · ${num(p.xp)} XP</span>${p.profession ? `<span class="chip">🧰 ${esc(p.profession)}</span>` : ''}${p.townJob ? `<span class="chip">🏛️ ${esc(p.townJob)}</span>` : ''}${p.employer ? `<span class="chip">💼 ${esc(p.employer)}</span>` : ''}${p.businesses ? `<span class="chip">🏪 ${num(p.businesses)}</span>` : ''}${p.plots ? `<span class="chip">📍 ${num(p.plots)}</span>` : ''}<span class="chip">🚨 heute ${num(p.runsToday)}</span><span class="chip">seit ${new Date(p.createdAt).toLocaleDateString('de-AT')}</span></div></div>`;
   }).join('') : '<div class="empty">Keine Spieler gefunden.</div>';
 }
 $('q').oninput = () => { clearTimeout(qT); qT = setTimeout(() => loadPlayers().catch((e) => toast(errTxt(e), 1)), 300); };
@@ -418,6 +420,7 @@ let curPid = null;
 async function openPlayer(id) {
   curPid = id;
   openDlg('<div class="empty">Lade …</div>');
+  try { if (!PT[id]) PT = (await rpc('admin_playtime')) || PT; } catch (e) { /* egal */ }
   let d; try { d = await rpc('admin_player_detail', { p_id: id }); } catch (e) { openDlg(`<h2>Fehler<span class="sp"></span><button class="x">✕</button></h2><p>${esc(errTxt(e))}</p>`); return; }
   const p = d.player;
   const ban = p.banned ? `<div class="ev" style="background:rgba(255,93,93,.12)"><span>⛔</span><div class="body"><b>Gesperrt</b> ${p.banned_until && p.banned_until !== 'infinity' ? 'bis ' + esc(dt(p.banned_until)) : 'dauerhaft'}<div class="small muted">Grund: ${esc(p.ban_reason || '—')}</div></div></div>` : '';
@@ -434,7 +437,7 @@ async function openPlayer(id) {
       <dt>Kasse</dt><dd><b>${eur(p.cash)}</b></dd><dt>Rang / XP</dt><dd>${num(p.rank)} · ${num(p.xp)} XP</dd>
       <dt>Beruf</dt><dd>${esc(p.profession || '—')}${p.town_job ? ' · Stadtjob: ' + esc(p.town_job) : ''}${p.employerName ? ' · bei ' + esc(p.employerName) : ''}</dd>
       <dt>Combo</dt><dd>${num(p.combo)}</dd><dt>Zuletzt</dt><dd>${esc(dt(p.last_seen))} (${ago(p.last_seen)})</dd>
-      <dt>Login</dt><dd>${esc(dt(p.lastSignIn))}</dd><dt>Dabei seit</dt><dd>${esc(dt(p.created_at))}</dd>
+      <dt>Spielzeit</dt><dd>${hm((PT[p.id] || {}).today)} heute · ${hm((PT[p.id] || {}).total)} gesamt</dd><dt>Login</dt><dd>${esc(dt(p.lastSignIn))}</dd><dt>Dabei seit</dt><dd>${esc(dt(p.created_at))}</dd>
       ${d.save ? `<dt>Werkstatt</dt><dd>Tag ${num(d.save.day)} · ${eur(d.save.money)} · ges. ${ago(d.save.updatedAt)}</dd>` : ''}
       <dt>ID</dt><dd class="small muted">${esc(p.id)}</dd></dl></section>
     <section><h4>Betriebe & Grundstücke</h4>${list(d.businesses, (b) => `<div class="row"><span class="ic">🏪</span><div class="body">${esc(b.name)} <span class="muted small">${esc(b.kind)} · Stufe ${num(b.level)} · Wert ${eur(b.value)}</span></div></div>`, 'Keine Betriebe')}
@@ -528,7 +531,9 @@ $('fbList').onclick = async (e) => {
 };
 
 /* ---------- Laden / Live ---------- */
-async function loadDash() { renderDash(await rpc('admin_overview')); }
+async function loadDash() { const [o, pt] = await Promise.all([rpc('admin_overview'), rpc('admin_playtime').catch(() => null)]); renderDash(o); if (pt) { PT = pt;
+  const v = Object.values(pt), today = v.reduce((a, x) => a + (x.today || 0), 0), tot = v.reduce((a, x) => a + (x.total || 0), 0), act = v.filter((x) => x.today > 0).length;
+  const t = document.createElement('div'); t.className = 'tile'; t.innerHTML = `<div class="k">⏱️ Spielzeit heute</div><div class="v">${hm(today)}</div><div class="s">${act ? 'Ø ' + hm(Math.round(today / act)) + ' pro Spieler · ' : ''}gesamt ${hm(tot)}</div>`; $('tiles').appendChild(t); } }
 async function refresh() {
   try {
     if (tab === 'dash') await Promise.all([loadDash(), loadFeed()]);
