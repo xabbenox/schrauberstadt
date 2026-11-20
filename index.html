@@ -3950,7 +3950,7 @@ function draw(now) {
   if (ampelOn()) for (const a of AMPELN) ents.push(a);
   if (WALK.on) { ents.push(WALK.me); // viele Spieler online: nur die 15 nächsten zeichnen, Namen nur bei den 3 nächsten (sonst Text-Chaos)
     const m = WALK.me, ps = presPeople().map((o) => [o, Math.hypot(o.x - m.x, (o.y - m.y) * 2)]).sort((a, b) => a[1] - b[1]).slice(0, 15);
-    ps.forEach(([o, d], k) => { o._lbl = k < 3 && d < 900; ents.push(o); }); evEnts(ents); } // evEnts: Stadt-Ereignisse (64_events.js)
+    const few = ps.length <= 9; ps.forEach(([o, d], k) => { o._lbl = few || (k < 3 && d < 900); ents.push(o); }); evEnts(ents); } // bis 10 Spieler: alle Namen (sonst wirkt die Stadt leer); evEnts: Stadt-Ereignisse (64_events.js)
   occluders();
   ents.sort(byY);
   for (const e of ents) { if (e.occ) drawOcc(e.occ); else if (e.evd) e.evd(e, now); else if (e.peer) drawPeer(e); else if (e.me) drawMe(); else if (e.amp) drawAmpel(e); else if (e.role) drawCrew(e, now); else drawCar(e); }
@@ -4184,7 +4184,7 @@ function walkHud() {
 function openPlace(p) {
   const st = CITY.state || {}, me = st.me || {}, uid = ONLINE.sess && ONLINE.sess.uid, rk = rankOf(me.xp || 0);
   const list = $('placeList'); list.innerHTML = ''; shopBtns = []; $('placeH').textContent = `${p.icon} ${p.name}`;
-  const workHere = () => { $('place').hidden = true; WALK.shift = { t: 0, busy: false, place: p }; WALK.follow = true; openWork(); }; // Ort merken: Aufgaben + Abrechnung passen zum Betrieb, in dem man gerade steht
+  const workHere = () => { if (typeof garageStart === 'function' && garageStart(p)) return; $('place').hidden = true; WALK.shift = { t: 0, busy: false, place: p }; WALK.follow = true; openWork(); }; // Ort merken: Aufgaben + Abrechnung passen zum Betrieb, in dem man gerade steht
   const take = (args, okMsg) => async () => { try { await sbRpc('take_job', args); sfx.goal(); toast(okMsg); await cityLoad(); openPlace(p); } catch (e) { sfx.nope(); const m = e.message || ''; toast(e instanceof TypeError || /Abort|Timeout/.test(e.name) ? 'Keine Verbindung zum Stadt-Server – bitte später nochmal probieren.' : p.soon && !/cooldown|join first|choose profession|no vacancy/.test(m) ? p.soon : cityErr(m)); } };
   if (p.kind === 'town') {
     const mine = me.townJob === p.id;
@@ -4661,13 +4661,15 @@ function workScale(d) {
   if (x.circle && x.n % 2 === 0) x.n--; if (typeof d.time === 'number') x.time = Math.max(d.time * 0.8, d.time * (1 - 0.05 * (rk - 1)));
   if (d.t === 'memo') x.k = Math.min(d.k + (rk >= 3 ? 1 : 0), 5); return x;
 }
+// Werkstatt-Schicht (66g_garage.js): nach dem Auftrag zurück auf die Karte, Auto fährt auf die Bühne
+function garBack(seq, q) { if (WK.seq !== seq || !WK.garage) return; const pl = WALK.shift && WALK.shift.place; closeWork(); WALK.shift = { t: 0, busy: false, place: pl, garage: true }; garageAfter(q); }
 // Ergebnis an den Server, dann nächster Auftrag
 async function finishTask(q, note) {
   if (WK.busy || !WK.on) return; WK.busy = true; const seq = WK.seq; clearInterval(WK.timer); clearInterval(WK.anim);
   $('workArea').querySelectorAll('button').forEach((b) => { b.disabled = true; }); // kein zweites Abrechnen über alte Knöpfe
   q = Math.max(0, Math.min(1, q)); const stars = q >= 0.9 ? '⭐⭐⭐' : q >= 0.65 ? '⭐⭐' : q >= 0.4 ? '⭐' : '😬';
   $('workRes').textContent = `${stars} ${note || ''}`;
-  if (q <= 0) { $('workRes').textContent += ' · kein Lohn'; WK.busy = false; setTimeout(() => { if (WK.on && WK.seq === seq) nextTask(); }, 1600); return; } // nichts geschafft = keine Abrechnung (kein Geld fürs Herumstehen)
+  if (q <= 0) { $('workRes').textContent += ' · kein Lohn'; WK.busy = false; if (WK.garage) { setTimeout(() => garBack(seq, 0), 1400); return; } setTimeout(() => { if (WK.on && WK.seq === seq) nextTask(); }, 1600); return; } // nichts geschafft = keine Abrechnung (kein Geld fürs Herumstehen)
   try {
     const own = workOwnBiz(), r = own ? await sbRpc('work_task_at', { p_quality: Math.max(0.2, q), p_biz: own.id }) : await sbRpc('work_task', { p_quality: Math.max(0.2, q) });
     const rk = rankOf(r.xp), next = RANKS[rk + 1]; WK.done++; const cur = WK.on && WK.seq === seq;
@@ -4675,7 +4677,7 @@ async function finishTask(q, note) {
     if (rk > rankOf(r.xp - (r.gain ? 1 : 0))) { sfx.goal(); toast(`🎉 Aufgestiegen: Du bist jetzt ${RANKS[rk][0]}!`); }
     cityLoad();
   } catch (e) { if (WK.on && WK.seq === seq) $('workRes').textContent = e.message.includes('too fast') ? 'Kurz durchschnaufen …' : e.message.includes('no job') ? 'Du hast hier keine Arbeit.' : 'Abrechnung hat nicht geklappt.'; }
-  if (WK.seq === seq) WK.busy = false; setTimeout(() => { if (WK.on && WK.seq === seq) nextTask(); }, 1600); // nicht, wenn inzwischen schon ein neuer Auftrag läuft
+  if (WK.seq === seq) WK.busy = false; if (WK.garage) { setTimeout(() => garBack(seq, q), 1400); return; } setTimeout(() => { if (WK.on && WK.seq === seq) nextTask(); }, 1600); // nicht, wenn inzwischen schon ein neuer Auftrag läuft
 }
 const TIME_K = 1.6, READ_MS = 1500; // mehr Zeit zum Lesen und Nachdenken (Feedback): Uhr läuft 60 % langsamer und startet erst nach 1,5 s
 function bar(sec, onEnd) { sec *= TIME_K; const b = $('workTime'); const t0 = performance.now() + READ_MS; b.style.width = '100%'; WK.timer = setInterval(() => { const k = Math.min(1, 1 - (performance.now() - t0) / (sec * 1000)); b.style.width = Math.max(0, k * 100) + '%'; if (k <= 0) { clearInterval(WK.timer); onEnd(); } }, 50); return () => Math.min(1, Math.max(0, 1 - (performance.now() - t0) / (sec * 1000))); }
@@ -6368,6 +6370,85 @@ function tkRender(force) {
 window.addEventListener('inc-state', () => { try { if (WALK.on) tkRender(); } catch (e) { /* nie das Spiel stören */ } });
 setInterval(() => { try { if (TK.el || window.INC_STATE) tkRender(); } catch (e) { if (!TK.err) { TK.err = 1; console.warn('[Schrauberstadt] Ticker', e); } } }, 250);
 window.__ticker = { TK, render: () => tkRender(true) };
+/* ---------------- Werkstatt-Schicht wie im Einzelspieler (Beta-Feedback 20.11.) ---------------- */
+// Wer in der Schrauberstadt-Werkstatt (oder einer Spieler-Werkstatt) arbeitet: Kunden fahren wirklich vor (Verkehrslogik aus 40_cars),
+// Auto antippen → Aufgabe (Minispiel) → Auto fährt auf die Hebebühne, wird hochgefahren, wieder runter und fährt weg. Nächster Kunde.
+const GAR = { on: false, place: null, car: null, next: 0, ui: null, served: 0, pin: null };
+const garIsWerk = (p) => !!p && ((p.kind === 'town' && p.id === 'werkstatt') || (p.plot && p.plot.biz && p.plot.biz.kind === 'werkstatt'));
+function garageStart(p) {
+  if (!garIsWerk(p) || !WALK.on) return false;
+  GAR.on = true; GAR.place = p; GAR.next = 1.2; GAR.served = 0;
+  WALK.path = []; WALK.me.x = ST.paint.wx; WALK.me.y = ST.paint.wy; // an die Hebebühne stellen (nicht in die Einfahrt – die Kunden warten sonst auf uns)
+  WALK.shift = { t: 0, busy: false, place: p, garage: true }; WALK.follow = true; $('place').hidden = true;
+  garUi(); toast('🔧 Werkstatt offen! Gleich kommt der erste Kunde.');
+  return true;
+}
+function garageStop(msg) {
+  if (!GAR.on) return; GAR.on = false; const c = GAR.car; GAR.car = null;
+  if (c && cars.includes(c) && c.state !== 'leaving') { try { leave(c); } catch (e) { /* egal */ } }
+  if (GAR.ui) { GAR.ui.remove(); GAR.ui = null; } if (GAR.pin) { GAR.pin.remove(); GAR.pin = null; }
+  if (WALK.shift && WALK.shift.garage) WALK.shift = null; if (msg) toast(msg);
+}
+function garUi() {
+  if (GAR.ui) return;
+  const d = document.createElement('div'); d.id = 'garBar'; d.innerHTML = '<span id="garTxt">🔧 Werkstatt offen</span><button type="button" id="garStop">Feierabend</button>';
+  document.body.appendChild(d); GAR.ui = d; $('garStop').addEventListener('click', () => garageStop(GAR.served ? `Feierabend! ${GAR.served} Kunden bedient. 🔧` : 'Werkstatt zu.'));
+  const pin = document.createElement('button'); pin.type = 'button'; pin.className = 'pin walkpin garpin focuskeep'; pin.hidden = true; layer.appendChild(pin); GAR.pin = pin;
+  pin.addEventListener('click', garServe);
+}
+function garSpawn() {
+  const slot = SLOTS[1]; if (!slot || slot.car) { GAR.next = 2; return; }
+  let path = null; for (let k = 0; k < 4 && !path; k++) { const q = routeToSlot(slot); if (spawnClear(q[0].x, q[0].y, 420)) path = q; }
+  if (!path) { GAR.next = 1.5; return; }
+  const ci = Math.floor(Math.random() * CARS.length), [model, colorName, sprite, hue, sat, lum] = CARS[ci], start = path.shift();
+  const job = pick(JOBS.filter((j) => j.st === 'lift')) || JOBS[0];
+  const car = { kind: 'cust', mp: true, ci, id: ++carId, front: tinted(sprite, hue, sat, lum), rear: tinted(sprite + '_r', hue, sat, lum), model, colorName, job, cust: pick(NAMES), slot, state: 'arriving', x: start.x, y: start.y,
+    path: [], patience: 9999, maxPat: 9999, waitT: 0, progress: 0, flip: false, back: false, hidden: false, lift: 0, v: 440 };
+  setRoute(car, path); slot.car = car; cars.push(car); GAR.car = car; sfx.horn();
+}
+function garServe() {
+  const c = GAR.car; if (!c || c.state !== 'mpWait' || WK.on) return;
+  const m = WALK.me; if (Math.hypot(m.x - c.x, m.y - c.y) > 800) { walkTo(ST.paint.wx, ST.paint.wy, GAR.place); WALK.shift = { t: 0, busy: false, place: GAR.place, garage: true }; toast('Erst hingehen …'); return; }
+  c.state = 'mpTask'; WK.garage = true; openWork(); $('workTitle').textContent = `${c.cust}: ${c.job.name} · ${WK.task ? WK.task.title : ''}`;
+}
+// aus finishTask (63_work.js): Auftrag fertig → Auto auf die Bühne (gute Arbeit) bzw. Kunde fährt verärgert weg
+function garageAfter(q) {
+  WK.garage = false; const c = GAR.car; if (!c || !cars.includes(c)) { GAR.car = null; GAR.next = 2; return; }
+  if (q <= 0) { toast(`${c.cust} fährt kopfschüttelnd weg. 😬`); leave(c); GAR.car = null; GAR.next = 3; return; }
+  const st = ST.lift2;
+  if (st.car && st.car !== c) { c.state = 'mpDone'; c.doneT = 1.2; return; } // Bühne belegt (Einzelspieler-Rest): gleich fertig
+  c.slot.car = null; st.car = c; c.station = st; setRoute(c, routeToStation(c.slot, st)); c.state = 'mpToLift'; c.q = q;
+}
+function garageTick(dt) {
+  if (!GAR.on) return;
+  if (!WALK.on) { garageStop(); return; }
+  const c = GAR.car, m = WALK.me, wp = GAR.place;
+  if (!WK.on && !(WALK.shift && WALK.shift.garage) && WALK.path.length) { garageStop('Werkstatt zu – du bist weggegangen.'); return; } // woanders hingelaufen
+  if (!c) { GAR.next -= dt; if (GAR.next <= 0) garSpawn(); }
+  else if (!cars.includes(c)) { GAR.car = null; GAR.next = 2; }
+  else if (c.state === 'waiting') { c.state = 'mpWait'; sfx.pop(); }
+  else if (c.state === 'mpTask' && !WK.on) { WK.garage = false; toast(`${c.cust} fährt wieder – Auftrag abgebrochen.`); leave(c); GAR.car = null; GAR.next = 3; WALK.shift = { t: 0, busy: false, place: wp, garage: true }; }
+  else if (c.state === 'mpToLift') { if (moveCar(c, dt)) { setSprite(c, c.station.back, c.station.flip); c.state = 'mpLift'; c.liftT = 0; } }
+  else if (c.state === 'mpLift') {
+    c.liftT += dt; c.lift = c.liftT < 1.2 ? c.liftT / 1.2 : c.liftT < 3 ? 1 : Math.max(0, 1 - (c.liftT - 3) / 1);
+    if (c.liftT > 4.1) { c.lift = 0; c.state = 'mpDone'; c.doneT = 0.6; }
+  } else if (c.state === 'mpDone') {
+    c.doneT -= dt; if (c.doneT <= 0) { GAR.served++; toast(pick([`${c.cust} ist zufrieden! 👍`, `${c.cust}: „Schnurrt wie ein Kätzchen!“`, `${c.cust} kommt sicher wieder. ⭐`])); try { leave(c); } catch (e) { /* egal */ } GAR.car = null; GAR.next = 3.5; }
+  }
+  // Schild über dem Auto + Leiste
+  const pin = GAR.pin, show = !!(c && cars.includes(c) && ['arriving', 'mpWait', 'mpLift'].includes(c.state));
+  if (pin) {
+    if (show) { const h = c.state === 'mpWait' ? `<b>🚗 ${esc(c.cust)}</b><span>${esc(c.job.name)} · antippen!</span>` : c.state === 'mpLift' ? `<b>🔧 Auf der Bühne</b><span>${esc(c.job.name)}</span>` : `<b>🚗 Kunde kommt</b><span>${esc(c.model)}</span>`;
+      if (pin._h !== h) { pin._h = h; pin.innerHTML = h; } pin.classList.toggle('ready', c.state === 'mpWait'); const s = toScreen(c.x, c.y - 150 - (c.lift || 0) * LIFT_H); setPos(pin, s.x, s.y); if (pin.hidden) pin.hidden = false; }
+    else if (!pin.hidden) pin.hidden = true;
+  }
+  const t = $('garTxt'); if (t) { const tx = `🔧 Werkstatt offen${GAR.served ? ` · ${GAR.served} bedient` : ''}`; if (t.textContent !== tx) t.textContent = tx; }
+}
+{ const st = document.createElement('style');
+  st.textContent = `#garBar { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 44px); transform: translateX(-50%); z-index: 6; display: flex; gap: 8px; align-items: center; background: #1f9a52; color: #fff; border: 3px solid var(--ink); border-radius: 16px; box-shadow: 0 4px 0 var(--ink); padding: 5px 6px 5px 12px; font-weight: 800; font-size: 14px; white-space: nowrap; }
+#garBar button { border: 3px solid var(--ink); background: #fff; border-radius: 12px; font: 800 13px var(--body); padding: 4px 10px; cursor: pointer; }
+.pin.walkpin.garpin { background: #fffdf6; z-index: 3; } .pin.walkpin.garpin.ready { background: #ffd23f; animation: evbob .7s ease-in-out infinite alternate; } .pin.walkpin.garpin span { color: #5b6270; }`;
+  document.head.appendChild(st); }
 /* ---------------- Abschleppwagen selbst fahren (Mehrspieler/Walk-Modus) ---------------- */
 // window.DRIVE.start(info, cb): info = { id, kind, task, from:{u,w} (Pannenauto), to:{u,w} (Werkstatt), car, limit? (s) }
 // cb(score 0…100, ok). Gefahren wird im Iso-Raster wie der übrige Verkehr: nur entlang der Achsen u/w (die vier Sprites passen
@@ -6939,6 +7020,7 @@ function frame(dt, now) {
   safe('presence', presTick, dt);
   safe('events', evTick, dt); // Stadt-Ereignisse (64_events.js)
   safe('incidents', incTick, dt); // Welt-Incidents (65_incidents.js)
+  safe('garage', garageTick, dt); // Werkstatt-Schicht mit echten Kunden (66g_garage.js)
   safe('focus', focusTick, dt); // Fokus-Weg bei dringenden Anweisungen (66_focus.js)
   safe('drive', driveTick, dt); // Abschleppwagen selbst fahren (67_drive.js) – nach walk/cars, setzt WALK.me in den Wagen
   if (running && !guest) safe('goal', checkGoal);
