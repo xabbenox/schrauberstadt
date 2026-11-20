@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#141a2b">
+<title>Schrauberstadt Admin</title>
+<link rel="icon" href="../favicon.png">
+<style>
+:root{--bg:#121826;--bg2:#1a2236;--card:#1f2940;--card2:#26324d;--line:#33415f;--tx:#eef2fa;--mut:#9aa7c2;--y:#ffc927;--y2:#ffdb6b;--ytx:#2a2000;--red:#ff5d5d;--grn:#41d68a;--blu:#5fb3ff;--r:16px}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--y)}
+.hidden{display:none!important}
+header{position:sticky;top:0;z-index:20;background:rgba(18,24,38,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:10px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;letter-spacing:.2px}
+.logo i{font-style:normal;background:var(--y);color:var(--ytx);border-radius:10px;width:32px;height:32px;display:grid;place-items:center;font-size:18px}
+.logo small{color:var(--y);font-weight:700;margin-left:2px}
+header .sp{flex:1}
+.who{color:var(--mut);font-size:13px;max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn{border:0;border-radius:12px;padding:10px 14px;background:var(--card2);cursor:pointer;font-weight:600;min-height:42px;transition:filter .15s}
+.btn:hover{filter:brightness(1.15)}.btn:disabled{opacity:.5;cursor:default}
+.btn.y{background:var(--y);color:var(--ytx)}.btn.red{background:var(--red);color:#fff}.btn.grn{background:var(--grn);color:#062814}
+.btn.sm{min-height:34px;padding:6px 10px;font-size:13px;border-radius:10px}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+nav.tabs{display:flex;gap:6px;padding:10px 16px 0;max-width:1200px;margin:0 auto}
+nav.tabs button{flex:0 0 auto;border:0;background:transparent;color:var(--mut);padding:9px 14px;border-radius:12px;cursor:pointer;font-weight:700}
+nav.tabs button.on{background:var(--y);color:var(--ytx)}
+main{max-width:1200px;margin:0 auto;padding:14px 16px 96px}
+.grid{display:grid;gap:12px}
+.tiles{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.tile{background:var(--card);border-radius:var(--r);padding:14px;border:1px solid var(--line)}
+.tile .k{color:var(--mut);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.tile .v{font-size:clamp(20px,2.2vw,26px);white-space:nowrap;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
+.tile .s{color:var(--mut);font-size:12px;margin-top:2px}
+.tile.hl{background:linear-gradient(135deg,#3a3010,#1f2940);border-color:#6b5a1a}.tile.hl .v{color:var(--y)}
+.card{background:var(--card);border-radius:var(--r);padding:14px;border:1px solid var(--line);min-width:0}
+.card h3{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:8px}
+.card h3 .sp{flex:1}
+.two{grid-template-columns:1fr}
+@media(min-width:860px){.two{grid-template-columns:1.4fr 1fr}.three{grid-template-columns:repeat(3,1fr)}}
+.muted{color:var(--mut)}.small{font-size:12px}
+.chart svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mut);margin-top:6px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.list{display:flex;flex-direction:column;gap:2px}
+.row{display:flex;gap:10px;align-items:flex-start;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
+.row:last-child{border-bottom:0}
+.row .ic{width:26px;text-align:center;flex:0 0 26px;font-size:17px}
+.row .body{flex:1;min-width:0;word-wrap:break-word}
+.row .t{color:var(--mut);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.row b.name{color:var(--y2)}
+.amt{font-weight:700;font-variant-numeric:tabular-nums}.amt.p{color:var(--grn)}.amt.n{color:var(--red)}
+.bar{height:8px;background:var(--bg2);border-radius:6px;overflow:hidden}.bar i{display:block;height:100%;background:var(--y);border-radius:6px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}.kv dt{color:var(--mut)}.kv dd{margin:0;word-break:break-word}
+input.in,select.in,textarea.in{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;outline:none}
+input.in:focus,select.in:focus,textarea.in:focus{border-color:var(--y)}
+.search{display:flex;gap:8px;margin-bottom:12px}
+.pl{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:12px;border-radius:14px;background:var(--card);border:1px solid var(--line);cursor:pointer;margin-bottom:8px}
+.pl:hover{border-color:var(--y)}
+.pl .n{font-weight:800}.pl .e{color:var(--mut);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pl .m{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg2);border-radius:999px;padding:3px 9px;font-size:12px;color:var(--mut);white-space:nowrap}
+.chip.y{background:rgba(255,201,39,.15);color:var(--y)}.chip.red{background:rgba(255,93,93,.18);color:#ff9a9a}.chip.grn{background:rgba(65,214,138,.15);color:var(--grn)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mut);display:inline-block}.dot.on{background:var(--grn);box-shadow:0 0 0 3px rgba(65,214,138,.2)}
+.ev{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:var(--bg2);margin-bottom:8px}
+.ev .body{flex:1;min-width:0}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.login{min-height:80vh;display:grid;place-items:center;padding:24px 16px}
+.login .box{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:26px 22px;text-align:center}
+.login h1{font-size:22px;margin:12px 0 4px}
+.login .big{font-size:44px;background:var(--y);color:var(--ytx);width:76px;height:76px;border-radius:22px;display:grid;place-items:center;margin:0 auto}
+.login .btn{width:100%;margin-top:10px}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:#fff!important;color:#1f1f1f!important}
+.sep{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:12px;margin:16px 0 4px}.sep::before,.sep::after{content:"";flex:1;height:1px;background:var(--line)}
+.msg{margin-top:12px;color:var(--mut);font-size:13px;min-height:18px}
+.msg.err{color:#ff9a9a}
+dialog{border:0;padding:0;background:transparent;color:var(--tx);max-width:100vw;max-height:100vh}
+dialog::backdrop{background:rgba(5,8,15,.7);backdrop-filter:blur(2px)}
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:20px;width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 40px);overflow:auto;padding:18px}
+.sheet h2{margin:0 0 4px;font-size:19px;display:flex;align-items:center;gap:8px}.sheet h2 .sp{flex:1}
+.sheet .x{background:var(--bg2);border:0;border-radius:10px;width:36px;height:36px;cursor:pointer;font-size:18px}
+.sheet section{margin-top:14px}
+.sheet section h4{margin:0 0 6px;color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+.form{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.form label{font-size:13px;color:var(--mut);display:flex;flex-direction:column;gap:4px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}.seg button{flex:1 1 auto}
+.seg button.on{background:var(--y);color:var(--ytx)}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#0b0f19;border:1px solid var(--line);color:var(--tx);padding:11px 16px;border-radius:14px;z-index:99;max-width:calc(100vw - 32px);box-shadow:0 8px 30px rgba(0,0,0,.4);font-weight:600}
+#toast.err{border-color:var(--red)}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--mut);font-weight:600}
+.empty{color:var(--mut);text-align:center;padding:18px 8px;font-size:14px}
+.scroll{max-height:520px;overflow:auto}
+.denied{max-width:420px;margin:12vh auto;text-align:center}
+@media(max-width:700px){
+  nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(18,24,38,.97);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom));margin:0;max-width:none;justify-content:space-around}
+  nav.tabs button{flex:1;padding:8px 2px;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px}
+  nav.tabs button span{font-size:19px}
+  .tile .v{font-size:21px}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .who{display:none}
+  .scroll{max-height:none}
+  dialog{margin:auto auto 0;width:100vw}
+  .sheet{width:100vw;border-radius:20px 20px 0 0;max-height:88vh;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+}
+@media(min-width:701px){nav.tabs button span{margin-right:6px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><i>🔧</i><span>Schrauberstadt <small>Admin</small></span></div>
+  <div class="sp"></div>
+  <span class="who" id="who"></span>
+  <button class="btn sm ghost hidden" id="logout">Abmelden</button>
+</header>
+
+<!-- Login: einziges, was ohne Admin-Sitzung sichtbar ist -->
+<div class="login hidden" id="loginView">
+  <div class="box">
+    <div class="big">🔒</div>
+    <h1>Admin-Bereich</h1>
+    <div class="muted small">Nur für die Stadtverwaltung.</div>
+    <button class="btn gbtn" id="gLogin"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Mit Google anmelden</button>
+    <div class="sep">oder per E-Mail-Code</div>
+    <div id="mailStep1"><input class="in" id="mail" type="email" autocomplete="email" placeholder="E-Mail-Adresse"><button class="btn" id="mailSend">Code schicken</button></div>
+    <div id="mailStep2" class="hidden"><input class="in" id="otp" inputmode="numeric" autocomplete="one-time-code" placeholder="6-stelliger Code"><button class="btn y" id="otpGo">Anmelden</button></div>
+    <div class="msg" id="loginMsg"></div>
+  </div>
+</div>
+
+<div class="denied hidden" id="deniedView">
+  <div class="login" style="min-height:auto"><div class="box"><div class="big">⛔</div><h1>Kein Zugriff</h1><p class="muted" id="deniedTxt">Dieses Konto ist kein Admin.</p><button class="btn" id="deniedOut">Abmelden</button></div></div>
+</div>
+
+<div id="app" class="hidden">
+  <nav class="tabs" id="tabs">
+    <button data-t="dash" class="on"><span>📊</span>Übersicht</button>
+    <button data-t="players"><span>👥</span>Spieler</button>
+    <button data-t="feed"><span>📡</span>Live</button>
+    <button data-t="actions"><span>🛠️</span>Aktionen</button>
+    <button data-t="log"><span>📜</span>Log</button>
+  </nav>
+  <main>
+    <!-- Übersicht -->
+    <section id="t_dash">
+      <div class="grid tiles" id="tiles"></div>
+      <div class="grid two" style="margin-top:12px">
+        <div class="card chart"><h3>📈 Aktive Spieler pro Tag <span class="sp"></span><span class="muted small">14 Tage</span></h3><div id="chart"></div>
+          <div class="legend"><span style="--c:var(--y)">aktiv</span><span style="--c:var(--blu)">neu</span></div></div>
+        <div class="card"><h3>🔥 Groß-Ereignisse</h3><div id="events"></div></div>
+      </div>
+      <div class="grid three" style="margin-top:12px">
+        <div class="card"><h3>🏘️ Stadt</h3><dl class="kv" id="town"></dl></div>
+        <div class="card"><h3>🧰 Top-Berufe</h3><div id="jobs"></div></div>
+        <div class="card"><h3>🏪 Betriebe</h3><div id="biz"></div></div>
+      </div>
+      <div class="card" style="margin-top:12px"><h3>📡 Gerade los <span class="sp"></span><button class="btn sm ghost" data-goto="feed">Alles</button></h3><div class="list" id="miniFeed"></div></div>
+    </section>
+
+    <!-- Spieler -->
+    <section id="t_players" class="hidden">
+      <div class="search"><input class="in" id="q" type="search" placeholder="Name, E-Mail oder ID suchen …" autocomplete="off"><button class="btn" id="qGo">🔍</button></div>
+      <div id="plist"></div>
+    </section>
+
+    <!-- Live-Feed -->
+    <section id="t_feed" class="hidden">
+      <div class="card"><h3>📡 Wer macht was <span class="sp"></span><label class="live small"><input type="checkbox" id="feedAll"> Ticks</label><span class="live"><span class="dot on" id="liveDot"></span><span id="feedAge">live</span></span></h3>
+        <div class="list" id="feed"></div></div>
+    </section>
+
+    <!-- Aktionen -->
+    <section id="t_actions" class="hidden">
+      <div class="grid two">
+        <div class="card"><h3>📢 Ticker-Nachricht</h3>
+          <div class="muted small">Erscheint im Spiel-Ticker als „📢 Stadtverwaltung: …“</div>
+          <div class="form"><textarea class="in" id="tickTxt" rows="3" maxlength="180" placeholder="z. B. Heute Abend Doppel-XP bei allen Einsätzen!"></textarea>
+          <div class="actions"><span class="muted small" id="tickCnt" style="flex:1;align-self:center">0 / 180</span><button class="btn y" id="tickGo">Senden</button></div></div></div>
+        <div class="card"><h3>🔥 Ereignis</h3>
+          <div class="muted small" id="evState">–</div>
+          <div class="form"><div class="seg" id="evKind">
+            <button class="btn sm on" data-k="">🎲 Zufall</button><button class="btn sm" data-k="brand">🔥 Brand</button><button class="btn sm" data-k="ansturm">🚌 Ansturm</button><button class="btn sm" data-k="blitzer">📸 Blitzer</button><button class="btn sm" data-k="kuehe">🐄 Kühe</button></div>
+          <div class="actions"><button class="btn y" id="evStart">Ereignis starten</button><button class="btn red" id="evEnd">Laufendes beenden</button></div></div></div>
+      </div>
+    </section>
+
+    <!-- Log -->
+    <section id="t_log" class="hidden">
+      <div class="card"><h3>📜 Admin-Log <span class="sp"></span><button class="btn sm ghost" id="logRe">↻</button></h3><div class="list" id="alog"></div></div>
+    </section>
+  </main>
+</div>
+
+<dialog id="dlg"><div class="sheet" id="dlgBody"></div></dialog>
+<div id="toast" class="hidden"></div>
+
+<script>
+(() => {
+'use strict';
+const SB_URL = 'https://yjxzmlnwtmrvzmtwbwrz.supabase.co', SB_KEY = 'sb_publishable_NboKBZDEgo-jiyptztBEFA_pcWdaBE3';
+const SESS_KEY = 'ss_admin_session', REDIRECT = 'https://schrauberstadt.com/richi/';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf = new Intl.NumberFormat('de-AT');
+const eur = (n) => nf.format(Math.round(Number(n) || 0)) + ' €';
+const num = (n) => nf.format(Number(n) || 0);
+const EVK = { brand: ['🔥', 'Brand'], ansturm: ['🚌', 'Ansturm'], blitzer: ['📸', 'Blitzer'], kuehe: ['🐄', 'Kühe ausgebüxt'] };
+const ERR = { forbidden: 'Kein Admin-Zugriff.', 'event running': 'Es läuft schon ein Ereignis.', 'name taken': 'Name ist schon vergeben.', 'name too short': 'Name zu kurz.',
+  'cannot ban admin': 'Admins können nicht gesperrt werden.', 'not found': 'Spieler nicht gefunden.', 'bad amount': 'Ungültiger Betrag.', 'amount too large': 'Betrag zu groß (max. 10 Mio.).', 'text too short': 'Text zu kurz.' };
+
+function ago(t) {
+  if (!t) return '–';
+  const s = (Date.now() - Date.parse(t)) / 1000;
+  if (s < 0) return 'gleich';
+  if (s < 60) return 'jetzt';
+  if (s < 3600) return Math.floor(s / 60) + ' min';
+  if (s < 86400) return Math.floor(s / 3600) + ' h';
+  if (s < 86400 * 30) return Math.floor(s / 86400) + ' T';
+  return new Date(t).toLocaleDateString('de-AT');
+}
+const dt = (t) => (t ? new Date(t).toLocaleString('de-AT', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '–');
+const tm = (t) => (t ? new Date(t).toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' }) : '');
+let toastT;
+function toast(m, err) { const t = $('toast'); t.textContent = m; t.className = err ? 'err' : ''; clearTimeout(toastT); toastT = setTimeout(() => t.classList.add('hidden'), 3200); }
+
+/* ---------- Sitzung ---------- */
+let sess = null;
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* privat */ } }
+function store(s) { sess = s; lsSet(SESS_KEY, s ? JSON.stringify(s) : null); }
+const head = (tok) => ({ apikey: SB_KEY, 'Content-Type': 'application/json', ...(tok ? { Authorization: 'Bearer ' + tok } : {}) });
+let refreshing = null;
+async function token(force) {
+  if (!sess) return null;
+  if (!force && Date.now() < sess.exp - 60000) return sess.at;
+  if (!refreshing) refreshing = (async () => {
+    try {
+      const r = await fetch(SB_URL + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: head(), body: JSON.stringify({ refresh_token: sess.rt }) });
+      if (!r.ok) { if (r.status === 400 || r.status === 401) store(null); return null; }
+      const j = await r.json(); store({ ...sess, at: j.access_token, rt: j.refresh_token, exp: Date.now() + j.expires_in * 1000 }); return j.access_token;
+    } catch (e) { return null; } finally { setTimeout(() => { refreshing = null; }, 0); }
+  })();
+  return refreshing;
+}
+class RpcError extends Error { constructor(m, d) { super(m); this.detail = d; } }
+async function rpc(fn, args, retry) {
+  const tok = await token(); if (!tok) { showLogin('Sitzung abgelaufen – bitte neu anmelden.'); throw new RpcError('nicht angemeldet'); }
+  const r = await fetch(SB_URL + '/rest/v1/rpc/' + fn, { method: 'POST', headers: head(tok), body: JSON.stringify(args || {}) });
+  const t = await r.text();
+  if (r.status === 401 && !retry) { await token(true); return rpc(fn, args, true); }
+  if (!r.ok) {
+    let m = t, d = ''; try { const j = JSON.parse(t); m = j.message || t; d = j.details || ''; } catch (e) { /* Text */ }
+    if (m === 'forbidden') showDenied();
+    throw new RpcError(m, d);
+  }
+  return t ? JSON.parse(t) : null;
+}
+const errTxt = (e) => ERR[e && e.message] || (e && e.message) || 'Fehler';
+
+async function fromHash() {
+  const frag = location.hash.slice(1); if (!frag || frag.length < 10) return;
+  const h = new URLSearchParams(frag);
+  history.replaceState(null, '', location.pathname + location.search);
+  if (h.get('error_description')) { $('loginMsg').textContent = 'Login: ' + h.get('error_description').replace(/\+/g, ' '); $('loginMsg').className = 'msg err'; }
+  const at = h.get('access_token'), rt = h.get('refresh_token'); if (!at || !rt) return;
+  let email = '', uid = '';
+  try { const r = await fetch(SB_URL + '/auth/v1/user', { headers: head(at) }); if (r.ok) { const u = await r.json(); email = u.email || ''; uid = u.id || ''; } } catch (e) { /* offline */ }
+  if (uid) store({ at, rt, exp: Date.now() + (Number(h.get('expires_in')) || 3600) * 1000, email, uid });
+}
+
+/* ---------- Ansichten ---------- */
+function showOnly(id) { ['loginView', 'deniedView', 'app'].forEach((v) => $(v).classList.toggle('hidden', v !== id)); $('logout').classList.toggle('hidden', id !== 'app'); }
+function showLogin(m) { stopLive(); showOnly('loginView'); $('who').textContent = ''; if (m) { $('loginMsg').textContent = m; } }
+function showDenied() { stopLive(); showOnly('deniedView'); $('deniedTxt').textContent = 'Das Konto ' + ((sess && sess.email) || '') + ' hat keinen Admin-Zugriff.'; }
+async function logout() { const tok = sess && sess.at; store(null); try { if (tok) await fetch(SB_URL + '/auth/v1/logout', { method: 'POST', headers: head(tok) }); } catch (e) { /* egal */ } showLogin(''); }
+$('logout').onclick = logout; $('deniedOut').onclick = logout;
+
+$('gLogin').onclick = () => { location.href = SB_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent(location.protocol === 'https:' && location.host === 'schrauberstadt.com' ? location.origin + location.pathname : REDIRECT); };
+$('mailSend').onclick = async () => {
+  const email = $('mail').value.trim(); const m = $('loginMsg');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { m.textContent = 'Bitte gültige E-Mail eingeben.'; m.className = 'msg err'; return; }
+  $('mailSend').disabled = true;
+  try {
+    const r = await fetch(SB_URL + '/auth/v1/otp', { method: 'POST', headers: head(), body: JSON.stringify({ email, create_user: false }) });
+    if (!r.ok) throw new Error('Fehler ' + r.status);
+    $('mailStep1').classList.add('hidden'); $('mailStep2').classList.remove('hidden'); m.className = 'msg'; m.textContent = 'Code an ' + email + ' geschickt.'; $('otp').focus();
+  } catch (e) { m.className = 'msg err'; m.textContent = 'Konnte keinen Code schicken.'; }
+  $('mailSend').disabled = false;
+};
+$('otpGo').onclick = async () => {
+  const token = $('otp').value.replace(/\D/g, ''), email = $('mail').value.trim(), m = $('loginMsg');
+  try {
+    const r = await fetch(SB_URL + '/auth/v1/verify', { method: 'POST', headers: head(), body: JSON.stringify({ type: 'email', email, token }) });
+    const j = await r.json(); if (!r.ok || !j.access_token) throw new Error('x');
+    store({ at: j.access_token, rt: j.refresh_token, exp: Date.now() + (j.expires_in || 3600) * 1000, email: (j.user && j.user.email) || email, uid: j.user && j.user.id });
+    boot();
+  } catch (e) { m.className = 'msg err'; m.textContent = 'Code falsch oder abgelaufen.'; }
+};
+
+/* ---------- Tabs ---------- */
+let tab = 'dash';
+function go(t) {
+  tab = t; document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.t === t));
+  ['dash', 'players', 'feed', 'actions', 'log'].forEach((x) => $('t_' + x).classList.toggle('hidden', x !== t));
+  lsSet('ss_admin_tab', t); refresh();
+}
+$('tabs').onclick = (e) => { const b = e.target.closest('button'); if (b) go(b.dataset.t); };
+document.addEventListener('click', (e) => { const g = e.target.closest('[data-goto]'); if (g) go(g.dataset.goto); });
+
+/* ---------- Übersicht ---------- */
+let OV = null;
+function tile(k, v, s, hl) { return `<div class="tile${hl ? ' hl' : ''}"><div class="k">${esc(k)}</div><div class="v">${v}</div>${s ? `<div class="s">${s}</div>` : ''}</div>`; }
+function renderDash(o) {
+  OV = o;
+  $('tiles').innerHTML = [
+    tile('Spieler', num(o.players), o.banned ? `<span class="chip red">${num(o.banned)} gesperrt</span>` : 'gesamt'),
+    tile('Aktiv jetzt', num(o.activeNow), 'letzte 10 min', true),
+    tile('Aktiv heute', num(o.activeToday), num(o.active7d) + ' in 7 Tagen'),
+    tile('Neu heute', num(o.newToday), num(o.new7d) + ' in 7 Tagen'),
+    tile('Geld im Umlauf', eur(o.money), 'Summe Spielerkassen'),
+    tile('Offene Einsätze', num(o.openIncidents), num(o.claimedIncidents) + ' in Arbeit'),
+  ].join('');
+  // Diagramm
+  const d = o.daily || [], W = 560, H = 190, pl = 26, pb = 22, pt = 10, bw = (W - pl) / Math.max(1, d.length);
+  const max = Math.max(2, ...d.map((x) => Math.max(x.active, x.new)));
+  const step = max <= 5 ? 1 : Math.ceil(max / 4);
+  let g = '';
+  for (let v = 0; v <= max; v += step) { const y = pt + (H - pt - pb) * (1 - v / max); g += `<line x1="${pl}" x2="${W}" y1="${y}" y2="${y}" stroke="#33415f" stroke-width="1"/><text x="${pl - 6}" y="${y + 4}" text-anchor="end" font-size="10" fill="#9aa7c2">${v}</text>`; }
+  d.forEach((x, i) => {
+    const x0 = pl + i * bw, hA = (H - pt - pb) * (x.active / max), hN = (H - pt - pb) * (x.new / max), w = Math.max(3, bw * 0.34);
+    const lab = new Date(x.day + 'T12:00:00').toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' });
+    g += `<g><title>${lab}: ${x.active} aktiv, ${x.new} neu</title>`
+      + `<rect x="${x0 + bw * 0.14}" y="${H - pb - hA}" width="${w}" height="${Math.max(hA, x.active ? 2 : 0)}" rx="3" fill="#ffc927"/>`
+      + `<rect x="${x0 + bw * 0.14 + w + 2}" y="${H - pb - hN}" width="${w}" height="${Math.max(hN, x.new ? 2 : 0)}" rx="3" fill="#5fb3ff"/>`
+      + (i % 2 === (d.length - 1) % 2 ? `<text x="${x0 + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="#9aa7c2">${lab}</text>` : '') + '</g>';
+  });
+  $('chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Aktive Spieler pro Tag">${g}</svg>`;
+  // Ereignisse
+  const ev = o.events || [];
+  $('events').innerHTML = (ev.length ? ev.map((e) => { const k = EVK[e.kind] || ['❓', e.kind]; const p = Math.min(100, Math.round(100 * e.progress / Math.max(1, e.goal)));
+    return `<div class="ev"><span style="font-size:22px">${k[0]}</span><div class="body"><b>${esc(k[1])}</b> <span class="muted small">· ${esc(e.spot)} · ${num(e.helpers)} Helfer · endet ${tm(e.endsAt)}</span><div class="bar" style="margin-top:6px"><i style="width:${p}%"></i></div><div class="small muted">${num(e.progress)} / ${num(e.goal)}</div></div><button class="btn sm red" data-end="${e.id}">Beenden</button></div>`; }).join('')
+    : '<div class="empty">Gerade läuft kein Ereignis.</div>')
+    + ((o.lastEvents || []).length ? '<div class="muted small" style="margin:8px 0 4px">Zuletzt</div>' + o.lastEvents.map((e) => { const k = EVK[e.kind] || ['❓', e.kind]; return `<div class="row"><span class="ic">${k[0]}</span><div class="body">${esc(k[1])} <span class="chip ${e.outcome === 'ok' ? 'grn' : 'red'}">${e.outcome === 'ok' ? 'geschafft' : 'verpasst'}</span> <span class="muted small">${num(e.progress)}/${num(e.goal)}</span></div><span class="t">${ago(e.at)}</span></div>`; }).join('') : '');
+  const t = o.town || {};
+  $('town').innerHTML = `<dt>Einwohner</dt><dd><b>${num(t.residents)}</b></dd><dt>Stadtkasse</dt><dd><b>${eur(t.fund)}</b></dd><dt>Feuerwehr</dt><dd>${t.fireBuilt ? '✅ gebaut' : eur(t.fireFund) + ' / ' + eur(t.fireGoal)}</dd><dt>Folge</dt><dd>${num(t.episode)}</dd><dt>Grundstücke</dt><dd>${num(o.plotsOwned)} verkauft</dd>`;
+  const jm = Math.max(1, ...(o.professions || []).map((x) => x.n));
+  $('jobs').innerHTML = (o.professions || []).map((x) => `<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between"><span>${esc(x.job)}</span><b>${num(x.n)}</b></div><div class="bar"><i style="width:${100 * x.n / jm}%"></i></div></div>`).join('') || '<div class="empty">–</div>';
+  $('biz').innerHTML = `<div class="tile" style="padding:10px;margin-bottom:8px"><div class="k">Betriebe gesamt</div><div class="v">${num(o.businesses)}</div></div>` + (o.businessKinds || []).map((x) => `<div class="row"><div class="body">${esc(x.kind)}</div><b>${num(x.n)}</b></div>`).join('');
+  evStateTxt();
+}
+$('events').addEventListener('click', (e) => { const b = e.target.closest('[data-end]'); if (b) endEvent(Number(b.dataset.end)); });
+
+/* ---------- Feed ---------- */
+function feedRow(f, compact) {
+  const amt = f.amount != null && f.src !== 'done' ? `<span class="amt ${f.amount >= 0 ? 'p' : 'n'}">${f.amount >= 0 ? '+' : ''}${eur(f.amount)}</span>` : (f.src === 'done' && f.amount ? `<span class="amt p">+${eur(f.amount)}</span>` : '');
+  const who = f.who ? `<b class="name" data-pid="${esc(f.uid)}" style="cursor:pointer">${esc(f.who)}</b> ` : (f.src === 'ticker' ? '<span class="chip y">Ticker</span> ' : '');
+  return `<div class="row"><span class="ic">${esc(f.icon || '•')}</span><div class="body">${who}${esc(f.text)} ${amt}</div><span class="t" title="${esc(dt(f.at))}">${compact ? ago(f.at) : tm(f.at) + ' · ' + ago(f.at)}</span></div>`;
+}
+let feedAt = 0;
+async function loadFeed() {
+  const n = tab === 'feed' ? 120 : 8;
+  const f = await rpc('admin_feed', { p_limit: n, p_all: $('feedAll').checked });
+  feedAt = Date.now();
+  if (tab === 'feed') $('feed').innerHTML = f.length ? f.map((x) => feedRow(x)).join('') : '<div class="empty">Noch nichts los.</div>';
+  else $('miniFeed').innerHTML = f.length ? f.map((x) => feedRow(x, true)).join('') : '<div class="empty">Noch nichts los.</div>';
+}
+$('feedAll').onchange = () => loadFeed().catch(() => {});
+document.addEventListener('click', (e) => { const n = e.target.closest('[data-pid]'); if (n && n.dataset.pid) openPlayer(n.dataset.pid); });
+
+/* ---------- Spieler ---------- */
+let qT;
+async function loadPlayers() {
+  const list = await rpc('admin_players', { p_search: $('q').value.trim() || null, p_limit: 200 });
+  $('plist').innerHTML = list.length ? list.map((p) => {
+    const on = p.lastSeen && Date.now() - Date.parse(p.lastSeen) < 600000;
+    return `<div class="pl" data-pid="${esc(p.id)}"><div style="min-width:0"><div class="n"><span class="dot${on ? ' on' : ''}"></span> ${esc(p.name)} ${p.isAdmin ? '<span class="chip y">Admin</span>' : ''}${p.banned ? '<span class="chip red">gesperrt</span>' : ''}</div><div class="e">${esc(p.email || '—')}</div></div>
+      <div style="text-align:right"><div class="amt">${eur(p.cash)}</div><div class="muted small">${ago(p.lastSeen)}</div></div>
+      <div class="m"><span class="chip y">Rang ${num(p.rank)} · ${num(p.xp)} XP</span>${p.profession ? `<span class="chip">🧰 ${esc(p.profession)}</span>` : ''}${p.townJob ? `<span class="chip">🏛️ ${esc(p.townJob)}</span>` : ''}${p.employer ? `<span class="chip">💼 ${esc(p.employer)}</span>` : ''}${p.businesses ? `<span class="chip">🏪 ${num(p.businesses)}</span>` : ''}${p.plots ? `<span class="chip">📍 ${num(p.plots)}</span>` : ''}<span class="chip">🚨 heute ${num(p.runsToday)}</span><span class="chip">seit ${new Date(p.createdAt).toLocaleDateString('de-AT')}</span></div></div>`;
+  }).join('') : '<div class="empty">Keine Spieler gefunden.</div>';
+}
+$('q').oninput = () => { clearTimeout(qT); qT = setTimeout(() => loadPlayers().catch((e) => toast(errTxt(e), 1)), 300); };
+$('qGo').onclick = () => loadPlayers().catch((e) => toast(errTxt(e), 1));
+
+/* ---------- Dialoge ---------- */
+const dlg = $('dlg');
+function openDlg(html) { $('dlgBody').innerHTML = html; if (!dlg.open) { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); } }
+function closeDlg() { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
+dlg.addEventListener('click', (e) => { if (e.target === dlg || e.target.closest('.x')) closeDlg(); });
+
+let curPid = null;
+async function openPlayer(id) {
+  curPid = id;
+  openDlg('<div class="empty">Lade …</div>');
+  let d; try { d = await rpc('admin_player_detail', { p_id: id }); } catch (e) { openDlg(`<h2>Fehler<span class="sp"></span><button class="x">✕</button></h2><p>${esc(errTxt(e))}</p>`); return; }
+  const p = d.player;
+  const ban = p.banned ? `<div class="ev" style="background:rgba(255,93,93,.12)"><span>⛔</span><div class="body"><b>Gesperrt</b> ${p.banned_until && p.banned_until !== 'infinity' ? 'bis ' + esc(dt(p.banned_until)) : 'dauerhaft'}<div class="small muted">Grund: ${esc(p.ban_reason || '—')}</div></div></div>` : '';
+  const list = (arr, fn, empty) => (arr && arr.length ? `<div class="list">${arr.map(fn).join('')}</div>` : `<div class="empty">${empty}</div>`);
+  openDlg(`<h2>${esc(p.name)} ${p.isAdmin ? '<span class="chip y">Admin</span>' : ''}<span class="sp"></span><button class="x" aria-label="Schließen">✕</button></h2>
+    <div class="muted small">${esc(p.email || '—')} · ${esc(p.provider || '')}</div>
+    ${ban}
+    <section><div class="actions">
+      ${p.banned ? '<button class="btn grn sm" data-act="unban">✅ Entsperren</button>' : (p.isAdmin ? '' : '<button class="btn red sm" data-act="ban">⛔ Sperren</button>')}
+      <button class="btn y sm" data-act="cash">💶 Geld anpassen</button>
+      <button class="btn sm" data-act="rename">✏️ Umbenennen</button>
+    </div></section>
+    <section><h4>Stammdaten</h4><dl class="kv">
+      <dt>Kasse</dt><dd><b>${eur(p.cash)}</b></dd><dt>Rang / XP</dt><dd>${num(p.rank)} · ${num(p.xp)} XP</dd>
+      <dt>Beruf</dt><dd>${esc(p.profession || '—')}${p.town_job ? ' · Stadtjob: ' + esc(p.town_job) : ''}${p.employerName ? ' · bei ' + esc(p.employerName) : ''}</dd>
+      <dt>Combo</dt><dd>${num(p.combo)}</dd><dt>Zuletzt</dt><dd>${esc(dt(p.last_seen))} (${ago(p.last_seen)})</dd>
+      <dt>Login</dt><dd>${esc(dt(p.lastSignIn))}</dd><dt>Dabei seit</dt><dd>${esc(dt(p.created_at))}</dd>
+      ${d.save ? `<dt>Werkstatt</dt><dd>Tag ${num(d.save.day)} · ${eur(d.save.money)} · ges. ${ago(d.save.updatedAt)}</dd>` : ''}
+      <dt>ID</dt><dd class="small muted">${esc(p.id)}</dd></dl></section>
+    <section><h4>Betriebe & Grundstücke</h4>${list(d.businesses, (b) => `<div class="row"><span class="ic">🏪</span><div class="body">${esc(b.name)} <span class="muted small">${esc(b.kind)} · Stufe ${num(b.level)} · Wert ${eur(b.value)}</span></div></div>`, 'Keine Betriebe')}
+      ${d.plots && d.plots.length ? list(d.plots, (x) => `<div class="row"><span class="ic">📍</span><div class="body">${esc(x.label)} <span class="muted small">${eur(x.price)} · seit ${ago(x.boughtAt)}</span></div></div>`) : ''}</section>
+    <section><h4>Einsätze</h4>${list(d.incidents, (i) => `<div class="row"><span class="ic">${i.status === 'done' ? '✅' : i.status === 'open' ? '🚨' : '⌛'}</span><div class="body">${esc(i.car || '')} ${esc(i.kind)} <span class="muted small">Stufe ${num(i.stage)}/${num(i.stages)} · ${esc(i.status)}${i.reward ? ' · ' + eur(i.reward) : ''}</span></div><span class="t">${ago(i.doneAt || i.claimedAt)}</span></div>`, 'Keine Einsätze')}</section>
+    <section><h4>Ereignis-Beiträge</h4>${list(d.events, (e) => { const k = EVK[e.kind] || ['❓', e.kind]; return `<div class="row"><span class="ic">${k[0]}</span><div class="body">${esc(k[1])} <span class="muted small">${num(e.amount)} Pkt · ${num(e.calls)}× ${e.cash ? '· ' + eur(e.cash) : ''}</span></div><span class="t">${ago(e.at)}</span></div>`; }, 'Keine Beiträge')}</section>
+    <section><h4>Buchungen (letzte 50)</h4><div class="scroll" style="max-height:300px">${list(d.ledger, (l) => `<div class="row"><div class="body">${esc(l.reason)}</div><span class="amt ${l.amount >= 0 ? 'p' : 'n'}">${l.amount >= 0 ? '+' : ''}${eur(l.amount)}</span><span class="t">${esc(dt(l.at))}</span></div>`, 'Keine Buchungen')}</div></section>`);
+  $('dlgBody').dataset.name = p.name;
+}
+$('dlgBody').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const a = b.dataset.act, name = $('dlgBody').dataset.name || '';
+  if (a === 'ban') banDialog(curPid, name);
+  if (a === 'unban') act('admin_unban', { p_id: curPid }, name + ' entsperrt', true);
+  if (a === 'cash') formDialog('💶 Geld anpassen – ' + name, `<label>Betrag (+ gutschreiben / − abziehen)<input class="in" name="d" type="number" inputmode="numeric" step="1" required placeholder="z. B. 500 oder -200"></label><label>Grund<input class="in" name="r" maxlength="120" placeholder="z. B. Fehler-Ausgleich"></label>`, 'Buchen', (f) => act('admin_set_cash', { p_id: curPid, p_delta: Math.round(Number(f.d)), p_reason: f.r }, 'Geld gebucht', true));
+  if (a === 'rename') formDialog('✏️ Umbenennen', `<label>Neuer Name (2–20 Zeichen)<input class="in" name="n" maxlength="20" minlength="2" required value="${esc(name)}"></label>`, 'Speichern', (f) => act('admin_rename', { p_id: curPid, p_name: f.n }, 'Umbenannt', true));
+});
+function banDialog(id, name) {
+  formDialog('⛔ ' + name + ' sperren', `<label>Grund (sieht der Spieler)<input class="in" name="r" maxlength="200" required placeholder="z. B. Beleidigender Name"></label>
+    <label>Dauer<div class="seg" id="banDur"><button type="button" class="btn sm" data-d="1">1 Tag</button><button type="button" class="btn sm on" data-d="7">7 Tage</button><button type="button" class="btn sm" data-d="30">30 Tage</button><button type="button" class="btn sm" data-d="">Dauerhaft</button></div></label>
+    <input type="hidden" name="d" value="7">`, 'Sperren', (f) => act('admin_ban', { p_id: id, p_reason: f.r, p_days: f.d ? Number(f.d) : null }, name + ' gesperrt', true), 'red');
+  $('banDur').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; $('banDur').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); $('dlgBody').querySelector('[name=d]').value = b.dataset.d; };
+}
+function formDialog(title, fields, ok, fn, cls) {
+  openDlg(`<h2>${esc(title)}<span class="sp"></span><button class="x" type="button" aria-label="Schließen">✕</button></h2><form class="form" id="dlgForm">${fields}<div class="actions"><button type="button" class="btn ghost x" style="width:auto;height:auto;font-size:15px">Abbrechen</button><button class="btn ${cls || 'y'}" id="dlgOk" style="flex:1">${esc(ok)}</button></div></form>`);
+  const form = $('dlgForm'); const first = form.querySelector('input:not([type=hidden])'); if (first) setTimeout(() => first.focus(), 50);
+  form.onsubmit = async (e) => { e.preventDefault(); const btn = $('dlgOk'); btn.disabled = true; const data = Object.fromEntries(new FormData(form)); await fn(data); btn.disabled = false; };
+}
+async function act(fn, args, okMsg, reopen) {
+  try { await rpc(fn, args); toast('✅ ' + okMsg); if (reopen && curPid && args.p_id) openPlayer(curPid); else closeDlg(); refresh(); return true; }
+  catch (e) { toast(errTxt(e), 1); return false; }
+}
+
+/* ---------- Aktionen ---------- */
+$('tickTxt').oninput = () => { $('tickCnt').textContent = $('tickTxt').value.length + ' / 180'; };
+$('tickGo').onclick = async () => {
+  const t = $('tickTxt').value.trim(); if (t.length < 2) { toast('Text fehlt', 1); return; }
+  if (!confirm('Ticker-Nachricht an alle senden?\n\n„📢 Stadtverwaltung: ' + t + '“')) return;
+  $('tickGo').disabled = true;
+  try { await rpc('admin_feed_post', { p_text: t }); $('tickTxt').value = ''; $('tickTxt').oninput(); toast('📢 Gesendet'); } catch (e) { toast(errTxt(e), 1); }
+  $('tickGo').disabled = false;
+};
+let evKind = '';
+$('evKind').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; evKind = b.dataset.k; $('evKind').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); };
+function evStateTxt() { const ev = (OV && OV.events) || []; $('evState').textContent = ev.length ? 'Läuft gerade: ' + ev.map((e) => (EVK[e.kind] || ['', e.kind]).join(' ') + ' (' + e.progress + '/' + e.goal + ')').join(', ') : 'Gerade läuft kein Ereignis.'; }
+$('evStart').onclick = async () => {
+  $('evStart').disabled = true;
+  try { const r = await rpc('admin_spawn_event', { p_kind: evKind || null }); toast('🔥 Ereignis gestartet: ' + ((EVK[r.kind] || ['', r.kind])[1])); await loadDash(); } catch (e) { toast(errTxt(e), 1); }
+  $('evStart').disabled = false;
+};
+async function endEvent(id) {
+  if (!confirm('Laufendes Ereignis jetzt beenden und abrechnen?')) return;
+  try { const r = await rpc('admin_end_event', { p_id: id || null }); toast(r.ended ? '✅ Ereignis beendet' : 'Kein laufendes Ereignis'); await loadDash(); } catch (e) { toast(errTxt(e), 1); }
+}
+$('evEnd').onclick = () => endEvent(null);
+
+/* ---------- Log ---------- */
+const ACT = { ban: '⛔ Sperre', unban: '✅ Entsperrt', cash: '💶 Geld', rename: '✏️ Name', end_event: '🛑 Ereignis beendet', spawn_event: '🔥 Ereignis gestartet', feed_post: '📢 Ticker' };
+async function loadLog() {
+  const l = await rpc('admin_log_list', { p_limit: 200 });
+  $('alog').innerHTML = l.length ? l.map((x) => `<div class="row"><div class="body"><b>${esc(ACT[x.action] || x.action)}</b> ${x.targetName ? `<b class="name" data-pid="${esc(x.target)}" style="cursor:pointer">${esc(x.targetName)}</b>` : ''} <span class="muted">${esc(x.detail || '')}</span><div class="small muted">${esc(x.admin || '')}</div></div><span class="t">${esc(dt(x.at))}</span></div>`).join('') : '<div class="empty">Noch keine Admin-Aktionen.</div>';
+}
+$('logRe').onclick = () => loadLog().catch((e) => toast(errTxt(e), 1));
+
+/* ---------- Laden / Live ---------- */
+async function loadDash() { renderDash(await rpc('admin_overview')); }
+async function refresh() {
+  try {
+    if (tab === 'dash') await Promise.all([loadDash(), loadFeed()]);
+    else if (tab === 'players') await loadPlayers();
+    else if (tab === 'feed') await loadFeed();
+    else if (tab === 'actions') await loadDash();
+    else if (tab === 'log') await loadLog();
+    $('liveDot').classList.add('on');
+  } catch (e) { $('liveDot').classList.remove('on'); if (e.message !== 'forbidden' && e.message !== 'nicht angemeldet') toast(errTxt(e), 1); }
+}
+let liveT = null;
+function startLive() { stopLive(); liveT = setInterval(() => { if (document.hidden || dlg.open) return; if (tab === 'feed' || tab === 'dash') refresh(); }, 10000); }
+function stopLive() { if (liveT) clearInterval(liveT); liveT = null; }
+setInterval(() => { if (feedAt) $('feedAge').textContent = 'live · ' + Math.round((Date.now() - feedAt) / 1000) + ' s'; }, 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && liveT) refresh(); });
+
+async function boot() {
+  try { const raw = lsGet(SESS_KEY); if (raw) sess = JSON.parse(raw); } catch (e) { sess = null; }
+  await fromHash();
+  if (!sess) { showLogin(''); return; }
+  let me;
+  try { me = await rpc('admin_whoami'); } catch (e) { if (e.message !== 'nicht angemeldet') showLogin('Server nicht erreichbar: ' + errTxt(e)); return; }
+  if (!me || !me.admin) { showDenied(); return; }
+  $('who').textContent = sess.email || '';
+  showOnly('app');
+  const t = lsGet('ss_admin_tab'); go(['dash', 'players', 'feed', 'actions', 'log'].includes(t) ? t : 'dash');
+  startLive();
+}
+boot();
+})();
+</script>
+</body>
+</html>
