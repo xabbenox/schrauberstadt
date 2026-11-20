@@ -208,6 +208,10 @@ body:has(#decide:not([hidden])) #toast { bottom: auto; top: calc(env(safe-area-i
 .set-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 3px solid var(--ink); border-radius: 16px; padding: 10px 12px; background: #fff; }
 .set-row .cnt { flex: none; } .set-row input { flex: 1; min-width: 0; width: 0; font: inherit; font-weight: 800; border: 3px solid var(--ink); border-radius: 12px; padding: 6px 10px; }
 .help-body { overflow-y: auto; font-weight: 600; font-size: 14px; line-height: 1.45; } .help-body h3 { font-family: var(--display); font-weight: normal; font-size: 19px; margin: 12px 0 2px; color: var(--navy); } .help-body p { margin: 0 0 6px; }
+/* Outfit */
+.out-wrap { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: center; } #outPrev { width: 95px; height: 300px; justify-self: center; background: radial-gradient(circle at 50% 70%, #e8e2d2, transparent 70%); }
+.out-pick h3 { margin: 4px 0; font-family: var(--display); font-weight: normal; font-size: 18px; } .out-sw { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 8px; }
+.out-sw button { aspect-ratio: 1; border: 3px solid var(--ink); border-radius: 50%; cursor: pointer; padding: 0; } .out-sw button.on { outline: 4px solid var(--sun); outline-offset: 1px; }
 /* Feedback */
 .fb-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } .fbTab { font-size: 16px !important; opacity: .55; } .fbTab.on { opacity: 1; outline: 3px solid var(--ink); }
 #fbText { width: 100%; box-sizing: border-box; font: inherit; font-weight: 700; font-size: 16px; border: 3px solid var(--ink); border-radius: 14px; padding: 10px; resize: vertical; min-height: 110px; }
@@ -452,11 +456,21 @@ body.tkon #evBanner { top: calc(env(safe-area-inset-top, 0px) + 34px); }
     </div>
   </div>
 </div>
+<div class="sheet" id="outfit" hidden>
+  <div class="panel" role="dialog" aria-labelledby="outH">
+    <div class="panel-head"><h2 id="outH">👕 Dein Outfit</h2><button class="x" id="outClose" type="button">Fertig</button></div>
+    <div class="mp-box">
+      <div class="out-wrap"><canvas id="outPrev" width="95" height="300"></canvas><div class="out-pick"><h3>Overall</h3><div class="out-sw" id="outSuit"></div><h3>Kappe</h3><div class="out-sw" id="outCap"></div></div></div>
+      <p class="hint">Alle in der Stadt sehen dein Outfit. Mehr Kleidung kommt mit den nächsten Folgen!</p>
+    </div>
+  </div>
+</div>
 <div class="sheet" id="settings" hidden>
   <div class="panel" role="dialog" aria-labelledby="setH">
     <div class="panel-head"><h2 id="setH">Einstellungen</h2><button class="x" id="setClose" type="button">Fertig</button></div>
     <div class="mp-box">
       <label class="set-row"><span class="cnt">Werkstattname</span><input id="setName" maxlength="24" autocomplete="off"></label>
+      <div class="set-row"><span class="cnt">Outfit</span><button class="buy" id="setOutfit" type="button">👕 Gestalten</button></div>
       <div class="set-row"><span class="cnt">Ton</span><button class="buy" id="setMute" type="button">Ton: an</button></div>
       <div class="set-row"><span class="cnt">Spielstand</span><button class="fire" id="setReset" type="button">Löschen</button></div>
     </div>
@@ -3715,7 +3729,7 @@ async function cityLoad() {
   try {
     CITY.state = await sbRpc('city_state');
     const uid = ONLINE.sess.uid;
-    const me = await sbRest('players?select=name,cash,last_tick_net&id=eq.' + uid); CITY.me = me && me[0];
+    const me = await sbRest('players?select=name,cash,last_tick_net,outfit&id=eq.' + uid); CITY.me = me && me[0]; if (CITY.me && Array.isArray(CITY.me.outfit) && !lsGet('ss_outfit')) { OUTFIT.cur = outfitNorm(CITY.me.outfit); lsSet('ss_outfit', JSON.stringify(OUTFIT.cur)); }
     if (!CITY.me) { await sbRpc('join_game', { p_name: myName() }); const m2 = await sbRest('players?select=name,cash,last_tick_net&id=eq.' + uid); CITY.me = m2 && m2[0]; }
     CITY.ledger = await sbRest('ledger?select=amount,reason,created_at&order=created_at.desc&limit=8&player=eq.' + uid) || [];
     CITY.err = '';
@@ -3844,6 +3858,7 @@ function cityTick(dt) {
   if (!ONLINE.sess) return;
   CITY.t += dt; if (CITY.t > 30) cityLoad();
   CITY.ping += dt; if (running && CITY.ping > 120) { CITY.ping = 0; sbRpc('ping').catch(() => {}); }
+  CITY.beat = (CITY.beat || 0) + dt; if ((running || WALK.on) && !document.hidden && CITY.beat > 60) { CITY.beat = 0; sbRpc('play_beat').catch(() => {}); } // Spielzeit fürs Admin-Panel
 }
 $('cityClose').addEventListener('click', () => { $('city').hidden = true; });
 $('cityOpen').addEventListener('click', () => { $('mp').hidden = true; $('city').hidden = false; renderCity(); cityLoad(); });
@@ -4064,7 +4079,7 @@ async function workShift() {
 function drawMe() {
   const m = WALK.me, bob = m.moving ? Math.abs(Math.sin(performance.now() / 90)) * 8 : WALK.shift ? Math.abs(Math.sin(performance.now() / 170)) * 6 : 0;
   if (!IMG.geselle) return;
-  shadow(m.x, m.y, 26, 11); drawSprite(tinted('geselle', 0, 1.15, 1.2), m.x, m.y - bob, m.w, m.flip, 1, 0.97);
+  shadow(m.x, m.y, 26, 11); drawSprite(outfitImg(OUTFIT.cur), m.x, m.y - bob, m.w, m.flip, 1, 0.97);
   const s = toScreen(m.x, m.y - 110); ctx.save(); ctx.font = '800 13px system-ui, sans-serif'; ctx.textAlign = 'center';
   let name = (CITY.me && CITY.me.name) || ''; if (!name || DEFAULT_NAME.test(name.trim())) name = 'Du'; const w = ctx.measureText(name).width + 16;
   ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(s.x - w / 2, s.y - 22, w, 22, 11) : ctx.rect(s.x - w / 2, s.y - 22, w, 22); ctx.fill(); ctx.stroke();
@@ -4225,12 +4240,12 @@ function askPlayerName(force) {
   $('nameAskLater').onclick = () => d.remove();
   const save = async () => {
     const v = inp.value.trim(); if (v.length < 2) { $('nameAskErr').textContent = 'Mindestens 2 Zeichen, bitte.'; return; }
-    $('nameAskOk').disabled = true;
+    const okB = $('nameAskOk'); okB.disabled = true;
     try { const r = await sbRpc('set_player_name', { p_name: v });
       if (r && r.ok) { if (CITY.me) CITY.me.name = r.name; if (CITY.state && CITY.state.me) CITY.state.me.name = r.name; d.remove(); sfx.goal(); toast(`Hallo ${r.name}! 👋`); }
       else $('nameAskErr').textContent = (r && r.msg) || 'Hat nicht geklappt – probier einen anderen Namen.';
     } catch (e) { $('nameAskErr').textContent = 'Keine Verbindung – probier es gleich nochmal.'; }
-    $('nameAskOk').disabled = false;
+    okB.disabled = false; // (Fenster kann schon zu sein – Knopf-Referenz statt erneut suchen)
   };
   $('nameAskOk').onclick = save; inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
 }
@@ -4329,7 +4344,7 @@ async function presConnect() {
       o.still = o.rx === x && o.ry === y ? (o.still || 0) + 1 : 0; o.rx = x; o.ry = y;
       let tx = x, ty = y; const uw = uwOf({ x, y }); // steht jemand (ältere Version) länger auf der Fahrbahn: bei uns auf den Gehsteig stellen, sonst warten die Autos ewig
       if (o.still >= 3 && onCarriage(uw)) { const q = offRoad(uw), qi = iso(q.u, q.w); tx = qi.x; ty = qi.y; }
-      Object.assign(o, { tx, ty, n: str(p.n, 20), r: Math.max(0, Math.min(4, p.r | 0)), j: str(p.j, 24), w: !!p.w, t: performance.now() });
+      Object.assign(o, { tx, ty, n: str(p.n, 20), r: Math.max(0, Math.min(4, p.r | 0)), j: str(p.j, 24), w: !!p.w, t: performance.now(), o: outfitNorm(p.o), pl: str(String(p.pl || ''), 40) });
     };
     ws.onclose = () => { PRES.ws = null; PRES.ok = false; PRES.back = Math.min(60, (PRES.back || 2.5) * 2); PRES.retry = PRES.back; }; // offline: 5, 10, 20 … 60 s Pause
     ws.onerror = () => { try { ws.close(); } catch (e) { /* egal */ } };
@@ -4342,7 +4357,7 @@ function presTick(dt) {
   PRES.sendT += dt;
   if (PRES.ok && PRES.sendT > 0.5) {
     PRES.sendT = 0; const me = (CITY.state && CITY.state.me) || {}, prof = ((CITY.state && CITY.state.professions) || []).find((x) => x.id === me.profession);
-    presSend('broadcast', { type: 'broadcast', event: 'pos', payload: { id: ONLINE.sess.uid, x: Math.round(WALK.me.x), y: Math.round(WALK.me.y), n: (CITY.me && CITY.me.name) || myName(), r: rankOf(me.xp || 0), j: prof ? prof.icon + ' ' + prof.label : '', w: !!WALK.shift } });
+    presSend('broadcast', { type: 'broadcast', event: 'pos', payload: { id: ONLINE.sess.uid, x: Math.round(WALK.me.x), y: Math.round(WALK.me.y), n: (CITY.me && CITY.me.name) || myName(), r: rankOf(me.xp || 0), o: OUTFIT.cur, pl: WALK.job || '', j: prof ? prof.icon + ' ' + prof.label : '', w: !!WALK.shift } });
   }
   const now = performance.now();
   for (const id in PRES.peers) {
@@ -4351,18 +4366,56 @@ function presTick(dt) {
     if (d > 600) { o.x = o.tx; o.y = o.ty; } else { const k = Math.min(1, dt * 6); o.x += dx * k; o.y += dy * k; }
   }
 }
+/* ---- Outfit (Beta-Wunsch: eigene Figur gestalten): Overall- und Kappenfarbe, wird live an alle geschickt ---- */
+const OUTFIT_COL = [['Blau', null], ['Rot', [0.0, 1.1, 1.05]], ['Grün', [0.33, 1, 0.95]], ['Orange', [0.07, 1.5, 1.45]], ['Gelb', [0.135, 1.5, 1.8]], ['Pink', [0.92, 1, 1.2]], ['Lila', [0.78, 1, 1.05]], ['Schwarz', [0.6, 0.15, 0.5]], ['Grau', [0.6, 0.05, 1.35]]];
+const OUTFIT = { cur: [0, 0], cache: {} };
+try { const v = JSON.parse(lsGet('ss_outfit') || 'null'); if (Array.isArray(v)) OUTFIT.cur = outfitNorm(v); } catch (e) { /* egal */ }
+function outfitNorm(v) { const a = Array.isArray(v) ? v : [0, 0], n = (x) => clamp(Math.floor(Number(x) || 0), 0, OUTFIT_COL.length - 1); return [n(a[0]), n(a[1])]; }
+function outfitImg(o) {
+  o = outfitNorm(o); const key = o.join(','); if (OUTFIT.cache[key]) return OUTFIT.cache[key];
+  const src = IMG.geselle; if (!src) return tinted('geselle', 0, 1, 1);
+  const c = document.createElement('canvas'); c.width = src.width; c.height = src.height; const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(src, 0, 0);
+  if (!o[0] && !o[1]) return (OUTFIT.cache[key] = c);
+  try {
+    const d = g.getImageData(0, 0, c.width, c.height), p = d.data, capY = c.height * 0.16;
+    for (let i = 0; i < p.length; i += 4) {
+      if (p[i + 3] < 10) continue; const r = p[i] / 255, gg = p[i + 1] / 255, b = p[i + 2] / 255, mx = Math.max(r, gg, b), mn = Math.min(r, gg, b), l = (mx + mn) / 2; if (mx === mn) continue;
+      const dd = mx - mn, sa = l > 0.5 ? dd / (2 - mx - mn) : dd / (mx + mn); if (sa < 0.05) continue;
+      let h = mx === r ? (gg - b) / dd + (gg < b ? 6 : 0) : mx === gg ? (b - r) / dd + 2 : (r - gg) / dd + 4; h /= 6;
+      const y = Math.floor(i / 4 / c.width), cap = y < capY && sa > 0.18 && h > 0.13 && h < 0.56, suit = !cap && y >= capY * 0.9 && h > 0.5 && h < 0.85 && (sa > 0.12 || l < 0.45); // Kappe (petrol, oben) / Overall (blau)
+      const t = cap ? OUTFIT_COL[o[1]][1] : suit ? OUTFIT_COL[o[0]][1] : null; if (!t) continue;
+      const nh = t[0], ns = clamp(Math.max(sa, cap ? 0.3 : 0.38) * t[1], 0, 1), L = clamp(l * t[2], 0, 1), q = L < 0.5 ? L * (1 + ns) : L + ns - L * ns, pp = 2 * L - q;
+      const f = (x) => { x = (x + 1) % 1; return x < 1 / 6 ? pp + (q - pp) * 6 * x : x < 0.5 ? q : x < 2 / 3 ? pp + (q - pp) * (2 / 3 - x) * 6 : pp; };
+      p[i] = f(nh + 1 / 3) * 255; p[i + 1] = f(nh) * 255; p[i + 2] = f(nh - 1 / 3) * 255;
+    }
+    g.putImageData(d, 0, 0);
+  } catch (e) { /* ohne Farbe */ }
+  return (OUTFIT.cache[key] = c);
+}
+function outfitSet(o) { OUTFIT.cur = outfitNorm(o); lsSet('ss_outfit', JSON.stringify(OUTFIT.cur)); try { if (ONLINE.sess) sbRpc('set_outfit', { p_outfit: OUTFIT.cur }).catch(() => {}); } catch (e) { /* egal */ } }
 function presPeople() { return Object.values(PRES.peers); }
 function drawPeer(o) {
   if (!IMG.geselle) return;
   const t = performance.now(), bob = o.moving ? Math.abs(Math.sin(t / 90)) * 8 : o.w ? Math.abs(Math.sin(t / 170)) * 6 : 0;
-  shadow(o.x, o.y, 24, 10); drawSprite(tinted('geselle', 140, 0.9, 1.1), o.x, o.y - bob, 52, o.flip, 1, 0.97);
-  if ((typeof FOCUS !== 'undefined' && FOCUS.on) || o._lbl === false) return; // Fokus oder weit weg: keine Namen
+  const mate = !!(o.pl && WALK.job && o.pl === WALK.job); o._mate = mate; // Kollegen (gleicher Arbeitsplatz) kräftig, fremde etwas blasser
+  shadow(o.x, o.y, 24, 10); drawSprite(outfitImg(o.o), o.x, o.y - bob, 52, o.flip, mate || o._lbl ? 1 : 0.7, 0.97);
+  if ((typeof FOCUS !== 'undefined' && FOCUS.on) || (o._lbl === false && !(o.pl && WALK.job && o.pl === WALK.job))) return; // Fokus oder weit weg: keine Namen
   const s = toScreen(o.x, o.y - 105); ctx.save(); ctx.font = '800 12px system-ui, sans-serif'; ctx.textAlign = 'center';
-  const label = `${o.n} · ${RANKS[o.r][0]}`; const w = ctx.measureText(label).width + 14;
+  const label = `${o._mate ? '🤝 ' : ''}${o.n} · ${RANKS[o.r][0]}`; const w = ctx.measureText(label).width + 14;
   ctx.fillStyle = 'rgba(255,253,246,0.95)'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(s.x - w / 2, s.y - 20, w, 20, 10) : ctx.rect(s.x - w / 2, s.y - 20, w, 20); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#1b1b1b'; ctx.fillText(label, s.x, s.y - 6); if (o.w) { ctx.font = '16px system-ui'; ctx.fillText('🔧', s.x, s.y - 26); }
   ctx.restore();
 }
+
+// Outfit-Fenster (Einstellungen → 👕 Gestalten)
+{ const SW = ['#2f4f9b', '#d63a2f', '#2f9b4a', '#f08a1c', '#f2c81e', '#e86aa8', '#7a4fc0', '#26282c', '#b8bcc4'];
+  const draw = () => { const c = $('outPrev'), g = c.getContext('2d'); g.clearRect(0, 0, c.width, c.height); const im = outfitImg(OUTFIT.cur); if (im && im.width > 1) g.drawImage(im, 0, 0, c.width, c.height);
+    ['outSuit', 'outCap'].forEach((id, k) => $(id).querySelectorAll('button').forEach((b, i) => b.classList.toggle('on', OUTFIT.cur[k] === i))); };
+  ['outSuit', 'outCap'].forEach((id, k) => { const box = $(id); OUTFIT_COL.forEach(([name], i) => { const b = document.createElement('button'); b.type = 'button'; b.style.background = SW[i]; b.title = name; b.setAttribute('aria-label', (k ? 'Kappe ' : 'Overall ') + name);
+    b.addEventListener('click', () => { const o = OUTFIT.cur.slice(); o[k] = i; outfitSet(o); sfx.pop(); draw(); }); box.appendChild(b); }); });
+  $('setOutfit').addEventListener('click', () => { $('settings').hidden = true; $('outfit').hidden = false; draw(); });
+  $('outClose').addEventListener('click', () => { $('outfit').hidden = true; });
+  window.__outfit = { draw }; }
 /* ---------------- Arbeiten im Mehrspieler: echte Aufträge statt Wartezeit ---------------- */
 // Je nach Beruf kommen kurze Aufträge (Minispiele): Schrauben lösen, Öl/Tank füllen, Kunden bedienen, Fehler finden.
 // Gute Arbeit = voller Lohn + Erfahrung. Der Server rechnet ab (work_task mit Qualität 0..1).
@@ -6380,7 +6433,7 @@ const DRV_TXT = {
   hit: ['Rums! Der Lack hat’s überlebt.', 'Sanft geküsst – zählt trotzdem.', 'Der Fahrer zeigt dir einen Vogel. 🐦', 'Stoßstange an Stoßstange – wie im Stau in Villach.'],
   ped: ['Hup hup! Fußgänger haben Vorrang. 🚶', 'Bremse! Da geht wer.'],
   hookNear: 'Hier anhalten – dann kommt der Haken. 🪝',
-  hookFar: 'Näher ran ans Auto! Spur wechseln mit ◀ ▶',
+  hookFar: 'Gleich da – langsamer werden!',
   hooked: ['🪝 Eingehängt! Ab in die Werkstatt.', '🪝 Hängt! Jetzt bitte keine Schlaglöcher.'],
   wrong: 'Falsche Richtung? Im Stand ◀ ▶ = wenden.',
 };
@@ -6406,7 +6459,7 @@ function drvUi() {
 #drvPads button[data-k=B] { background: #e63b2e; color: #fff; font-size: 16px; } #drvPads button[data-k=B].on { background: #b92d22; }
 #drvPads .kb { pointer-events: none; font-weight: 800; font-size: 12px; color: #fff; text-shadow: 0 1px 2px #000; text-align: center; align-self: center; }
 @media (hover: hover) and (pointer: fine) { #drvPads button { width: 58px; height: 58px; font-size: 24px; } #drvPads button[data-k=G] { height: 74px; font-size: 18px; } #drvPads button[data-k=B] { font-size: 13px; } }
-@media (pointer: coarse) { #drvPads .kb { display: none; } }
+#drvPads .kb.nav { font-size: 13px; background: rgba(27,27,27,.55); border-radius: 12px; padding: 6px 10px; }
 #drvPin { position: absolute; transform: translate(-50%, -100%); z-index: 3; pointer-events: none; background: #1f9a52; color: #fff; border: 3px solid var(--ink); border-radius: 12px; box-shadow: 0 3px 0 var(--ink); padding: 2px 8px; font-weight: 800; font-size: 13px; white-space: nowrap; animation: evbob .7s ease-in-out infinite alternate; }
 #drvPin.car { background: #f08a1c; }
 #drvArrow { position: fixed; z-index: 7; width: 46px; height: 46px; margin: -23px 0 0 -23px; pointer-events: none; border-radius: 50%; background: var(--sun); border: 4px solid var(--ink); box-sizing: border-box; display: grid; place-items: center; font-size: 20px; box-shadow: 0 3px 0 var(--ink); }
@@ -6420,8 +6473,7 @@ function drvUi() {
   hud.innerHTML = '<span><b id="drvGoal"></b><br><span class="dd" id="drvDist"></span></span><span class="dt" id="drvTime"></span><button type="button" id="drvQuit" aria-label="Abschleppen abbrechen">✖</button>';
   const say = document.createElement('div'); say.id = 'drvSay';
   const pads = document.createElement('div'); pads.id = 'drvPads';
-  pads.innerHTML = '<div><button type="button" data-k="L" aria-label="links lenken">◀</button><button type="button" data-k="R" aria-label="rechts lenken">▶</button></div>'
-    + '<span class="kb">⌨️ Pfeiltasten / WASD<br>◀ ▶ = Lenken (aus Fahrersicht)</span>'
+  pads.innerHTML = '<span class="kb nav">🧭 Das Navi lenkt.<br>Achte auf Ampeln, Verkehr und Kurven!</span>'
     + '<div><button type="button" data-k="B" aria-label="Bremse / rückwärts">Bremse</button><button type="button" data-k="G" aria-label="Gas">Gas</button></div>';
   const pin = document.createElement('div'); pin.id = 'drvPin';
   const arrow = document.createElement('div'); arrow.id = 'drvArrow'; arrow.innerHTML = '<i></i><span></span>'; arrow.hidden = true;
@@ -6468,10 +6520,11 @@ function drvStart(info, cb) {
   Object.assign(DRV.tow, { on: false, u: from.u, w: from.w, hu: fax === 'u' ? f : 0, hw: fax === 'w' ? f : 0, v: 0 });
   drvPose(DRV.tow, DRV.tow.hu, DRV.tow.hw); const tp = iso(from.u, from.w); DRV.tow.x = tp.x; DRV.tow.y = tp.y;
   DRV.dist0 = Math.hypot(sf.u - DRV.u, sf.w - DRV.w) + Math.hypot(stt.u - sf.u, stt.w - sf.w);
+  if (!drvReplan(sf.u, sf.w)) { DRV.on = false; try { cb && cb(0, false); } catch (e) { console.error('[Schrauberstadt] Fahren', e); } return false; } // kein Weg gefunden → normales Minispiel
   WALK.path = []; WALK.dest = null; WALK.follow = false; WALK.intro = null; WALK.pan = null; if (typeof walkStopShift === 'function') walkStopShift();
   $('place').hidden = true; document.body.classList.add('driving'); drvUi(); drvSync(); setZoom(clamp(zoom * 0.8, 0.6, 1.1));
   for (let i = 0; i < 8; i++) DRV.fx.push({ u: DRV.u + rnd(-90, 90), w: DRV.w + rnd(-60, 60), t: 0, life: rnd(0.5, 0.9), r: rnd(18, 34) }); // Staubwolke beim Einsteigen
-  sfx.horn(); drvSay('🛻 Rein in den Abschlepper! Gas geben – mit Gefühl.', true);
+  sfx.horn(); drvSay('🛻 Rein in den Abschlepper! Das Navi lenkt – du gibst Gas und bremst.', true);
   return true;
 }
 function drvEnd(ok, why) {
@@ -6527,71 +6580,33 @@ function drvTick(dt) {
   else if (gas && !brk) v = v < 0 ? Math.min(0, v + DRV_BRK * dt) : Math.min(DRV_VMAX, v + DRV_ACC * (1 - 0.45 * v / DRV_VMAX) * dt);
   else if (brk) v = v > 0 ? Math.max(0, v - DRV_BRK * dt) : Math.max(-DRV_REV, v - 260 * dt);
   else v = v > 0 ? Math.max(0, v - 150 * dt) : Math.min(0, v + 220 * dt);
-  // Lenken: im Stand (oder ganz langsam) auf der Stelle drehen, an Kreuzungen abbiegen, sonst Spur wechseln
-  let turned = false;
-  if (!frozen && DRV.intent && Math.abs(v) < 45 && fresh) {
-    // an einer Einmündung: 90° hinein; sonst wenden (180°, auf die Gegenspur). Mit Auto am Haken muss dessen neuer Platz frei sein.
-    const [nu, nw] = DRV.intent > 0 ? drvRight(DRV.hu, DRV.hw) : drvLeft(DRV.hu, DRV.hw), nax = drvAx(nu);
-    const cross = DRV.rects.some((R) => R.ax === nax && drvIn(R, DRV.u + nu * 200, DRV.w + nw * 200, 20) && drvIn(R, DRV.u, DRV.w, -60));
-    let tu = DRV.u, tw = DRV.w, hu = nu, hw = nw;
-    if (!cross) {
-      hu = -DRV.hu; hw = -DRV.hw; const R = DRV.rects.find((q) => q.ax === drvAx(DRV.hu) && drvIn(q, DRV.u, DRV.w, 0));
-      if (DRV.tow.on) { tu = DRV.u - DRV.hu * DRV_TOW_GAP; tw = DRV.w - DRV.hw * DRV_TOW_GAP; } // mit Auto am Haken: Gespann dreht um seine Mitte (Wagen und Auto tauschen die Plätze)
-      if (R) { const L = drvLane(R, hu || hw); if (R.ax === 'u') tw = L; else tu = L; }
+  // Runde 5 (Feedback „fährt sich komisch“): Navi lenkt. Der Wagen folgt einer geplanten Spur auf der rechten Fahrbahnseite mit weichen Kurven;
+  // der Spieler gibt Gas / bremst (im Stand: Bremse = rückwärts). Zu schnell in die Kurve = Quietschen + Punkteabzug.
+  const P = DRV.plan;
+  if (P && !frozen) {
+    const ahead = drvCurveAhead(P, DRV.s, Math.max(60, v * 0.55));
+    if (ahead && v > DRV_CURVE_V) { // Kurve kommt: Assistent bremst mit, wer zu schnell ist, quietscht
+      const over = v - DRV_CURVE_V; if (ahead.d < 40 && over > 150 && DRV.bonkT <= 0) { DRV.bonks++; DRV.bonkT = 1.4; DRV.shake = 0.6; sfx.nope(); drvSay(drvRnd(['Quietsch! 🛞 Langsamer in die Kurve!', 'Uiii – fast im Vorgarten!', 'Der Kran schwingt bedrohlich … 😬'])); }
+      v = Math.max(DRV_CURVE_V, v - (DRV_BRK * 0.55) * dt * clamp(1 - ahead.d / 260, 0.15, 1));
     }
-    const tow = DRV.tow.on ? { u: tu - hu * DRV_TOW_GAP, w: tw - hw * DRV_TOW_GAP } : null;
-    if (!drvOk(tu, tw, 30) || !drvFree(tu, tw, hu) || (tow && (!drvOk(tow.u, tow.w, 20) || !drvFree(tow.u, tow.w, hu, 220)))) drvSay(tow ? 'Zu eng zum Wenden – erst ein Stück weiter!' : 'Zu eng zum Wenden! 🚧');
-    else { DRV.u = tu; DRV.w = tw; DRV.hu = hu; DRV.hw = hw; turned = true; v = 0; DRV.trail = []; sfx.pop(); if (!cross) drvSay(drvRnd(['Wenden in einem Zug – Fahrlehrer weint. 🥲', 'U-Turn! 🔄', 'Rumms, gewendet.'])); }
-  }
-  if (!frozen && !turned && DRV.intent && v > 20) {
-    const [nu, nw] = DRV.intent > 0 ? drvRight(DRV.hu, DRV.hw) : drvLeft(DRV.hu, DRV.hw), nax = drvAx(nu), nd = nu || nw;
-    const p = DRV.hu ? DRV.u : DRV.w, step = v * dt * (DRV.hu || DRV.hw), lat = DRV.hu ? DRV.w : DRV.u;
-    for (const R of DRV.rects) {
-      if (R.ax !== nax) continue;
-      if (lat < R.a0 - 90 || lat > R.a1 + 90) continue; // Querstraße muss bei uns anfangen/durchgehen
-      const T = drvLane(R, nd), dp = T - p;
-      if (Math.abs(dp) > Math.abs(step) + 14 || (dp * step < 0 && Math.abs(dp) > 14)) continue;
-      const tu = DRV.hu ? T : DRV.u, tw = DRV.hu ? DRV.w : T;
-      if (!drvOk(tu + nu * 170, tw + nw * 170, 20)) continue;
-      DRV.u = tu; DRV.w = tw; DRV.hu = nu; DRV.hw = nw; v = Math.min(v, DRV_TURN_V); turned = true; DRV.intent = 0; DRV.intentT = 0;
-      if (v > 260) drvSay('Quietsch! 🛞'); break;
-    }
-  }
-  if (!frozen && !turned && steer && Math.abs(v) > 40) { // Spur wechseln (nur solange gehalten)
-    const [su, sw] = steer > 0 ? drvRight(DRV.hu, DRV.hw) : drvLeft(DRV.hu, DRV.hw), k = 190 * dt * Math.min(1, Math.abs(v) / 200);
-    if (drvOk(DRV.u + su * k, DRV.w + sw * k, 45) && drvOk(DRV.u + su * k + DRV.hu * 110, DRV.w + sw * k + DRV.hw * 110, 0)) { DRV.u += su * k; DRV.w += sw * k; }
-  }
-  // Bewegung + Hindernisse
-  const dir = Math.sign(v) || 1, nu = DRV.u + DRV.hu * v * dt, nw = DRV.w + DRV.hw * v * dt;
-  if (Math.abs(v) > 0.5) {
-    const front = { u: nu + DRV.hu * dir * 115, w: nw + DRV.hw * dir * 115 };
+    const ns = clamp(DRV.s + v * dt, 0, P.len), q = drvAt(P, ns), tg = drvTan(P, ns), dir = Math.sign(v) || 1;
     let block = null;
-    if (!drvOk(nu, nw, 30) || !drvOk(front.u, front.w, 0)) block = 'curb';
-    if (!block) {
-      const T = DRV.truck, x0 = T.x, y0 = T.y, np = iso(nu, nw);
-      const pen0 = (O) => drvPen(T, O); const me = { kind: 'drive', x: np.x, y: np.y, len: DRV_LEN, flip: !!DRV.hu };
-      for (const O of vehicles()) {
-        if (O === DRV.truck || O === DRV.tow || O.hidden || O.inHall || O.fade !== undefined) continue;
-        const a = drvPen(me, O); if (a > 1 && a > pen0(O) - 0.5) { block = 'car'; break; }
-      }
-      if (!block) {
-        const PPL = crew.concat(presPeople());
-        for (const w of PPL) if (carPen(me, w.x, w.y, 22)[0] > 0 && carPen(T, w.x, w.y, 22)[0] <= 0) { block = 'ped'; break; }
-      }
+    if (Math.abs(v) > 0.5) {
+      const T = DRV.truck, x0 = T.x, y0 = T.y, np = iso(q.u, q.w), me = { kind: 'drive', x: np.x, y: np.y, len: DRV_LEN, flip: Math.abs(tg.u) >= Math.abs(tg.w) };
+      for (const O of vehicles()) { if (O === DRV.truck || O === DRV.tow || O.hidden || O.inHall || O.fade !== undefined) continue; const a2 = drvPen(me, O); if (a2 > 1 && a2 > drvPen(T, O) - 0.5) { block = 'car'; break; } }
+      if (!block) for (const w2 of crew.concat(presPeople())) if (carPen(me, w2.x, w2.y, 22)[0] > 0 && carPen(T, w2.x, w2.y, 22)[0] <= 0) { block = 'ped'; break; }
       T.x = x0; T.y = y0;
     }
-    if (block === 'curb') {
-      if (Math.abs(v) > 140 && DRV.bonkT <= 0) { DRV.bonks++; DRV.bonkT = 1.2; DRV.shake = 1; sfx.nope(); drvSay(drvRnd(DRV_TXT.curb)); drvPuff(front.u, front.w); }
-      v = -v * 0.3;
-    } else if (block === 'car') {
-      if (Math.abs(v) > 90 && DRV.hitT <= 0) { DRV.hits++; DRV.hitT = 1.4; DRV.shake = 1; sfx.horn(); drvSay(drvRnd(DRV_TXT.hit)); drvPuff(front.u, front.w); }
-      v = -v * 0.25;
-    } else if (block === 'ped') { if (DRV.sayT <= 0) { sfx.horn(); drvSay(drvRnd(DRV_TXT.ped)); } v = 0; }
+    if (block === 'car') { if (Math.abs(v) > 90 && DRV.hitT <= 0) { DRV.hits++; DRV.hitT = 1.4; DRV.shake = 1; sfx.horn(); drvSay(drvRnd(DRV_TXT.hit)); const f = drvAt(P, clamp(DRV.s + dir * 115, 0, P.len)); drvPuff(f.u, f.w); } v = 0; }
+    else if (block === 'ped') { if (DRV.sayT <= 0) { sfx.horn(); drvSay(drvRnd(DRV_TXT.ped)); } v = 0; }
     else {
-      // Ampel: bei Rot in die Kreuzung einfahren kostet Punkte
-      const inJ = Math.abs(nu) < 150 && Math.abs(nw) < 150;
-      if (inJ && !DRV.inJ && Math.abs(v) > 60 && ampelOn() && ampelLight(DRV.hu ? 'u' : 'w') === 'r') { DRV.red++; sfx.nope(); drvSay(drvRnd(DRV_TXT.red), true); }
-      DRV.inJ = inJ; DRV.u = nu; DRV.w = nw;
+      if (ns === P.len && v > 0) v = Math.max(0, v - DRV_BRK * dt); // Ende der Spur = Ziel: ausrollen
+      if (ns === 0 && v < 0) v = 0;
+      const inJ = Math.abs(q.u) < 150 && Math.abs(q.w) < 150;
+      if (inJ && !DRV.inJ && Math.abs(v) > 60 && ampelOn() && ampelLight(Math.abs(tg.u) >= Math.abs(tg.w) ? 'u' : 'w') === 'r') { DRV.red++; sfx.nope(); drvSay(drvRnd(DRV_TXT.red), true); }
+      DRV.inJ = inJ; DRV.s = ns; DRV.u = q.u; DRV.w = q.w;
+      // Sprite-Richtung = überwiegende Achse der Spur (Fahrtrichtung, auch beim Zurücksetzen)
+      if (Math.abs(tg.u) >= Math.abs(tg.w)) { DRV.hu = Math.sign(tg.u) || 1; DRV.hw = 0; } else { DRV.hw = Math.sign(tg.w) || 1; DRV.hu = 0; }
       const L = DRV.trail[DRV.trail.length - 1];
       if (v > 0) { if (!L || Math.hypot(L.u - DRV.u, L.w - DRV.w) > 12) { DRV.trail.push({ u: DRV.u, w: DRV.w }); if (DRV.trail.length > 80) DRV.trail.shift(); } }
       else while (DRV.trail.length && Math.hypot(DRV.trail[DRV.trail.length - 1].u - DRV.u, DRV.trail[DRV.trail.length - 1].w - DRV.w) < 14) DRV.trail.pop();
@@ -6606,7 +6621,10 @@ function drvTick(dt) {
     DRV.hookT += dt; const k = eob(clamp(DRV.hookT / 1.4)), tp = drvTowPos();
     W.u = DRV.from.u + (tp.u - DRV.from.u) * k; W.w = DRV.from.w + (tp.w - DRV.from.w) * k;
     if (DRV.hookT > 0.7) { W.hu = Math.round(-tp.du) || 0; W.hw = W.hu ? 0 : Math.round(-tp.dw) || 0; }
-    if (DRV.hookT >= 1.6) { DRV.phase = 'toWerk'; sfx.cash(); drvSay(drvRnd(DRV_TXT.hooked), true); }
+    if (DRV.hookT >= 1.6) { DRV.phase = 'toWerk'; drvReplan(DRV.werkP.u, DRV.werkP.w);
+      const t0 = DRV.plan && drvTan(DRV.plan, Math.min(DRV.plan.len, 60)); // Werkstatt liegt hinten: Gespann dreht um seine Mitte (Wagen und Auto tauschen die Plätze)
+      if (t0 && t0.u * DRV.hu + t0.w * DRV.hw < -0.5 && drvOk(DRV.u - DRV.hu * DRV_TOW_GAP, DRV.w - DRV.hw * DRV_TOW_GAP, 20)) { DRV.u -= DRV.hu * DRV_TOW_GAP; DRV.w -= DRV.hw * DRV_TOW_GAP; DRV.hu = -DRV.hu; DRV.hw = -DRV.hw; DRV.trail = []; drvReplan(DRV.werkP.u, DRV.werkP.w); drvSync(); }
+      sfx.cash(); drvSay(drvRnd(DRV_TXT.hooked), true); }
   } else if (DRV.phase === 'toWerk') {
     const tp = drvTowPos(); W.u = tp.u; W.w = tp.w;
     if (Math.abs(tp.du) > Math.abs(tp.dw)) { W.hu = -Math.sign(tp.du); W.hw = 0; } else { W.hw = -Math.sign(tp.dw); W.hu = 0; }
@@ -6617,11 +6635,11 @@ function drvTick(dt) {
   // Ziele
   if (DRV.phase === 'toCar') {
     const d = Math.hypot(DRV.u - DRV.from.u, DRV.w - DRV.from.w);
-    if (d < 330 && Math.abs(DRV.v) < 40) { DRV.stopT += dt; if (DRV.stopT > 0.35) { DRV.phase = 'hook'; DRV.hookT = 0; DRV.v = 0; W.on = true; DRV.towing = DRV.info.id; DRV.trail = []; sfx.pop(); drvSay('🪝 Haken runter …', true); } }
-    else { DRV.stopT = 0; if (d < 330) drvSay(DRV_TXT.hookNear); else if (d < 560 && DRV.v > 40) drvSay(DRV_TXT.hookFar); }
+    if (d < 420 && Math.abs(DRV.v) < 40) { DRV.stopT += dt; if (DRV.stopT > 0.35) { DRV.phase = 'hook'; DRV.hookT = 0; DRV.v = 0; W.on = true; DRV.towing = DRV.info.id; DRV.trail = []; sfx.pop(); drvSay('🪝 Haken runter …', true); } }
+    else { DRV.stopT = 0; if (d < 420) drvSay(DRV_TXT.hookNear); else if (d < 560 && DRV.v > 40) drvSay(DRV_TXT.hookFar); }
   } else if (DRV.phase === 'toWerk') {
     const d = Math.hypot(DRV.u - DRV.werkP.u, DRV.w - DRV.werkP.w);
-    if (d < 260 && Math.abs(DRV.v) < 50) { drvEnd(true, 'ok'); return; }
+    if (d < 320 && Math.abs(DRV.v) < 50) { drvEnd(true, 'ok'); return; }
     if (d < 520 && DRV.v > 80) drvSay('Werkstatt! Anhalten zum Abladen. 🔧');
   }
   drvCam(dt); drvHud();
@@ -6682,13 +6700,57 @@ function drvDraw() {
     if (brake) for (const sd of [-1, 1]) { const q = iso(DRV.u - DRV.hu * 118 + DRV.hw * sd * 40, DRV.w - DRV.hw * 118 - DRV.hu * sd * 40); drvGlow(q.x, q.y - 40, 28, 'rgba(255,40,30,1)', 'rgba(255,0,0,0)'); }
     ctx.restore();
     // Name über dem Wagen (wie die Figur)
-    const n = (CITY.me && CITY.me.name) || myName(), ns = toScreen(T.x, T.y - 205); ctx.save(); ctx.font = '800 13px system-ui, sans-serif'; ctx.textAlign = 'center';
+    let n = (CITY.me && CITY.me.name) || myName(); if (DEFAULT_NAME.test(String(n).trim())) n = 'Du'; const ns = toScreen(T.x, T.y - 205); ctx.save(); ctx.font = '800 13px system-ui, sans-serif'; ctx.textAlign = 'center';
     const w = ctx.measureText(n).width + 16; ctx.fillStyle = '#ffd23f'; ctx.strokeStyle = '#1b1b1b'; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(ns.x - w / 2, ns.y - 22, w, 22, 11) : ctx.rect(ns.x - w / 2, ns.y - 22, w, 22); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#1b1b1b'; ctx.fillText(n, ns.x, ns.y - 6); ctx.restore();
   };
   if (W.on && W.y < T.y) { drawTow(); cable(); drawTruck(); } else { drawTruck(); cable(); drawTow(); }
   for (const f of DRV.fx) { const q = iso(f.u, f.w), k = f.t / f.life, sc = toScreen(q.x, q.y - 20 - k * 40); ctx.save(); ctx.globalAlpha = (1 - k) * 0.7; ctx.fillStyle = '#d8d2c4'; ctx.beginPath(); ctx.arc(sc.x, sc.y, f.r * (0.6 + k) * view.s * 2, 0, 7); ctx.fill(); ctx.restore(); }
 }
+
+// ---- Navi: Spur über das Straßennetz (Hauptstraßen + Nebenstraßen) planen ----
+const DRV_CURVE_V = 300; // so schnell geht’s sauber um die Kurve
+function drvPlanTo(u0, w0, u1, w1) {
+  const R = DRV.rects, sA = drvSnap(u0, w0), sB = drvSnap(u1, w1); if (!sA || !sB) return null;
+  const pts = [], key = (u, w) => Math.round(u) + ',' + Math.round(w), byRect = R.map(() => []);
+  const add = (u, w, ri) => { const k = key(u, w); let n = pts.find((x) => x.k === k); if (!n) { n = { k, u, w, e: [] }; pts.push(n); } byRect[ri].push(n); return n; };
+  const ri0 = R.indexOf(sA.R), ri1 = R.indexOf(sB.R);
+  const cen = (r, s) => (r.ax === 'u' ? { u: s.u, w: r.c } : { u: r.c, w: s.w });
+  const A = cen(sA.R, sA), Bq = cen(sB.R, sB), nA = add(A.u, A.w, ri0), nB = add(Bq.u, Bq.w, ri1);
+  for (let i = 0; i < R.length; i++) for (let j = 0; j < R.length; j++) {
+    const r1 = R[i], r2 = R[j]; if (r1.ax !== 'u' || r2.ax !== 'w') continue;
+    if (r2.c < r1.a0 - 20 || r2.c > r1.a1 + 20 || r1.c < r2.a0 - 20 || r1.c > r2.a1 + 20) continue; // u-Straße bei w=r1.c, w-Straße bei u=r2.c
+    const n = add(r2.c, r1.c, i); byRect[j].push(n);
+  }
+  byRect.forEach((list, ri) => { const ax = R[ri].ax, so = [...new Set(list)].sort((a, b) => (ax === 'u' ? a.u - b.u : a.w - b.w));
+    for (let k = 1; k < so.length; k++) { const a = so[k - 1], b = so[k], d = Math.hypot(a.u - b.u, a.w - b.w); a.e.push([b, d, ri]); b.e.push([a, d, ri]); } });
+  // Dijkstra (wenige Knoten)
+  const dist = new Map([[nA, 0]]), prev = new Map(), todo = new Set(pts);
+  while (todo.size) { let cur = null, cd = Infinity; for (const n of todo) { const d = dist.has(n) ? dist.get(n) : Infinity; if (d < cd) { cd = d; cur = n; } } if (!cur || cd === Infinity) break; todo.delete(cur); if (cur === nB) break;
+    for (const [nb, d, ri] of cur.e) { const nd = cd + d; if (nd < (dist.has(nb) ? dist.get(nb) : Infinity)) { dist.set(nb, nd); prev.set(nb, [cur, ri]); } } }
+  if (!dist.has(nB)) return null;
+  const path = [{ u: nB.u, w: nB.w, ri: ri1 }]; let c = nB; while (prev.has(c)) { const [p, ri] = prev.get(c); path[0].ri = ri; path.unshift({ u: p.u, w: p.w, ri }); c = p; }
+  // gerade Stücke zusammenfassen
+  const P = [path[0]]; for (let k = 1; k < path.length; k++) { const a = P[P.length - 1], b = path[k]; if (Math.hypot(a.u - b.u, a.w - b.w) < 1) continue; if (P.length >= 2) { const z = P[P.length - 2]; const col = (Math.abs(z.u - a.u) < 1 && Math.abs(a.u - b.u) < 1) || (Math.abs(z.w - a.w) < 1 && Math.abs(a.w - b.w) < 1); if (col) { P[P.length - 1] = b; continue; } } P.push(b); }
+  if (P.length < 2) P.push({ u: P[0].u + 1, w: P[0].w, ri: P[0].ri });
+  // rechte Fahrspur: Mittellinie um die halbe Spurbreite nach rechts versetzen (Rechtsverkehr), Ecken auf die Schnittpunkte
+  const segs = []; for (let k = 1; k < P.length; k++) { const a = P[k - 1], b = P[k], L = Math.hypot(b.u - a.u, b.w - a.w), du = (b.u - a.u) / L, dw = (b.w - a.w) / L, r = R[b.ri] || R[0];
+    const [nu, nw] = drvRight(Math.round(du), Math.round(dw)), off = Math.min(72, r.hw * 0.48); segs.push({ a: { u: a.u + nu * off, w: a.w + nw * off }, b: { u: b.u + nu * off, w: b.w + nw * off }, du, dw, L }); }
+  const lane = [segs[0].a];
+  for (let k = 1; k < segs.length; k++) { const s1 = segs[k - 1], s2 = segs[k]; const corner = Math.abs(s1.du) > 0.5 ? { u: s2.a.u, w: s1.a.w } : { u: s1.a.u, w: s2.a.w };
+    const rr = Math.min(130, s1.L / 2, s2.L / 2), e = { u: corner.u - s1.du * rr, w: corner.w - s1.dw * rr }, x = { u: corner.u + s2.du * rr, w: corner.w + s2.dw * rr };
+    lane.push(e); for (let t = 1; t < 8; t++) { const tt = t / 8, m = 1 - tt; lane.push({ u: m * m * e.u + 2 * m * tt * corner.u + tt * tt * x.u, w: m * m * e.w + 2 * m * tt * corner.w + tt * tt * x.w, curve: true }); } lane.push(x); }
+  lane.push(segs[segs.length - 1].b);
+  // Startpunkt = wo der Wagen gerade steht (sanft auf die Spur einfädeln)
+  lane.unshift({ u: u0, w: w0 });
+  const cl = [0]; for (let k = 1; k < lane.length; k++) cl.push(cl[k - 1] + Math.hypot(lane[k].u - lane[k - 1].u, lane[k].w - lane[k - 1].w));
+  return { pts: lane, cl, len: cl[cl.length - 1] };
+}
+function drvIdx(P, s) { let lo = 0, hi = P.cl.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (P.cl[m] <= s) lo = m; else hi = m; } return lo; }
+function drvAt(P, s) { const i = drvIdx(P, s), a = P.pts[i], b = P.pts[Math.min(i + 1, P.pts.length - 1)], L = (P.cl[i + 1] - P.cl[i]) || 1, k = clamp((s - P.cl[i]) / L, 0, 1); return { u: a.u + (b.u - a.u) * k, w: a.w + (b.w - a.w) * k }; }
+function drvTan(P, s) { const a = drvAt(P, Math.max(0, s - 12)), b = drvAt(P, Math.min(P.len, s + 12)), L = Math.hypot(b.u - a.u, b.w - a.w) || 1; return { u: (b.u - a.u) / L, w: (b.w - a.w) / L }; }
+function drvCurveAhead(P, s, look) { const i0 = drvIdx(P, s); for (let i = i0; i < P.pts.length && P.cl[i] < s + look + 260; i++) if (P.pts[i].curve) return { d: Math.max(0, P.cl[i] - s) }; return null; }
+function drvReplan(tu, tw) { const P = drvPlanTo(DRV.u, DRV.w, tu, tw); DRV.plan = P; DRV.s = 0; return !!P; }
 const driveTick = (dt) => drvTick(dt);
 window.DRIVE = {
   get on() { return DRV.on; },
